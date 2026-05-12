@@ -1,0 +1,6 @@
+@PharmaSphere.api_HostAddress = http://localhost:5165
+
+GET {{PharmaSphere.api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
