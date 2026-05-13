@@ -111,20 +111,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const login = useCallback(async (payload: LoginRequest) => {
     dispatch({ type: 'SET_LOADING', payload: true });
-    const tokens = await AuthService.login(payload);
-    // Store tokens so the interceptor can attach them for subsequent calls
-    localStorage.setItem(AppConfig.tokenKey, tokens.accessToken);
-    localStorage.setItem(AppConfig.refreshTokenKey, tokens.refreshToken);
-    if (payload.rememberMe) {
-      sessionStorage.setItem(AppConfig.tokenKey, tokens.accessToken);
+    try {
+      const tokens = await AuthService.login(payload);
+      // Store tokens so the interceptor can attach them for subsequent calls
+      localStorage.setItem(AppConfig.tokenKey, tokens.accessToken);
+      localStorage.setItem(AppConfig.refreshTokenKey, tokens.refreshToken);
+      if (payload.rememberMe) {
+        sessionStorage.setItem(AppConfig.tokenKey, tokens.accessToken);
+      }
+      // Move to 2FA step immediately — redirect happens before code is sent
+      dispatch({
+        type: 'TWO_FACTOR_REQUIRED',
+        payload: { email: payload.email },
+      });
+      // Send the OTP email in the background; failures are recoverable via Resend
+      AuthService.sendTwoFactorCode(payload.email).catch(() => {});
+    } catch (err) {
+      // Reset loading so the login form becomes interactive again
+      dispatch({ type: 'SET_LOADING', payload: false });
+      throw err;
     }
-    // Move to 2FA step immediately — redirect happens before code is sent
-    dispatch({
-      type: 'TWO_FACTOR_REQUIRED',
-      payload: { email: payload.email },
-    });
-    // Send the OTP email in the background; failures are recoverable via Resend
-    AuthService.sendTwoFactorCode(payload.email).catch(() => {});
   }, []);
 
   /**

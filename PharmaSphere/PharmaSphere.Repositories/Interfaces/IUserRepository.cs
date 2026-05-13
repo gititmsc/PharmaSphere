@@ -10,5 +10,6 @@ namespace PharmaSphere.Repositories.Interfaces
     {
         Task<User?> GetByEmailAsync(string email, CancellationToken ct = default);
         Task<User?> GetByIdAsync(int userId, CancellationToken ct = default);
+        Task SaveChangesAsync(CancellationToken ct = default);
     }
 }

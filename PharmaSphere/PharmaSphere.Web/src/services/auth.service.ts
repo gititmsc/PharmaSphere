@@ -42,6 +42,26 @@ const AuthService = {
   verifyTwoFactor: async (email: string, code: string): Promise<void> => {
     await httpClient.post('/auth/verify-2fa', { email, code });
   },
+
+  /**
+   * Validate a password-reset token (from the link in the email).
+   * GET /api/auth/validate-reset-token?token=xxx
+   * Returns { email } if the token is valid, throws 401 if not.
+   */
+  validateResetToken: async (token: string): Promise<{ email: string }> => {
+    const { data } = await httpClient.get<{ email: string }>(
+      `/auth/validate-reset-token?token=${encodeURIComponent(token)}`,
+    );
+    return data;
+  },
+
+  /**
+   * Set a new password using a valid reset token.
+   * POST /api/auth/reset-password  { token, newPassword }
+   */
+  resetPassword: async (token: string, newPassword: string): Promise<void> => {
+    await httpClient.post('/auth/reset-password', { token, newPassword });
+  },
 };
 
 export default AuthService;

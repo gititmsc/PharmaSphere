@@ -44,13 +44,32 @@ httpClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+// Auth endpoints must never trigger the token-refresh logic — they either don't
+// need authentication or ARE the authentication flow.
+const NO_REFRESH_URLS = [
+  '/auth/login',
+  '/auth/refresh',
+  '/auth/send-2fa',
+  '/auth/verify-2fa',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/validate-reset-token',
+];
+
+const isAuthEndpoint = (url?: string) =>
+  NO_REFRESH_URLS.some((path) => url?.includes(path));
+
 // ─── Response interceptor ─────────────────────────────────────────────────────
 httpClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthEndpoint(originalRequest.url)
+    ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });

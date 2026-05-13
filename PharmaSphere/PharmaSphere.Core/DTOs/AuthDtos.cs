@@ -24,6 +24,13 @@ namespace PharmaSphere.Core.DTOs
 
     public sealed record TwoFactorVerifyRequestDto(string Email, string Code);
 
+    public sealed record ResetPasswordRequestDto(string Token, string NewPassword);
+
+    // ─── Password-reset responses ────────────────────────────────────────────────
+
+    /// <summary>Returned by GET /api/auth/validate-reset-token — confirms token is valid and returns the owner's email.</summary>
+    public sealed record ValidateResetTokenResponseDto(string Email);
+
     // ─── Responses ───────────────────────────────────────────────────────────────
 
     /// <summary>Returned on successful login or token refresh.</summary>

@@ -14,5 +14,7 @@ namespace PharmaSphere.Core.Configuration
         public string FromAddress { get; set; } = string.Empty;
         public string FromName { get; set; } = "PharmaSphere";
         public bool EnableSsl { get; set; } = true;
+        public bool EnableTestMode { get; set; } = true;
+        public string TestToEmailAddress { get; set; } = string.Empty;
     }
 }

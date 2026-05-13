@@ -44,6 +44,11 @@ namespace PharmaSphere.Repositories.Auth
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.UserId == userId, ct);
         }
+
+        public async Task SaveChangesAsync(CancellationToken ct = default)
+        {
+            await _db.SaveChangesAsync(ct);
+        }
     }
 
 }

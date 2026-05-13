@@ -99,6 +99,33 @@ namespace PharmaSphere.Api.Controllers
             return NoContent();
         }
 
+        // GET /api/auth/validate-reset-token?token=xxx
+        /// <summary>Checks whether a password-reset token is valid and returns the owner's email.</summary>
+        [HttpGet("validate-reset-token")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ValidateResetTokenResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ValidateResetToken(
+            [FromQuery] string token, CancellationToken ct)
+        {
+            var result = await _authService.ValidateResetTokenAsync(token, ct);
+            return Ok(result);
+        }
+
+        // POST /api/auth/reset-password
+        /// <summary>Sets a new password using a valid reset token.</summary>
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ResetPassword(
+            [FromBody] ResetPasswordRequestDto request, CancellationToken ct)
+        {
+            await _authService.ResetPasswordAsync(request.Token, request.NewPassword, ct);
+            return NoContent();
+        }
+
         // POST /api/auth/send-2fa
         /// <summary>Generates a 6-digit OTP and emails it to the user after a successful password login.</summary>
         [HttpPost("send-2fa")]
@@ -106,9 +133,13 @@ namespace PharmaSphere.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> SendTwoFactor(
-            [FromBody] TwoFactorSendRequestDto request, CancellationToken ct)
+            [FromBody] TwoFactorSendRequestDto request)
         {
-            await _authService.SendTwoFactorCodeAsync(request.Email, ct);
+            // CancellationToken intentionally omitted: the frontend fires this request
+            // fire-and-forget and navigates away immediately. The HTTP connection drops,
+            // which cancels the ASP.NET request token, but the OTP generation and email
+            // send must complete regardless of client connection state.
+            await _authService.SendTwoFactorCodeAsync(request.Email, CancellationToken.None);
             return NoContent();
         }
 
@@ -119,9 +150,9 @@ namespace PharmaSphere.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> VerifyTwoFactor(
-            [FromBody] TwoFactorVerifyRequestDto request, CancellationToken ct)
+            [FromBody] TwoFactorVerifyRequestDto request)
         {
-            await _authService.VerifyTwoFactorCodeAsync(request.Email, request.Code, ct);
+            await _authService.VerifyTwoFactorCodeAsync(request.Email, request.Code, CancellationToken.None);
             return NoContent();
         }
 

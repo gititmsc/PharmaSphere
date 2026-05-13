@@ -7,10 +7,11 @@ import ProtectedRoute from './ProtectedRoute';
 import GuestRoute from './GuestRoute';
 import TwoFactorRoute from './TwoFactorRoute';
 
-const LoginPage         = lazy(() => import('@/pages/auth/LoginPage'));
+const LoginPage          = lazy(() => import('@/pages/auth/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
-const TwoFactorPage     = lazy(() => import('@/pages/auth/TwoFactorPage'));
-const DashboardPage     = lazy(() => import('@/pages/dashboard/DashboardPage'));
+const ResetPasswordPage  = lazy(() => import('@/pages/auth/ResetPasswordPage'));
+const TwoFactorPage      = lazy(() => import('@/pages/auth/TwoFactorPage'));
+const DashboardPage      = lazy(() => import('@/pages/dashboard/DashboardPage'));
 
 const PageLoader: React.FC = () => (
   <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh">
@@ -24,9 +25,12 @@ const AppRouter: React.FC = () => (
       <Routes>
         {/* Guest-only routes (redirect to dashboard if already logged in) */}
         <Route element={<GuestRoute />}>
-          <Route path="/login"          element={<LoginPage />} />
+          <Route path="/login"           element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Route>
+
+        {/* Public route — accessible via the link in the reset email */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* 2FA route — only accessible while pendingTwoFactor is true */}
         <Route element={<TwoFactorRoute />}>

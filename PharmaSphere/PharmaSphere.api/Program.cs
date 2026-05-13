@@ -67,8 +67,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");
+app.UseAuthentication();   // must run before UseAuthorization so HttpContext.User is populated
 app.UseAuthorization();
-app.UseAuthentication();
 app.MapControllers();
 
 app.Run();

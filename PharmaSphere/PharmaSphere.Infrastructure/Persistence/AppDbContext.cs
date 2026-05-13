@@ -20,6 +20,7 @@ namespace PharmaSphere.Infrastructure.Persistence
         public DbSet<Role> Roles => Set<Role>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<TwoFactorCode> TwoFactorCodes => Set<TwoFactorCode>();
+        public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -138,6 +139,36 @@ namespace PharmaSphere.Infrastructure.Persistence
                 // Ignore computed properties
                 e.Ignore(c => c.IsExpired);
                 e.Ignore(c => c.IsValid);
+            });
+
+            // ── PasswordResetTokens table ─────────────────────────────────────────
+            modelBuilder.Entity<PasswordResetToken>(e =>
+            {
+                e.ToTable("PasswordResetTokens");
+                e.HasKey(t => t.PasswordResetTokenId);
+
+                e.Property(t => t.PasswordResetTokenId).ValueGeneratedOnAdd();
+                e.Property(t => t.Token).HasMaxLength(36).IsRequired();
+                e.Property(t => t.ExpiresAt).IsRequired();
+                e.Property(t => t.IsUsed).IsRequired();
+                e.Property(t => t.CreatedAt).IsRequired();
+
+                e.HasIndex(t => t.Token)
+                 .IsUnique()
+                 .HasDatabaseName("IX_PasswordResetTokens_Token");
+
+                e.HasIndex(t => t.UserId)
+                 .HasDatabaseName("IX_PasswordResetTokens_UserId");
+
+                // FK → Users
+                e.HasOne(t => t.User)
+                 .WithMany()
+                 .HasForeignKey(t => t.UserId)
+                 .HasConstraintName("FK_PasswordResetTokens_Users")
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.Ignore(t => t.IsExpired);
+                e.Ignore(t => t.IsValid);
             });
         }
     }

@@ -15,6 +15,7 @@ namespace PharmaSphere.Repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<ITwoFactorCodeRepository, TwoFactorCodeRepository>();
+            services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 
             return services;
         }

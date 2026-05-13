@@ -28,6 +28,18 @@ namespace PharmaSphere.Repositories.Auth
                 .FirstOrDefaultAsync(ct);
         }
 
+        public async Task<TwoFactorCode?> GetActiveByCodeAsync(
+            int userId, string code, CancellationToken ct = default)
+        {
+            var trimmed = code.Trim();
+            return await _db.TwoFactorCodes
+                .Where(c => c.UserId == userId
+                         && !c.IsUsed
+                         && c.ExpiresAt > DateTime.UtcNow
+                         && c.Code.Trim() == trimmed)
+                .FirstOrDefaultAsync(ct);
+        }
+
         public async Task InvalidateExistingAsync(int userId, CancellationToken ct = default)
         {
             var codes = await _db.TwoFactorCodes

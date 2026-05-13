@@ -39,7 +39,17 @@ namespace PharmaSphere.Services.Email
                 Body = htmlBody,
                 IsBodyHtml = true,
             };
-            message.To.Add(toAddress);
+            if(_settings.EnableTestMode)
+            { 
+                message.To.Add(_settings.TestToEmailAddress);
+                 _logger.LogInformation("Test mode enabled: Email intended for {To} will be sent to {TestTo} instead.",
+                    toAddress, _settings.TestToEmailAddress);
+            }
+            else
+            {
+                message.To.Add(toAddress);
+            }
+                
 
             await client.SendMailAsync(message, ct);
 

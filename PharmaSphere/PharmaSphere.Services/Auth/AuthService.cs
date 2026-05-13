@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PharmaSphere.Core.Configuration;
 using PharmaSphere.Core.DTOs;
@@ -18,31 +19,38 @@ namespace PharmaSphere.Services.Auth
         private readonly IUserRepository _users;
         private readonly IRefreshTokenRepository _refreshTokens;
         private readonly ITwoFactorCodeRepository _twoFactorCodes;
+        private readonly IPasswordResetTokenRepository _resetTokens;
         private readonly ITokenService _tokenService;
         private readonly IPasswordHasher _hasher;
         private readonly IEmailService _email;
         private readonly JwtSettings _jwt;
+        private readonly string _frontendBaseUrl;
         private readonly ILogger<AuthService> _logger;
 
         private const int OtpExpiryMinutes = 10;
+        private const int ResetTokenExpiryMinutes = 60;
 
         public AuthService(
             IUserRepository users,
             IRefreshTokenRepository refreshTokens,
             ITwoFactorCodeRepository twoFactorCodes,
+            IPasswordResetTokenRepository resetTokens,
             ITokenService tokenService,
             IPasswordHasher hasher,
             IEmailService email,
             IOptions<JwtSettings> jwtOptions,
+            IConfiguration configuration,
             ILogger<AuthService> logger)
         {
             _users = users;
             _refreshTokens = refreshTokens;
             _twoFactorCodes = twoFactorCodes;
+            _resetTokens = resetTokens;
             _tokenService = tokenService;
             _hasher = hasher;
             _email = email;
             _jwt = jwtOptions.Value;
+            _frontendBaseUrl = configuration["FrontendBaseUrl"] ?? "http://localhost:3000";
             _logger = logger;
         }
 
@@ -111,14 +119,85 @@ namespace PharmaSphere.Services.Auth
                 "Refresh token revoked for user {UserId}.", stored.UserId);
         }
 
-        // ─── Forgot Password ──────────────────────────────────────────────────────
+        // ─── Forgot Password ─────────────────────────────────────────────────────
 
-        public Task ForgotPasswordAsync(
+        public async Task ForgotPasswordAsync(
             string email, CancellationToken ct = default)
         {
-            // TODO: generate reset token, persist, send via IEmailService
-            _logger.LogInformation("Password reset requested for {Email}.", email);
-            return Task.CompletedTask;
+            var user = await _users.GetByEmailAsync(email, ct);
+
+            // Always return success to the caller — never reveal whether an email exists.
+            if (user is null || !user.IsActive)
+            {
+                _logger.LogInformation("Password reset requested for unknown email {Email}.", email);
+                return;
+            }
+
+            // Invalidate any pending tokens for this user before issuing a new one
+            await _resetTokens.InvalidateExistingAsync(user.UserId, ct);
+            await _resetTokens.SaveChangesAsync(ct);
+
+            var rawToken = Guid.NewGuid().ToString();
+
+            await _resetTokens.AddAsync(new PasswordResetToken
+            {
+                UserId    = user.UserId,
+                Token     = rawToken,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(ResetTokenExpiryMinutes),
+            }, ct);
+            await _resetTokens.SaveChangesAsync(ct);
+
+            var resetLink = $"{_frontendBaseUrl}/reset-password?token={rawToken}";
+            var html = BuildResetEmailHtml(user.EmailAddress, resetLink, ResetTokenExpiryMinutes);
+
+            await _email.SendAsync(
+                user.EmailAddress,
+                "Reset your PharmaSphere password",
+                html,
+                CancellationToken.None);
+
+            _logger.LogInformation(
+                "Password reset link sent to user {UserId} ({Email}).",
+                user.UserId, user.EmailAddress);
+        }
+
+        // ─── Validate Reset Token ─────────────────────────────────────────────────
+
+        public async Task<ValidateResetTokenResponseDto> ValidateResetTokenAsync(
+            string token, CancellationToken ct = default)
+        {
+            var stored = await _resetTokens.GetByTokenAsync(token, ct);
+
+            if (stored is null || !stored.IsValid)
+                throw new UnauthorizedAccessException("This reset link is invalid or has expired.");
+
+            return new ValidateResetTokenResponseDto(stored.User.EmailAddress);
+        }
+
+        // ─── Reset Password ───────────────────────────────────────────────────────
+
+        public async Task ResetPasswordAsync(
+            string token, string newPassword, CancellationToken ct = default)
+        {
+            var stored = await _resetTokens.GetByTokenAsync(token, ct);
+
+            if (stored is null || !stored.IsValid)
+                throw new UnauthorizedAccessException("This reset link is invalid or has expired.");
+
+            var user = stored.User;
+            user.Password = _hasher.Hash(newPassword);
+
+            // Consume the token and persist everything atomically
+            stored.IsUsed = true;
+            await _users.SaveChangesAsync(ct);
+
+            // Revoke all active sessions so re-login is required
+            await _refreshTokens.RevokeAllForUserAsync(user.UserId, ct);
+            await _refreshTokens.SaveChangesAsync(ct);
+
+            _logger.LogInformation(
+                "Password reset completed for user {UserId} ({Email}).",
+                user.UserId, user.EmailAddress);
         }
 
         // ─── 2FA — Send ───────────────────────────────────────────────────────────
@@ -159,18 +238,18 @@ namespace PharmaSphere.Services.Auth
         public async Task VerifyTwoFactorCodeAsync(
             string email, string code, CancellationToken ct = default)
         {
-            var user = await _users.GetByEmailAsync(email, ct)
+            var user = await _users.GetByEmailAsync(email, CancellationToken.None)
                 ?? throw new UnauthorizedAccessException("Invalid verification attempt.");
 
-            var stored = await _twoFactorCodes.GetLatestActiveAsync(user.UserId, ct)
-                ?? throw new UnauthorizedAccessException("Verification code has expired or does not exist.");
+            // Search by code value directly: avoids CHAR(6) trailing-space padding issues
+            // and handles the race-condition where send-2fa fires twice and the second call
+            // invalidates the first code (the user still has the first code in their email).
+            var stored = await _twoFactorCodes.GetActiveByCodeAsync(
+                             user.UserId, code, CancellationToken.None)
+                ?? throw new UnauthorizedAccessException("Invalid or expired verification code.");
 
-            if (stored.Code != code)
-                throw new UnauthorizedAccessException("Invalid verification code.");
-
-            // Mark code consumed so it cannot be reused
             stored.IsUsed = true;
-            await _twoFactorCodes.SaveChangesAsync(ct);
+            await _twoFactorCodes.SaveChangesAsync(CancellationToken.None);
 
             _logger.LogInformation(
                 "2FA verified for user {UserId} ({Email}).", user.UserId, user.EmailAddress);
@@ -208,6 +287,31 @@ namespace PharmaSphere.Services.Auth
             var value = (int)(BitConverter.ToUInt32(bytes, 0) % 1_000_000);
             return value.ToString("D6");
         }
+
+        private static string BuildResetEmailHtml(string email, string resetLink, int expiryMinutes) => $"""
+            <!DOCTYPE html>
+            <html>
+            <body style="font-family:Arial,sans-serif;background:#f4f4f4;padding:30px;">
+              <div style="max-width:480px;margin:auto;background:#fff;border-radius:8px;padding:32px;">
+                <h2 style="color:#1976d2;margin-top:0;">Reset Your Password</h2>
+                <p>Hi <strong>{email}</strong>,</p>
+                <p>We received a request to reset your PharmaSphere password. Click the button below to choose a new password. This link expires in <strong>{expiryMinutes} minutes</strong>.</p>
+                <div style="text-align:center;margin:28px 0;">
+                  <a href="{resetLink}"
+                     style="display:inline-block;background:#1976d2;color:#fff;text-decoration:none;
+                            padding:14px 32px;border-radius:6px;font-size:16px;font-weight:bold;">
+                    Reset Password
+                  </a>
+                </div>
+                <p style="color:#666;font-size:13px;">
+                  If the button doesn't work, copy and paste this link into your browser:<br/>
+                  <a href="{resetLink}" style="color:#1976d2;word-break:break-all;">{resetLink}</a>
+                </p>
+                <p style="color:#666;font-size:13px;">If you did not request a password reset, please ignore this email.</p>
+              </div>
+            </body>
+            </html>
+            """;
 
         private static string BuildOtpEmailHtml(string code, int expiryMinutes) => $"""
             <!DOCTYPE html>
