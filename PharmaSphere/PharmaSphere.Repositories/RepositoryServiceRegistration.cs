@@ -3,6 +3,7 @@ using PharmaSphere.Repositories.Auth;
 using PharmaSphere.Repositories.Interfaces;
 
 
+
 namespace PharmaSphere.Repositories
 {
     public static class RepositoryServiceRegistration
@@ -13,6 +14,7 @@ namespace PharmaSphere.Repositories
             // Scoped lifetime — one instance per HTTP request, matches DbContext lifetime
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<ITwoFactorCodeRepository, TwoFactorCodeRepository>();
 
             return services;
         }

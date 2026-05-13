@@ -12,5 +12,11 @@ namespace PharmaSphere.Services.Interfaces
         Task<AuthResponseDto> RefreshTokenAsync(string refreshToken, CancellationToken ct = default);
         Task LogoutAsync(string refreshToken, CancellationToken ct = default);
         Task ForgotPasswordAsync(string email, CancellationToken ct = default);
+
+        /// <summary>Generates a 6-digit OTP, stores it, and emails it to the user.</summary>
+        Task SendTwoFactorCodeAsync(string email, CancellationToken ct = default);
+
+        /// <summary>Validates the OTP. Throws UnauthorizedAccessException if invalid/expired.</summary>
+        Task VerifyTwoFactorCodeAsync(string email, string code, CancellationToken ct = default);
     }
 }

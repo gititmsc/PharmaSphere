@@ -99,6 +99,32 @@ namespace PharmaSphere.Api.Controllers
             return NoContent();
         }
 
+        // POST /api/auth/send-2fa
+        /// <summary>Generates a 6-digit OTP and emails it to the user after a successful password login.</summary>
+        [HttpPost("send-2fa")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> SendTwoFactor(
+            [FromBody] TwoFactorSendRequestDto request, CancellationToken ct)
+        {
+            await _authService.SendTwoFactorCodeAsync(request.Email, ct);
+            return NoContent();
+        }
+
+        // POST /api/auth/verify-2fa
+        /// <summary>Validates the 6-digit OTP entered by the user.</summary>
+        [HttpPost("verify-2fa")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> VerifyTwoFactor(
+            [FromBody] TwoFactorVerifyRequestDto request, CancellationToken ct)
+        {
+            await _authService.VerifyTwoFactorCodeAsync(request.Email, request.Code, ct);
+            return NoContent();
+        }
+
         // ─── Private helpers ──────────────────────────────────────────────────────
         private static class JwtClaims
         {

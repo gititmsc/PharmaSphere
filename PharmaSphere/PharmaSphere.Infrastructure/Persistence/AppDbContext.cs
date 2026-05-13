@@ -19,6 +19,7 @@ namespace PharmaSphere.Infrastructure.Persistence
         public DbSet<User> Users => Set<User>();
         public DbSet<Role> Roles => Set<Role>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<TwoFactorCode> TwoFactorCodes => Set<TwoFactorCode>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -109,6 +110,34 @@ namespace PharmaSphere.Infrastructure.Persistence
                 // Ignore computed properties — not stored in DB
                 e.Ignore(t => t.IsExpired);
                 e.Ignore(t => t.IsActive);
+            });
+
+            // ── TwoFactorCodes table ──────────────────────────────────────────────
+            modelBuilder.Entity<TwoFactorCode>(e =>
+            {
+                e.ToTable("TwoFactorCodes");
+                e.HasKey(c => c.TwoFactorCodeId);
+
+                e.Property(c => c.TwoFactorCodeId).ValueGeneratedOnAdd();
+                e.Property(c => c.Code).HasMaxLength(6).IsRequired().IsFixedLength();
+                e.Property(c => c.ExpiresAt).IsRequired();
+                e.Property(c => c.IsUsed).IsRequired();
+                e.Property(c => c.CreatedAt).IsRequired();
+
+                // FK → Users
+                e.HasOne(c => c.User)
+                 .WithMany()
+                 .HasForeignKey(c => c.UserId)
+                 .HasConstraintName("FK_TwoFactorCodes_Users")
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                // Index for fast per-user lookup
+                e.HasIndex(c => c.UserId)
+                 .HasDatabaseName("IX_TwoFactorCodes_UserId");
+
+                // Ignore computed properties
+                e.Ignore(c => c.IsExpired);
+                e.Ignore(c => c.IsValid);
             });
         }
     }

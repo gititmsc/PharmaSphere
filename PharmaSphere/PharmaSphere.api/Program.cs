@@ -24,8 +24,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // ── 4. Repository bindings (PharmaSphere.Repositories) ─────────────────────
 builder.Services.AddRepositories();
 
-// ── 5. AuthService, TokenService, PasswordHasher (PharmaSphere.Services) ────
-builder.Services.AddApplicationServices();
+// ── 5. AuthService, TokenService, PasswordHasher, EmailService (PharmaSphere.Services) ────
+builder.Services.AddApplicationServices(builder.Configuration);
 
 // CORS — allow the Vite dev server
 var allowedOrigins = builder.Configuration

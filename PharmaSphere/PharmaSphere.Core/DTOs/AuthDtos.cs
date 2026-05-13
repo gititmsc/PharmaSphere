@@ -20,6 +20,10 @@ namespace PharmaSphere.Core.DTOs
 
     public sealed record ForgotPasswordRequestDto(string Email);
 
+    public sealed record TwoFactorSendRequestDto(string Email);
+
+    public sealed record TwoFactorVerifyRequestDto(string Email, string Code);
+
     // ─── Responses ───────────────────────────────────────────────────────────────
 
     /// <summary>Returned on successful login or token refresh.</summary>

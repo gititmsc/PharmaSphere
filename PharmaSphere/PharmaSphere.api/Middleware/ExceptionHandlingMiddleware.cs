@@ -29,6 +29,13 @@ namespace PharmaSphere.Api.Middleware
             {
                 await _next(ctx);
             }
+            catch (OperationCanceledException) when (ctx.RequestAborted.IsCancellationRequested)
+            {
+                // Client disconnected before the response was sent — not an error on our side.
+                _logger.LogInformation("{Method} {Path} — client disconnected.",
+                    ctx.Request.Method, ctx.Request.Path);
+                ctx.Response.StatusCode = 499; // nginx convention: Client Closed Request
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{Method} {Path} threw: {Msg}",

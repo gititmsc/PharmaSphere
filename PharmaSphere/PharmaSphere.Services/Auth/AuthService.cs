@@ -10,30 +10,38 @@ namespace PharmaSphere.Services.Auth
 {
 
     /// <summary>
-    /// Orchestrates login, token rotation, logout and password-reset flows.
+    /// Orchestrates login, token rotation, logout, 2FA and password-reset flows.
     /// Depends on Services.Interfaces and Repositories.Interfaces — no EF or SQL here.
     /// </summary>
     public sealed class AuthService : IAuthService
     {
         private readonly IUserRepository _users;
         private readonly IRefreshTokenRepository _refreshTokens;
+        private readonly ITwoFactorCodeRepository _twoFactorCodes;
         private readonly ITokenService _tokenService;
         private readonly IPasswordHasher _hasher;
+        private readonly IEmailService _email;
         private readonly JwtSettings _jwt;
         private readonly ILogger<AuthService> _logger;
+
+        private const int OtpExpiryMinutes = 10;
 
         public AuthService(
             IUserRepository users,
             IRefreshTokenRepository refreshTokens,
+            ITwoFactorCodeRepository twoFactorCodes,
             ITokenService tokenService,
             IPasswordHasher hasher,
+            IEmailService email,
             IOptions<JwtSettings> jwtOptions,
             ILogger<AuthService> logger)
         {
             _users = users;
             _refreshTokens = refreshTokens;
+            _twoFactorCodes = twoFactorCodes;
             _tokenService = tokenService;
             _hasher = hasher;
+            _email = email;
             _jwt = jwtOptions.Value;
             _logger = logger;
         }
@@ -113,6 +121,61 @@ namespace PharmaSphere.Services.Auth
             return Task.CompletedTask;
         }
 
+        // ─── 2FA — Send ───────────────────────────────────────────────────────────
+
+        public async Task SendTwoFactorCodeAsync(
+            string email, CancellationToken ct = default)
+        {
+            // Use CancellationToken.None for every async call in this method.
+            // The frontend fires send-2fa fire-and-forget, so the HTTP connection
+            // can drop at any point — we must not let a cancelled request abort the
+            // user lookup, DB writes, or email send mid-flight.
+            var user = await _users.GetByEmailAsync(email, CancellationToken.None)
+                ?? throw new UnauthorizedAccessException("User not found.");
+
+            await _twoFactorCodes.InvalidateExistingAsync(user.UserId, CancellationToken.None);
+            await _twoFactorCodes.SaveChangesAsync(CancellationToken.None);
+
+            // Generate a cryptographically random 6-digit code
+            var code = GenerateOtp();
+
+            await _twoFactorCodes.AddAsync(new TwoFactorCode
+            {
+                UserId = user.UserId,
+                Code = code,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(OtpExpiryMinutes),
+            }, CancellationToken.None);
+            await _twoFactorCodes.SaveChangesAsync(CancellationToken.None);
+
+            var html = BuildOtpEmailHtml(code, OtpExpiryMinutes);
+            await _email.SendAsync(user.EmailAddress, "Your PharmaSphere verification code", html, CancellationToken.None);
+
+            _logger.LogInformation(
+                "2FA code sent to user {UserId} ({Email}).", user.UserId, user.EmailAddress);
+        }
+
+        // ─── 2FA — Verify ─────────────────────────────────────────────────────────
+
+        public async Task VerifyTwoFactorCodeAsync(
+            string email, string code, CancellationToken ct = default)
+        {
+            var user = await _users.GetByEmailAsync(email, ct)
+                ?? throw new UnauthorizedAccessException("Invalid verification attempt.");
+
+            var stored = await _twoFactorCodes.GetLatestActiveAsync(user.UserId, ct)
+                ?? throw new UnauthorizedAccessException("Verification code has expired or does not exist.");
+
+            if (stored.Code != code)
+                throw new UnauthorizedAccessException("Invalid verification code.");
+
+            // Mark code consumed so it cannot be reused
+            stored.IsUsed = true;
+            await _twoFactorCodes.SaveChangesAsync(ct);
+
+            _logger.LogInformation(
+                "2FA verified for user {UserId} ({Email}).", user.UserId, user.EmailAddress);
+        }
+
         // ─── Private Helpers ──────────────────────────────────────────────────────
 
         private async Task<AuthResponseDto> IssueTokenPairAsync(
@@ -136,6 +199,32 @@ namespace PharmaSphere.Services.Auth
                 RefreshToken: rawRefresh,
                 ExpiresIn: _jwt.AccessTokenExpiryMinutes * 60);
         }
+
+        private static string GenerateOtp()
+        {
+            // Cryptographically random 6-digit code (000000–999999)
+            var bytes = new byte[4];
+            System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
+            var value = (int)(BitConverter.ToUInt32(bytes, 0) % 1_000_000);
+            return value.ToString("D6");
+        }
+
+        private static string BuildOtpEmailHtml(string code, int expiryMinutes) => $"""
+            <!DOCTYPE html>
+            <html>
+            <body style="font-family:Arial,sans-serif;background:#f4f4f4;padding:30px;">
+              <div style="max-width:480px;margin:auto;background:#fff;border-radius:8px;padding:32px;">
+                <h2 style="color:#1976d2;margin-top:0;">PharmaSphere Verification</h2>
+                <p>Use the code below to complete your sign-in. It expires in <strong>{expiryMinutes} minutes</strong>.</p>
+                <div style="font-size:36px;font-weight:bold;letter-spacing:10px;text-align:center;
+                            background:#f0f4ff;padding:20px;border-radius:6px;color:#1976d2;margin:24px 0;">
+                  {code}
+                </div>
+                <p style="color:#666;font-size:13px;">If you did not attempt to sign in, please ignore this email.</p>
+              </div>
+            </body>
+            </html>
+            """;
     }
 
 }
