@@ -1,17 +1,20 @@
 // src/routes/AppRouter.tsx
 
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import ProtectedRoute from './ProtectedRoute';
 import GuestRoute from './GuestRoute';
 import TwoFactorRoute from './TwoFactorRoute';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 const LoginPage          = lazy(() => import('@/pages/auth/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
 const ResetPasswordPage  = lazy(() => import('@/pages/auth/ResetPasswordPage'));
 const TwoFactorPage      = lazy(() => import('@/pages/auth/TwoFactorPage'));
 const DashboardPage      = lazy(() => import('@/pages/dashboard/DashboardPage'));
+const SalesOrdersPage    = lazy(() => import('@/pages/sales-orders/SalesOrdersPage'));
+const UsersPage          = lazy(() => import('@/pages/users/UsersPage'));
 
 const PageLoader: React.FC = () => (
   <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh">
@@ -37,9 +40,13 @@ const AppRouter: React.FC = () => (
           <Route path="/verify-2fa" element={<TwoFactorPage />} />
         </Route>
 
-        {/* Protected routes — require full authentication */}
+        {/* Protected routes — shared DashboardLayout wraps all pages */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route element={<DashboardLayout><Outlet /></DashboardLayout>}>
+            <Route path="/dashboard"    element={<DashboardPage />} />
+            <Route path="/sales-orders" element={<SalesOrdersPage />} />
+            <Route path="/users"        element={<UsersPage />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

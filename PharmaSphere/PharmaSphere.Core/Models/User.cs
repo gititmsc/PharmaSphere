@@ -28,6 +28,12 @@ namespace PharmaSphere.Core.Models
         /// <summary>Maps to isActive bit.</summary>
         public bool IsActive { get; set; } = true;
 
+        /// <summary>Maps to FirstName varchar(100).</summary>
+        public string? FirstName { get; set; }
+
+        /// <summary>Maps to LastName varchar(100).</summary>
+        public string? LastName { get; set; }
+
         /// <summary>Foreign key to Role table.</summary>
         public int RoleId { get; set; }
 

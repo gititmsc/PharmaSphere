@@ -43,5 +43,7 @@ namespace PharmaSphere.Core.DTOs
     public sealed record UserProfileDto(
         int UserId,
         string Email,
-        string RoleName);
+        string RoleName,
+        string? FirstName,
+        string? LastName);
 }

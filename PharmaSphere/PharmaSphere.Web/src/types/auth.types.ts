@@ -17,11 +17,13 @@ export interface AuthTokens {
   expiresIn: number; // seconds
 }
 
-// Aligns with GET /api/auth/me → UserProfileDto (int userId, email, roleName)
+// Aligns with GET /api/auth/me → UserProfileDto
 export interface UserProfile {
   userId: number;
   email: string;
   roleName: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface AuthState {

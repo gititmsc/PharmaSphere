@@ -1,0 +1,11 @@
+{
+  "name": "pharmasphere",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix PharmaSphere.Web",
+    "build": "npm run build --prefix PharmaSphere.Web",
+    "preview": "npm run preview --prefix PharmaSphere.Web",
+    "install:web": "npm install --prefix PharmaSphere.Web"
+  }
+}

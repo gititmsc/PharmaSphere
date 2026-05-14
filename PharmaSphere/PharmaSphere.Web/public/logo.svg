@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none">
+  <!-- Blue left half -->
+  <path d="M18 3C9.716 3 3 9.716 3 18C3 26.284 9.716 33 18 33L18 3Z" fill="#1565C0"/>
+  <!-- Green right half -->
+  <path d="M18 3C26.284 3 33 9.716 33 18C33 26.284 26.284 33 18 33L18 3Z" fill="#388E3C"/>
+  <!-- White divider -->
+  <line x1="18" y1="3" x2="18" y2="33" stroke="white" stroke-width="1.5"/>
+  <!-- White pharmacy cross -->
+  <rect x="11" y="16.25" width="14" height="3.5" rx="1.75" fill="white"/>
+  <rect x="16.25" y="11" width="3.5" height="14" rx="1.75" fill="white"/>
+</svg>

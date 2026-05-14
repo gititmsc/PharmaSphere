@@ -84,7 +84,9 @@ namespace PharmaSphere.Api.Controllers
             return Ok(new UserProfileDto(
                 user.UserId,
                 user.EmailAddress,
-                user.Role?.RoleName ?? string.Empty));
+                user.Role?.RoleName ?? string.Empty,
+                user.FirstName,
+                user.LastName));
         }
 
         // POST /api/auth/forgot-password

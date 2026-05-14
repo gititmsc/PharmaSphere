@@ -62,6 +62,14 @@ namespace PharmaSphere.Infrastructure.Persistence
                  .HasMaxLength(100)
                  .IsRequired();
 
+                e.Property(u => u.FirstName)
+                 .HasColumnName("FirstName")
+                 .HasMaxLength(100);
+
+                e.Property(u => u.LastName)
+                 .HasColumnName("LastName")
+                 .HasMaxLength(100);
+
                 e.Property(u => u.IsActive)
                  .HasColumnName("isActive")
                  .IsRequired();
