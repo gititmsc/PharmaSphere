@@ -4,6 +4,7 @@ using PharmaSphere.Core.Configuration;
 using PharmaSphere.Services.Auth;
 using PharmaSphere.Services.Email;
 using PharmaSphere.Services.Interfaces;
+using PharmaSphere.Services.Users;
 
 namespace PharmaSphere.Services
 {
@@ -21,6 +22,7 @@ namespace PharmaSphere.Services
             services.AddSingleton<IPasswordHasher, Sha256PasswordHasher>();
             services.AddScoped<IEmailService, SmtpEmailService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
 
             return services;
         }

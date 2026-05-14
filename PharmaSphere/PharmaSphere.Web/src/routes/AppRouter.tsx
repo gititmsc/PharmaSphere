@@ -15,6 +15,7 @@ const TwoFactorPage      = lazy(() => import('@/pages/auth/TwoFactorPage'));
 const DashboardPage      = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const SalesOrdersPage    = lazy(() => import('@/pages/sales-orders/SalesOrdersPage'));
 const UsersPage          = lazy(() => import('@/pages/users/UsersPage'));
+const UserFormPage       = lazy(() => import('@/pages/users/UserFormPage'));
 
 const PageLoader: React.FC = () => (
   <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh">
@@ -46,6 +47,7 @@ const AppRouter: React.FC = () => (
             <Route path="/dashboard"    element={<DashboardPage />} />
             <Route path="/sales-orders" element={<SalesOrdersPage />} />
             <Route path="/users"        element={<UsersPage />} />
+            <Route path="/users/form"   element={<UserFormPage />} />
           </Route>
         </Route>
 
