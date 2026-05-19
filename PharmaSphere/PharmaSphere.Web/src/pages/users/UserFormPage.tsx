@@ -320,8 +320,12 @@ const UserFormPage: React.FC = () => {
                   rules={{
                     validate: (value) => {
                       if (!isEditMode && !value) return 'Password is required';
-                      if (value && value.length < 8)
-                        return 'Password must be at least 8 characters';
+                      if (
+                        typeof value === "string" &&
+                        value &&
+                        value.length < 8
+                      )
+                        return "Password must be at least 8 characters";
                       return true;
                     },
                   }}

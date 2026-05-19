@@ -16,12 +16,12 @@ import {
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import logo from '@/assets/logo.png';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
-import axios from 'axios';
+import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "notistack";
+import axios from "axios";
 
-import { useAuth } from '@/contexts/AuthContext';
-import LoadingButton from '@/components/common/LoadingButton';
+import { useAuth } from "@/contexts/AuthContext";
+import LoadingButton from "@/components/common/LoadingButton";
 
 const CODE_LENGTH = 6;
 const RESEND_SECONDS = 60;
@@ -65,39 +65,37 @@ const DigitBox: React.FC<DigitBoxProps> = ({
       onPaste={onPaste}
       onFocus={(e: React.FocusEvent<HTMLInputElement>) => e.target.select()}
       sx={{
-        width:          { xs: 44, sm: 52 },
-        height:         { xs: 52, sm: 62 },
-        textAlign:      'center',
-        fontSize:       { xs: '1.4rem', sm: '1.6rem' },
-        fontWeight:     700,
-        fontFamily:     'inherit',
-        borderRadius:   '10px',
-        border:         '2px solid',
-        borderColor:    hasError
+        width: { xs: 44, sm: 52 },
+        height: { xs: 52, sm: 62 },
+        textAlign: "center",
+        fontSize: { xs: "1.4rem", sm: "1.6rem" },
+        fontWeight: 700,
+        fontFamily: "inherit",
+        borderRadius: "10px",
+        border: "2px solid",
+        borderColor: hasError
           ? theme.palette.error.main
           : value
-          ? theme.palette.primary.main
-          : theme.palette.divider,
-        outline:        'none',
-        bgcolor:        hasError
-          ? 'rgba(211,47,47,0.04)'
+            ? theme.palette.primary.main
+            : theme.palette.divider,
+        outline: "none",
+        bgcolor: hasError
+          ? "rgba(211,47,47,0.04)"
           : value
-          ? 'rgba(21,101,192,0.05)'
-          : theme.palette.background.paper,
-        color:          'text.primary',
-        transition:     'all 0.15s ease',
-        cursor:         'text',
-        caretColor:     theme.palette.primary.main,
-        '&:focus': {
+            ? "rgba(21,101,192,0.05)"
+            : theme.palette.background.paper,
+        color: "text.primary",
+        transition: "all 0.15s ease",
+        cursor: "text",
+        caretColor: theme.palette.primary.main,
+        "&:focus": {
           borderColor: hasError
             ? theme.palette.error.main
             : theme.palette.primary.main,
           boxShadow: hasError
             ? `0 0 0 3px rgba(211,47,47,0.15)`
             : `0 0 0 3px rgba(21,101,192,0.15)`,
-          bgcolor:    hasError
-            ? 'rgba(211,47,47,0.04)'
-            : 'rgba(21,101,192,0.06)',
+          bgcolor: hasError ? "rgba(211,47,47,0.04)" : "rgba(21,101,192,0.06)",
         },
       }}
     />
@@ -106,27 +104,35 @@ const DigitBox: React.FC<DigitBoxProps> = ({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 const TwoFactorPage: React.FC = () => {
-  const theme    = useTheme();
   const navigate = useNavigate();
-  const { enqueueSnackbar }               = useSnackbar();
-  const { pendingTwoFactor, pendingEmail, isAuthenticated, verifyTwoFactor, resendTwoFactorCode, logout } =
-    useAuth();
+  const { enqueueSnackbar } = useSnackbar();
+  const {
+    pendingTwoFactor,
+    pendingEmail,
+    isAuthenticated,
+    verifyTwoFactor,
+    resendTwoFactorCode,
+    logout,
+  } = useAuth();
 
-  const [digits,     setDigits    ] = useState<string[]>(Array(CODE_LENGTH).fill(''));
-  const [verifying,  setVerifying ] = useState(false);
-  const [resending,  setResending ] = useState(false);
-  const [apiError,   setApiError  ] = useState<string | null>(null);
-  const [countdown,  setCountdown ] = useState(RESEND_SECONDS);
+  const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(""));
+  const [verifying, setVerifying] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(RESEND_SECONDS);
   const [shakeError, setShakeError] = useState(false);
 
   const inputRefs = useRef<Array<React.RefObject<HTMLInputElement>>>(
-    Array.from({ length: CODE_LENGTH }, () => React.createRef<HTMLInputElement>()),
+    Array.from({ length: CODE_LENGTH }, () =>
+      React.createRef<HTMLInputElement>(),
+    ),
   );
 
   // Redirect to login only if there's no pending 2FA session AND not authenticated.
   // Avoid redirecting here after successful verification — TwoFactorRoute handles that.
   useEffect(() => {
-    if (!pendingTwoFactor && !isAuthenticated) navigate('/login', { replace: true });
+    if (!pendingTwoFactor && !isAuthenticated)
+      navigate("/login", { replace: true });
   }, [pendingTwoFactor, isAuthenticated, navigate]);
 
   // Countdown timer for resend button
@@ -142,7 +148,7 @@ const TwoFactorPage: React.FC = () => {
 
   const handleChange = useCallback((index: number, raw: string) => {
     // Accept only digits
-    const char = raw.replace(/\D/g, '').slice(-1);
+    const char = raw.replace(/\D/g, "").slice(-1);
     setDigits((prev) => {
       const next = [...prev];
       next[index] = char;
@@ -155,21 +161,21 @@ const TwoFactorPage: React.FC = () => {
 
   const handleKeyDown = useCallback(
     (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Backspace') {
+      if (e.key === "Backspace") {
         if (digits[index]) {
           setDigits((prev) => {
             const next = [...prev];
-            next[index] = '';
+            next[index] = "";
             return next;
           });
         } else if (index > 0) {
           focusBox(index - 1);
         }
-      } else if (e.key === 'ArrowLeft' && index > 0) {
+      } else if (e.key === "ArrowLeft" && index > 0) {
         focusBox(index - 1);
-      } else if (e.key === 'ArrowRight' && index < CODE_LENGTH - 1) {
+      } else if (e.key === "ArrowRight" && index < CODE_LENGTH - 1) {
         focusBox(index + 1);
-      } else if (e.key === 'Enter') {
+      } else if (e.key === "Enter") {
         handleVerify();
       }
     },
@@ -181,12 +187,12 @@ const TwoFactorPage: React.FC = () => {
     (e: React.ClipboardEvent<HTMLInputElement>) => {
       e.preventDefault();
       const pasted = e.clipboardData
-        .getData('text')
-        .replace(/\D/g, '')
+        .getData("text")
+        .replace(/\D/g, "")
         .slice(0, CODE_LENGTH);
       if (!pasted) return;
       const next = [...digits];
-      pasted.split('').forEach((ch, i) => {
+      pasted.split("").forEach((ch, i) => {
         if (i < CODE_LENGTH) next[i] = ch;
       });
       setDigits(next);
@@ -197,9 +203,9 @@ const TwoFactorPage: React.FC = () => {
   );
 
   const handleVerify = useCallback(async () => {
-    const code = digits.join('');
+    const code = digits.join("");
     if (code.length < CODE_LENGTH) {
-      setApiError('Please enter all 6 digits.');
+      setApiError("Please enter all 6 digits.");
       setShakeError(true);
       focusBox(digits.findIndex((d) => !d));
       return;
@@ -208,21 +214,21 @@ const TwoFactorPage: React.FC = () => {
     setApiError(null);
     try {
       await verifyTwoFactor(code);
-      enqueueSnackbar('Verified! Welcome to PharmaSphere.', {
-        variant:      'success',
+      enqueueSnackbar("Verified! Welcome to PharmaSphere.", {
+        variant: "success",
         autoHideDuration: 3500,
       });
-      navigate('/dashboard', { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      let msg = 'Invalid or expired code. Please try again.';
+      let msg = "Invalid or expired code. Please try again.";
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         msg = err.response.data.message;
       }
       setApiError(msg);
       setShakeError(true);
-      setDigits(Array(CODE_LENGTH).fill(''));
+      setDigits(Array(CODE_LENGTH).fill(""));
       setTimeout(() => focusBox(0), 50);
-      enqueueSnackbar(msg, { variant: 'error', autoHideDuration: 5000 });
+      enqueueSnackbar(msg, { variant: "error", autoHideDuration: 5000 });
     } finally {
       setVerifying(false);
       setTimeout(() => setShakeError(false), 600);
@@ -234,16 +240,16 @@ const TwoFactorPage: React.FC = () => {
     try {
       await resendTwoFactorCode();
       setCountdown(RESEND_SECONDS);
-      setDigits(Array(CODE_LENGTH).fill(''));
+      setDigits(Array(CODE_LENGTH).fill(""));
       setApiError(null);
       focusBox(0);
-      enqueueSnackbar('A new verification code has been sent.', {
-        variant:      'success',
+      enqueueSnackbar("A new verification code has been sent.", {
+        variant: "success",
         autoHideDuration: 4000,
       });
     } catch {
-      enqueueSnackbar('Failed to resend code. Please try again.', {
-        variant:      'error',
+      enqueueSnackbar("Failed to resend code. Please try again.", {
+        variant: "error",
         autoHideDuration: 4000,
       });
     } finally {
@@ -253,68 +259,72 @@ const TwoFactorPage: React.FC = () => {
 
   const handleBack = async () => {
     await logout();
-    navigate('/login', { replace: true });
+    navigate("/login", { replace: true });
   };
 
   const isFilled = digits.every(Boolean);
 
   // Mask email for display: s***@domain.com
   const maskedEmail = pendingEmail
-    ? pendingEmail.replace(/^(.{1,2})(.*)(@.*)$/, (_, a, b, c) =>
-        a + b.replace(/./g, '*') + c,
+    ? pendingEmail.replace(
+        /^(.{1,2})(.*)(@.*)$/,
+        (_, a, b, c) => a + b.replace(/./g, "*") + c,
       )
-    : '';
+    : "";
 
   return (
     <Box
       sx={{
-        minHeight:      '100vh',
-        display:        'flex',
-        alignItems:     'center',
-        justifyContent: 'center',
-        bgcolor:        'background.default',
-        px:             2,
-        py:             4,
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "background.default",
+        px: 2,
+        py: 4,
       }}
     >
-      <Box sx={{ width: '100%', maxWidth: 460 }}>
-
+      <Box sx={{ width: "100%", maxWidth: 460 }}>
         {/* Logo */}
         <Stack alignItems="center" mb={3}>
           <Box
             component="img"
             src={logo}
             alt="PharmaSphere"
-            sx={{ width: { xs: 180, sm: 220 }, height: 'auto', objectFit: 'contain' }}
+            sx={{
+              width: { xs: 180, sm: 220 },
+              height: "auto",
+              objectFit: "contain",
+            }}
           />
         </Stack>
 
         <Paper
           elevation={0}
           sx={{
-            p:            { xs: 3, sm: 5 },
+            p: { xs: 3, sm: 5 },
             borderRadius: 3,
-            border:       '1px solid',
-            borderColor:  'divider',
-            bgcolor:      'background.paper',
-            boxShadow:    '0 4px 24px rgba(56,142,60,0.10)',
+            border: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            boxShadow: "0 4px 24px rgba(56,142,60,0.10)",
           }}
         >
           {/* Icon + heading */}
           <Stack alignItems="center" spacing={2} mb={4}>
             <Box
               sx={{
-                width:        72,
-                height:       72,
+                width: 72,
+                height: 72,
                 borderRadius: 3,
-                background:   'linear-gradient(135deg, #1565C0 0%, #388E3C 100%)',
-                display:      'flex',
-                alignItems:   'center',
-                justifyContent: 'center',
-                boxShadow:    '0 8px 24px rgba(56,142,60,0.3)',
+                background: "linear-gradient(135deg, #1565C0 0%, #388E3C 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 8px 24px rgba(56,142,60,0.3)",
               }}
             >
-              <MarkEmailReadOutlinedIcon sx={{ color: '#fff', fontSize: 36 }} />
+              <MarkEmailReadOutlinedIcon sx={{ color: "#fff", fontSize: 36 }} />
             </Box>
             <Box textAlign="center">
               <Typography variant="h5" fontWeight={700} color="text.primary">
@@ -344,10 +354,10 @@ const TwoFactorPage: React.FC = () => {
               severity="error"
               onClose={() => setApiError(null)}
               sx={{
-                mb:           3,
+                mb: 3,
                 borderRadius: 2,
-                border:       '1px solid',
-                borderColor:  'error.light',
+                border: "1px solid",
+                borderColor: "error.light",
               }}
             >
               {apiError}
@@ -357,19 +367,19 @@ const TwoFactorPage: React.FC = () => {
           {/* OTP digit inputs */}
           <Box
             sx={{
-              display:        'flex',
-              gap:            { xs: 1, sm: 1.5 },
-              justifyContent: 'center',
-              mb:             3,
+              display: "flex",
+              gap: { xs: 1, sm: 1.5 },
+              justifyContent: "center",
+              mb: 3,
               // Shake animation on error
-              '@keyframes shake': {
-                '0%, 100%': { transform: 'translateX(0)' },
-                '20%':      { transform: 'translateX(-6px)' },
-                '40%':      { transform: 'translateX(6px)' },
-                '60%':      { transform: 'translateX(-4px)' },
-                '80%':      { transform: 'translateX(4px)' },
+              "@keyframes shake": {
+                "0%, 100%": { transform: "translateX(0)" },
+                "20%": { transform: "translateX(-6px)" },
+                "40%": { transform: "translateX(6px)" },
+                "60%": { transform: "translateX(-4px)" },
+                "80%": { transform: "translateX(4px)" },
               },
-              animation: shakeError ? 'shake 0.5s ease' : 'none',
+              animation: shakeError ? "shake 0.5s ease" : "none",
             }}
           >
             {digits.map((d, i) => (
@@ -392,11 +402,11 @@ const TwoFactorPage: React.FC = () => {
               <Box
                 key={i}
                 sx={{
-                  width:        8,
-                  height:       8,
-                  borderRadius: '50%',
-                  bgcolor:      d ? 'primary.main' : 'divider',
-                  transition:   'background-color 0.2s ease',
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  bgcolor: d ? "primary.main" : "divider",
+                  transition: "background-color 0.2s ease",
                 }}
               />
             ))}
@@ -413,10 +423,10 @@ const TwoFactorPage: React.FC = () => {
             disabled={!isFilled}
             disableElevation
             sx={{
-              py:           1.7,
-              fontSize:     '1rem',
+              py: 1.7,
+              fontSize: "1rem",
               borderRadius: 2.5,
-              mb:           2,
+              mb: 2,
             }}
           >
             Verify &amp; Sign in
@@ -429,8 +439,11 @@ const TwoFactorPage: React.FC = () => {
             </Typography>
             {countdown > 0 ? (
               <Typography variant="body2" color="text.secondary">
-                Resend in{' '}
-                <Box component="span" sx={{ color: 'primary.main', fontWeight: 600 }}>
+                Resend in{" "}
+                <Box
+                  component="span"
+                  sx={{ color: "primary.main", fontWeight: 600 }}
+                >
                   {countdown}s
                 </Box>
               </Typography>
@@ -441,11 +454,13 @@ const TwoFactorPage: React.FC = () => {
                 onClick={handleResend}
                 disabled={resending}
                 startIcon={
-                  resending ? <CircularProgress size={14} color="inherit" /> : undefined
+                  resending ? (
+                    <CircularProgress size={14} color="inherit" />
+                  ) : undefined
                 }
-                sx={{ fontWeight: 600, color: 'primary.main' }}
+                sx={{ fontWeight: 600, color: "primary.main" }}
               >
-                {resending ? 'Sending…' : 'Resend code'}
+                {resending ? "Sending…" : "Resend code"}
               </Button>
             )}
           </Stack>
@@ -460,14 +475,14 @@ const TwoFactorPage: React.FC = () => {
             underline="hover"
             onClick={handleBack}
             sx={{
-              display:    'inline-flex',
-              alignItems: 'center',
-              gap:        0.5,
-              color:      'text.secondary',
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              color: "text.secondary",
               fontWeight: 500,
-              cursor:     'pointer',
-              border:     'none',
-              background: 'none',
+              cursor: "pointer",
+              border: "none",
+              background: "none",
             }}
           >
             <ArrowBackIcon fontSize="inherit" />
