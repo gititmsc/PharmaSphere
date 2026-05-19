@@ -15,6 +15,11 @@ namespace PharmaSphere.Repositories.Auth
             _db = db;
         }
 
+        public async Task<User?> HealthCheck()
+        {
+            return await _db.Users.FirstOrDefaultAsync();
+        }
+
         public async Task<User?> GetByEmailAsync(string email, CancellationToken ct = default)
         {
             return await _db.Users

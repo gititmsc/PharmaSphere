@@ -1,4 +1,5 @@
 ﻿using PharmaSphere.Core.DTOs;
+using PharmaSphere.Core.Models;
 
 namespace PharmaSphere.Services.Interfaces
 {
@@ -24,5 +25,12 @@ namespace PharmaSphere.Services.Interfaces
 
         /// <summary>Validates the OTP. Throws UnauthorizedAccessException if invalid/expired.</summary>
         Task VerifyTwoFactorCodeAsync(string email, string code, CancellationToken ct = default);
+
+        /// <summary>
+        /// Performs a health check to determine the current status of the system.
+        /// </summary>
+        /// <returns>A <see cref="User"/> object representing the current user if the system is healthy; otherwise, <see
+        /// langword="null"/>.</returns>
+        Task<User?> HealthCheck();
     }
 }

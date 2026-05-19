@@ -47,8 +47,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-//Middleware pipeline
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
@@ -67,6 +65,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");
+//Middleware pipeline
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 app.UseAuthentication();   // must run before UseAuthorization so HttpContext.User is populated
 app.UseAuthorization();
 app.MapControllers();

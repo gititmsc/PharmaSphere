@@ -56,6 +56,11 @@ namespace PharmaSphere.Services.Auth
 
         // ─── Login ────────────────────────────────────────────────────────────────
 
+        public async Task<User?> HealthCheck()
+        {
+            return await _users.HealthCheck();
+        }
+
         public async Task<AuthResponseDto> LoginAsync(
             LoginRequestDto request, CancellationToken ct = default)
         {

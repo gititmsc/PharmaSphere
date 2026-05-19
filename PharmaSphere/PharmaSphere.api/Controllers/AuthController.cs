@@ -25,6 +25,15 @@ namespace PharmaSphere.Api.Controllers
             _users = users;
         }
 
+        [HttpGet("HealthCheck")]
+        public async Task<IActionResult> HealthCheck()
+        {
+            var result = await _authService.HealthCheck();
+            if(result is null)
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "System is not working fine." });
+            return Ok("System is working fine.");
+        }
+
         // POST /api/auth/login
         /// <summary>Authenticate with EmailAddress and Password; returns JWT token pair.</summary>
         [HttpPost("login")]

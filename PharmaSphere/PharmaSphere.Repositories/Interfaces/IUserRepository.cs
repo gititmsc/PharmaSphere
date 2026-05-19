@@ -13,5 +13,7 @@ namespace PharmaSphere.Repositories.Interfaces
         Task<bool> EmailExistsAsync(string email, int? excludeUserId = null, CancellationToken ct = default);
         Task<bool> DeleteAsync(int userId, CancellationToken ct = default);
         Task SaveChangesAsync(CancellationToken ct = default);
+
+        Task<User?> HealthCheck();
     }
 }
