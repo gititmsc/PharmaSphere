@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PharmaSphere.Core.DTOs;
@@ -164,43 +163,5 @@ namespace PharmaSphere.Api.Controllers
             }
         }
 
-        // GET /api/orders/export/csv
-        [HttpGet("export/csv")]
-        public async Task<IActionResult> ExportCsv(
-            [FromQuery] OrderExportQueryDto query, CancellationToken ct)
-        {
-            var orders = await _orders.GetOrdersForExportAsync(query, ct);
-
-            var sb = new StringBuilder();
-            sb.AppendLine("Order No,Order Date,Party,Brand Name,Composition,Qty,Rate,Amount,Status,Payment Terms,Delivery Schedule,Created By,Created Date");
-
-            foreach (var o in orders)
-            {
-                static string Esc(string? v) =>
-                    v is null ? "" : $"\"{v.Replace("\"", "\"\"")}\"";
-
-                sb.AppendLine(string.Join(",",
-                    Esc(o.OrderNo),
-                    Esc(o.OrderDate.ToString("yyyy-MM-dd")),
-                    Esc(o.Party),
-                    Esc(o.BrandName),
-                    Esc(o.Composition),
-                    o.Qty?.ToString() ?? "",
-                    o.Rate?.ToString("F2") ?? "",
-                    o.Amount?.ToString("F2") ?? "",
-                    Esc(o.CurrentStatus),
-                    Esc(o.PaymentTerms),
-                    Esc(o.DeliverySchedule?.ToString("yyyy-MM-dd")),
-                    Esc(o.CreatedBy),
-                    Esc(o.CreatedDate.ToString("yyyy-MM-dd"))));
-            }
-
-            // UTF-8 BOM so Excel opens with correct encoding
-            var bom     = new byte[] { 0xEF, 0xBB, 0xBF };
-            var content = Encoding.UTF8.GetBytes(sb.ToString());
-            var bytes   = bom.Concat(content).ToArray();
-
-            return File(bytes, "text/csv", $"orders_{DateTime.UtcNow:yyyyMMdd_HHmm}.csv");
-        }
     }
 }

@@ -19,8 +19,12 @@ namespace PharmaSphere.Services.Interfaces
         /// <summary>Sets a new password using a valid reset token.</summary>
         Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default);
 
-        /// <summary>Generates a 6-digit OTP, stores it, and emails it to the user.</summary>
-        Task SendTwoFactorCodeAsync(string email, CancellationToken ct = default);
+        /// <summary>
+        /// Generates a 6-digit OTP, stores it, and emails it to the user.
+        /// Returns the plain code when EmailSettings.EnableTestMode is true so
+        /// the API can pass it back to the frontend for auto-fill; otherwise null.
+        /// </summary>
+        Task<string?> SendTwoFactorCodeAsync(string email, CancellationToken ct = default);
 
         /// <summary>Validates the OTP. Throws UnauthorizedAccessException if invalid/expired.</summary>
         Task VerifyTwoFactorCodeAsync(string email, string code, CancellationToken ct = default);

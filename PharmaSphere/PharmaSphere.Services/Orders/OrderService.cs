@@ -207,10 +207,6 @@ namespace PharmaSphere.Services.Orders
             }, ct);
         }
 
-        public Task<IReadOnlyList<Order>> GetOrdersForExportAsync(
-            OrderExportQueryDto query, CancellationToken ct = default)
-            => _orders.GetAllForExportAsync(query, ct);
-
         public Task<IReadOnlyList<string>> GetSealColorsAsync(CancellationToken ct = default)
             => _orders.GetSealColorsAsync(ct);
 

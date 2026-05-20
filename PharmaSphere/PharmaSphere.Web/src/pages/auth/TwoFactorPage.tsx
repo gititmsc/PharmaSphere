@@ -109,7 +109,7 @@ const TwoFactorPage: React.FC = () => {
   const theme    = useTheme();
   const navigate = useNavigate();
   const { enqueueSnackbar }               = useSnackbar();
-  const { pendingTwoFactor, pendingEmail, isAuthenticated, verifyTwoFactor, resendTwoFactorCode, logout } =
+  const { pendingTwoFactor, pendingEmail, isAuthenticated, prefillOtp, verifyTwoFactor, resendTwoFactorCode, logout } =
     useAuth();
 
   const [digits,     setDigits    ] = useState<string[]>(Array(CODE_LENGTH).fill(''));
@@ -135,6 +135,16 @@ const TwoFactorPage: React.FC = () => {
     const id = setTimeout(() => setCountdown((c) => c - 1), 1000);
     return () => clearTimeout(id);
   }, [countdown]);
+
+  // Auto-fill digits when server returns the OTP in test mode
+  useEffect(() => {
+    if (!prefillOtp) return;
+    const chars = prefillOtp.replace(/\D/g, '').slice(0, CODE_LENGTH).split('');
+    const next = Array(CODE_LENGTH).fill('');
+    chars.forEach((ch, i) => { next[i] = ch; });
+    setDigits(next);
+    focusBox(Math.min(chars.length, CODE_LENGTH - 1));
+  }, [prefillOtp]);
 
   const focusBox = (index: number) => {
     inputRefs.current[index]?.current?.focus();

@@ -202,9 +202,4 @@ namespace PharmaSphere.Core.DTOs
         string NewStatus,
         string? Remarks = null);
 
-    public sealed record OrderExportQueryDto(
-        string? Search  = null,
-        string? Status  = null,
-        string? DateFrom = null,
-        string? DateTo  = null);
 }

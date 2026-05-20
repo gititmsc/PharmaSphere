@@ -34,6 +34,8 @@ export interface AuthState {
   // 2FA pending — login succeeded but OTP not yet verified
   pendingTwoFactor: boolean;
   pendingEmail: string | null;
+  // Set to the OTP code when server is in test mode (EnableTestMode=true) for auto-fill
+  prefillOtp: string | null;
 }
 
 export interface ApiError {

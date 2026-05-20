@@ -11,7 +11,6 @@ namespace PharmaSphere.Repositories.Interfaces
         Task AddAsync(Order order, CancellationToken ct = default);
         Task AddStatusHistoryAsync(OrderStatusHistory history, CancellationToken ct = default);
         Task AddAuditLogAsync(OrderAuditLog log, CancellationToken ct = default);
-        Task<IReadOnlyList<Order>> GetAllForExportAsync(OrderExportQueryDto query, CancellationToken ct = default);
         Task<IReadOnlyList<string>> GetSealColorsAsync(CancellationToken ct = default);
         Task SaveChangesAsync(CancellationToken ct = default);
     }

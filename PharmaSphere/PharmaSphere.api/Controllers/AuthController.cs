@@ -133,6 +133,7 @@ namespace PharmaSphere.Api.Controllers
         [HttpPost("send-2fa")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> SendTwoFactor(
             [FromBody] TwoFactorSendRequestDto request)
@@ -141,8 +142,8 @@ namespace PharmaSphere.Api.Controllers
             // fire-and-forget and navigates away immediately. The HTTP connection drops,
             // which cancels the ASP.NET request token, but the OTP generation and email
             // send must complete regardless of client connection state.
-            await _authService.SendTwoFactorCodeAsync(request.Email, CancellationToken.None);
-            return NoContent();
+            var code = await _authService.SendTwoFactorCodeAsync(request.Email, CancellationToken.None);
+            return code is not null ? Ok(new { code }) : NoContent();
         }
 
         // POST /api/auth/verify-2fa

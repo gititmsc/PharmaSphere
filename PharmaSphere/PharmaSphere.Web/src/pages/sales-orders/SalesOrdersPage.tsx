@@ -37,8 +37,6 @@ import SearchIcon            from '@mui/icons-material/Search';
 import AddIcon               from '@mui/icons-material/Add';
 import EditIcon              from '@mui/icons-material/Edit';
 import DeleteOutlineIcon     from '@mui/icons-material/DeleteOutline';
-import FileDownloadIcon      from '@mui/icons-material/FileDownload';
-import PictureAsPdfIcon      from '@mui/icons-material/PictureAsPdf';
 import ViewColumnIcon        from '@mui/icons-material/ViewColumn';
 import FilterAltIcon         from '@mui/icons-material/FilterAlt';
 
@@ -152,15 +150,6 @@ const SalesOrdersPage: React.FC = () => {
     }
   };
 
-  const handleExportCsv = () => {
-    const url = OrderService.exportCsvUrl({ search: search || undefined, status: statusFilter || undefined, dateFrom: dateFrom || undefined, dateTo: dateTo || undefined });
-    const a = document.createElement('a');
-    a.href = url;
-    a.click();
-  };
-
-  const handleExportPdf = () => window.print();
-
   const toggleCol = (id: string) => {
     setVisible(prev => {
       const next = new Set(prev);
@@ -186,16 +175,6 @@ const SalesOrdersPage: React.FC = () => {
           </Typography>
         </Stack>
         <Stack direction="row" gap={1}>
-          <Tooltip title="Export CSV">
-            <IconButton size="small" onClick={handleExportCsv} sx={{ border: 1, borderColor: 'divider' }}>
-              <FileDownloadIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Export PDF">
-            <IconButton size="small" onClick={handleExportPdf} sx={{ border: 1, borderColor: 'divider' }}>
-              <PictureAsPdfIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
           <Button variant="contained" size="small" startIcon={<AddIcon />}
             onClick={() => navigate('/sales-orders/form')} disableElevation>
             Add Order

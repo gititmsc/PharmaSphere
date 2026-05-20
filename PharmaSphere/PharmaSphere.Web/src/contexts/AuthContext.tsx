@@ -20,6 +20,7 @@ import {
 type AuthAction =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'TWO_FACTOR_REQUIRED'; payload: { email: string } }
+  | { type: 'SET_PREFILL_OTP'; payload: string | null }
   | { type: 'LOGIN_SUCCESS'; payload: { user: UserProfile; tokens: AuthTokens } }
   | { type: 'LOGOUT' };
 
@@ -30,6 +31,7 @@ const initialState: AuthState = {
   isLoading: true,
   pendingTwoFactor: false,
   pendingEmail: null,
+  prefillOtp: null,
 };
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
@@ -42,7 +44,10 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         isLoading: false,
         pendingTwoFactor: true,
         pendingEmail: action.payload.email,
+        prefillOtp: null,
       };
+    case 'SET_PREFILL_OTP':
+      return { ...state, prefillOtp: action.payload };
     case 'LOGIN_SUCCESS':
       return {
         ...state,
@@ -52,6 +57,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         isLoading: false,
         pendingTwoFactor: false,
         pendingEmail: null,
+        prefillOtp: null,
       };
     case 'LOGOUT':
       return { ...initialState, isLoading: false };
@@ -124,8 +130,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         type: 'TWO_FACTOR_REQUIRED',
         payload: { email: payload.email },
       });
-      // Send the OTP email in the background; failures are recoverable via Resend
-      AuthService.sendTwoFactorCode(payload.email).catch(() => {});
+      // Send the OTP email; capture code for test-mode auto-fill (non-blocking)
+      AuthService.sendTwoFactorCode(payload.email)
+        .then(({ code }) => {
+          if (code) dispatch({ type: 'SET_PREFILL_OTP', payload: code });
+        })
+        .catch(() => {});
     } catch (err) {
       // Reset loading so the login form becomes interactive again
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -155,7 +165,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   /** Resend a fresh OTP to the pending email. */
   const resendTwoFactorCode = useCallback(async () => {
     if (!state.pendingEmail) throw new Error('No pending 2FA session.');
-    await AuthService.sendTwoFactorCode(state.pendingEmail);
+    const { code } = await AuthService.sendTwoFactorCode(state.pendingEmail);
+    dispatch({ type: 'SET_PREFILL_OTP', payload: code ?? null });
   }, [state.pendingEmail]);
 
   const logout = useCallback(async () => {

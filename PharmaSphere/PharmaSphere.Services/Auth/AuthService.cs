@@ -24,6 +24,7 @@ namespace PharmaSphere.Services.Auth
         private readonly IPasswordHasher _hasher;
         private readonly IEmailService _email;
         private readonly JwtSettings _jwt;
+        private readonly EmailSettings _emailSettings;
         private readonly string _frontendBaseUrl;
         private readonly ILogger<AuthService> _logger;
 
@@ -39,6 +40,7 @@ namespace PharmaSphere.Services.Auth
             IPasswordHasher hasher,
             IEmailService email,
             IOptions<JwtSettings> jwtOptions,
+            IOptions<EmailSettings> emailOptions,
             IConfiguration configuration,
             ILogger<AuthService> logger)
         {
@@ -50,6 +52,7 @@ namespace PharmaSphere.Services.Auth
             _hasher = hasher;
             _email = email;
             _jwt = jwtOptions.Value;
+            _emailSettings = emailOptions.Value;
             _frontendBaseUrl = configuration["FrontendBaseUrl"] ?? "http://localhost:3000";
             _logger = logger;
         }
@@ -202,7 +205,7 @@ namespace PharmaSphere.Services.Auth
 
         // ─── 2FA — Send ───────────────────────────────────────────────────────────
 
-        public async Task SendTwoFactorCodeAsync(
+        public async Task<string?> SendTwoFactorCodeAsync(
             string email, CancellationToken ct = default)
         {
             // Use CancellationToken.None for every async call in this method.
@@ -231,6 +234,8 @@ namespace PharmaSphere.Services.Auth
 
             _logger.LogInformation(
                 "2FA code sent to user {UserId} ({Email}).", user.UserId, user.EmailAddress);
+
+            return _emailSettings.EnableTestMode ? code : null;
         }
 
         // ─── 2FA — Verify ─────────────────────────────────────────────────────────

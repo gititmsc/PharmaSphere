@@ -109,13 +109,4 @@ export const OrderService = {
     await httpClient.post(`/orders/${id}/status`, { newStatus, remarks });
   },
 
-  exportCsvUrl(query: { search?: string; status?: string; dateFrom?: string; dateTo?: string }): string {
-    const p = new URLSearchParams();
-    if (query.search)   p.set('search',   query.search);
-    if (query.status)   p.set('status',   query.status);
-    if (query.dateFrom) p.set('dateFrom', query.dateFrom);
-    if (query.dateTo)   p.set('dateTo',   query.dateTo);
-    const base = (httpClient.defaults.baseURL ?? '').replace(/\/$/, '');
-    return `${base}/orders/export/csv?${p.toString()}`;
-  },
 };

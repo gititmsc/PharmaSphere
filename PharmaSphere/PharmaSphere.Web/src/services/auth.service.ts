@@ -29,10 +29,12 @@ const AuthService = {
   /**
    * Send the 2FA auth code email after a successful password login.
    * POST /api/auth/send-2fa  { email }
-   * The API generates a 6-digit OTP, stores it server-side, and emails it.
+   * Returns { code } when the server is in test mode (EnableTestMode=true) for auto-fill,
+   * otherwise returns an empty object (204 No Content → no body).
    */
-  sendTwoFactorCode: async (email: string): Promise<void> => {
-    await httpClient.post('/auth/send-2fa', { email });
+  sendTwoFactorCode: async (email: string): Promise<{ code?: string }> => {
+    const res = await httpClient.post<{ code?: string } | null>('/auth/send-2fa', { email });
+    return res.data ?? {};
   },
 
   /**

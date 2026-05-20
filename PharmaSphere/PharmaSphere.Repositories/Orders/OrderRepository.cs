@@ -114,34 +114,6 @@ namespace PharmaSphere.Repositories.Orders
             await _db.SaveChangesAsync(ct);
         }
 
-        public async Task<IReadOnlyList<Order>> GetAllForExportAsync(
-            OrderExportQueryDto query, CancellationToken ct = default)
-        {
-            var q = _db.Orders.AsNoTracking().Where(o => o.IsActive);
-
-            if (!string.IsNullOrWhiteSpace(query.Search))
-            {
-                var s = query.Search.Trim().ToLower();
-                q = q.Where(o =>
-                    o.OrderNo.ToLower().Contains(s) ||
-                    (o.Party != null && o.Party.ToLower().Contains(s)) ||
-                    (o.BrandName != null && o.BrandName.ToLower().Contains(s)));
-            }
-
-            if (!string.IsNullOrWhiteSpace(query.Status))
-                q = q.Where(o => o.CurrentStatus == query.Status);
-
-            if (!string.IsNullOrWhiteSpace(query.DateFrom) &&
-                DateTime.TryParse(query.DateFrom, out var from))
-                q = q.Where(o => o.OrderDate >= from);
-
-            if (!string.IsNullOrWhiteSpace(query.DateTo) &&
-                DateTime.TryParse(query.DateTo, out var to))
-                q = q.Where(o => o.OrderDate <= to);
-
-            return await q.OrderByDescending(o => o.CreatedDate).ToListAsync(ct);
-        }
-
         public async Task<IReadOnlyList<string>> GetSealColorsAsync(CancellationToken ct = default)
         {
             return await _db.SealColors
