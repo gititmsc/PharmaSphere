@@ -162,14 +162,14 @@ const UsersPage: React.FC = () => {
       await UserService.deleteUser(userToDelete.userId);
       enqueueSnackbar(
         `User "${userToDelete.firstName || userToDelete.email}" deleted successfully.`,
-        { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } },
+        { variant: 'success', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } },
       );
       setUserToDelete(null);
       fetchUsers({ search, roleFilter, statusFilter, sortBy, sortDir, page, pageSize });
     } catch (err) {
       let message = 'Failed to delete user.';
       if (axios.isAxiosError(err)) message = err.response?.data?.message ?? message;
-      enqueueSnackbar(message, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      enqueueSnackbar(message, { variant: 'error', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } finally {
       setDeleting(false);
     }

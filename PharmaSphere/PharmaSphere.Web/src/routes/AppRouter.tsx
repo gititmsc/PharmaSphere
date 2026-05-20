@@ -14,6 +14,8 @@ const ResetPasswordPage  = lazy(() => import('@/pages/auth/ResetPasswordPage'));
 const TwoFactorPage      = lazy(() => import('@/pages/auth/TwoFactorPage'));
 const DashboardPage      = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const SalesOrdersPage    = lazy(() => import('@/pages/sales-orders/SalesOrdersPage'));
+const SalesOrderFormPage = lazy(() => import('@/pages/sales-orders/SalesOrderFormPage'));
+const SalesOrderDetailPage = lazy(() => import('@/pages/sales-orders/SalesOrderDetailPage'));
 const UsersPage          = lazy(() => import('@/pages/users/UsersPage'));
 const UserFormPage       = lazy(() => import('@/pages/users/UserFormPage'));
 
@@ -45,7 +47,9 @@ const AppRouter: React.FC = () => (
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout><Outlet /></DashboardLayout>}>
             <Route path="/dashboard"    element={<DashboardPage />} />
-            <Route path="/sales-orders" element={<SalesOrdersPage />} />
+            <Route path="/sales-orders"        element={<SalesOrdersPage />} />
+            <Route path="/sales-orders/form"   element={<SalesOrderFormPage />} />
+            <Route path="/sales-orders/:id"    element={<SalesOrderDetailPage />} />
             <Route path="/users"        element={<UsersPage />} />
             <Route path="/users/form"   element={<UserFormPage />} />
           </Route>

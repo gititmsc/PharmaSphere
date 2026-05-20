@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PharmaSphere.Repositories.Auth;
 using PharmaSphere.Repositories.Interfaces;
+using PharmaSphere.Repositories.Orders;
 
 
 
@@ -16,6 +17,7 @@ namespace PharmaSphere.Repositories
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<ITwoFactorCodeRepository, TwoFactorCodeRepository>();
             services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
 
             return services;
         }

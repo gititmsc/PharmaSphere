@@ -21,6 +21,10 @@ namespace PharmaSphere.Infrastructure.Persistence
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<TwoFactorCode> TwoFactorCodes => Set<TwoFactorCode>();
         public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+        public DbSet<Order> Orders => Set<Order>();
+        public DbSet<OrderStatusHistory> OrderStatusHistory => Set<OrderStatusHistory>();
+        public DbSet<OrderAuditLog> OrderAuditLogs => Set<OrderAuditLog>();
+        public DbSet<SealColor> SealColors => Set<SealColor>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -177,6 +181,132 @@ namespace PharmaSphere.Infrastructure.Persistence
 
                 e.Ignore(t => t.IsExpired);
                 e.Ignore(t => t.IsValid);
+            });
+
+            // ── Orders table ──────────────────────────────────────────────────────
+            modelBuilder.Entity<Order>(e =>
+            {
+                e.ToTable("Orders");
+                e.HasKey(o => o.OrderId);
+
+                e.Property(o => o.OrderId).ValueGeneratedOnAdd();
+                e.Property(o => o.OrderNo).HasMaxLength(50).IsRequired();
+                e.Property(o => o.OrderDate).IsRequired();
+                e.Property(o => o.BrandName).HasMaxLength(200);
+                e.Property(o => o.Composition).HasMaxLength(500);
+                e.Property(o => o.MRP).HasPrecision(18, 2);
+                e.Property(o => o.Rate).HasPrecision(18, 2);
+                e.Property(o => o.Amount).HasPrecision(18, 2);
+                e.Property(o => o.Party).HasMaxLength(200);
+                e.Property(o => o.Make).HasMaxLength(200);
+                e.Property(o => o.AdminRemarks).HasMaxLength(1000);
+                e.Property(o => o.PaymentTerms).HasMaxLength(500);
+                e.Property(o => o.Vial).HasMaxLength(100);
+                e.Property(o => o.SealColour).HasMaxLength(100);
+                e.Property(o => o.WFI).HasMaxLength(100);
+                e.Property(o => o.Label).HasMaxLength(100);
+                e.Property(o => o.MonoBox).HasMaxLength(100);
+                e.Property(o => o.Tray).HasMaxLength(100);
+                e.Property(o => o.Leaflet).HasMaxLength(100);
+                e.Property(o => o.SyringeAndNeedle).HasMaxLength(100);
+                e.Property(o => o.Shrink).HasMaxLength(100);
+                e.Property(o => o.Shipper).HasMaxLength(100);
+                e.Property(o => o.OtherRemarks).HasMaxLength(1000);
+                e.Property(o => o.QARemarks).HasMaxLength(1000);
+                e.Property(o => o.ProductionMonoBox).HasMaxLength(100);
+                e.Property(o => o.ProductionLabel).HasMaxLength(100);
+                e.Property(o => o.ProductionInsert).HasMaxLength(100);
+                e.Property(o => o.ProductionTray).HasMaxLength(100);
+                e.Property(o => o.ProductionShipper).HasMaxLength(100);
+                e.Property(o => o.CurrentStatus).HasMaxLength(50).IsRequired()
+                 .HasDefaultValue(OrderStatus.Created);
+                e.Property(o => o.CreatedBy).HasMaxLength(100);
+                e.Property(o => o.CreatedDate).IsRequired();
+                e.Property(o => o.UpdatedBy).HasMaxLength(100);
+                e.Property(o => o.IsActive).IsRequired().HasDefaultValue(true);
+
+                e.HasIndex(o => o.IsActive).HasDatabaseName("IX_Orders_IsActive");
+                e.HasIndex(o => o.CurrentStatus).HasDatabaseName("IX_Orders_Status");
+                e.HasIndex(o => o.OrderDate).HasDatabaseName("IX_Orders_OrderDate");
+
+                e.HasOne(o => o.CreatedByUser)
+                 .WithMany()
+                 .HasForeignKey(o => o.CreatedByUserId)
+                 .HasConstraintName("FK_Orders_CreatedByUser")
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(o => o.UpdatedByUser)
+                 .WithMany()
+                 .HasForeignKey(o => o.UpdatedByUserId)
+                 .HasConstraintName("FK_Orders_UpdatedByUser")
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── OrderStatusHistory table ──────────────────────────────────────────
+            modelBuilder.Entity<OrderStatusHistory>(e =>
+            {
+                e.ToTable("OrderStatusHistory");
+                e.HasKey(h => h.HistoryId);
+
+                e.Property(h => h.HistoryId).ValueGeneratedOnAdd();
+                e.Property(h => h.FromStatus).HasMaxLength(50);
+                e.Property(h => h.ToStatus).HasMaxLength(50).IsRequired();
+                e.Property(h => h.Remarks).HasMaxLength(500);
+                e.Property(h => h.ChangedBy).HasMaxLength(100);
+                e.Property(h => h.ChangedDate).IsRequired();
+
+                e.HasIndex(h => h.OrderId).HasDatabaseName("IX_OrderStatusHistory_OrderId");
+
+                e.HasOne(h => h.Order)
+                 .WithMany(o => o.StatusHistory)
+                 .HasForeignKey(h => h.OrderId)
+                 .HasConstraintName("FK_OrderStatusHistory_Order")
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(h => h.ChangedByUser)
+                 .WithMany()
+                 .HasForeignKey(h => h.ChangedByUserId)
+                 .HasConstraintName("FK_OrderStatusHistory_User")
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── OrderAuditLogs table ──────────────────────────────────────────────
+            modelBuilder.Entity<OrderAuditLog>(e =>
+            {
+                e.ToTable("OrderAuditLogs");
+                e.HasKey(a => a.AuditLogId);
+
+                e.Property(a => a.AuditLogId).ValueGeneratedOnAdd();
+                e.Property(a => a.Action).HasMaxLength(50).IsRequired();
+                e.Property(a => a.FieldName).HasMaxLength(100);
+                e.Property(a => a.ChangedBy).HasMaxLength(100);
+                e.Property(a => a.ChangedDate).IsRequired();
+
+                e.HasIndex(a => a.OrderId).HasDatabaseName("IX_OrderAuditLogs_OrderId");
+
+                e.HasOne(a => a.Order)
+                 .WithMany(o => o.AuditLogs)
+                 .HasForeignKey(a => a.OrderId)
+                 .HasConstraintName("FK_OrderAuditLogs_Order")
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(a => a.ChangedByUser)
+                 .WithMany()
+                 .HasForeignKey(a => a.ChangedByUserId)
+                 .HasConstraintName("FK_OrderAuditLogs_User")
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── SealColors table ──────────────────────────────────────────────────
+            modelBuilder.Entity<SealColor>(e =>
+            {
+                e.ToTable("SealColors");
+                e.HasKey(s => s.SealColorId);
+                e.Property(s => s.SealColorId).ValueGeneratedOnAdd();
+                e.Property(s => s.ColorName).HasMaxLength(100).IsRequired();
+                e.Property(s => s.IsActive).IsRequired().HasDefaultValue(true);
+                e.HasIndex(s => s.ColorName).IsUnique()
+                 .HasDatabaseName("UQ_SealColors_ColorName");
             });
         }
     }

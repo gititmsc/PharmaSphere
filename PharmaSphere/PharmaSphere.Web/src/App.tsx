@@ -17,7 +17,7 @@ const App: React.FC = () => {
       <SnackbarProvider
         maxSnack={4}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        autoHideDuration={15000}
+        autoHideDuration={10000}
         dense
       >
         <AuthProvider>
