@@ -55,7 +55,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 //{
 //    app.MapOpenApi();
 //}
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>

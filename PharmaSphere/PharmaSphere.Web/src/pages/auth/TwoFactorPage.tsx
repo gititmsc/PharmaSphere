@@ -16,7 +16,7 @@ import {
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import logo from '@/assets/logo.png';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import axios from 'axios';
 
@@ -106,7 +106,6 @@ const DigitBox: React.FC<DigitBoxProps> = ({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 const TwoFactorPage: React.FC = () => {
-  const theme    = useTheme();
   const navigate = useNavigate();
   const { enqueueSnackbar }               = useSnackbar();
   const { pendingTwoFactor, pendingEmail, isAuthenticated, prefillOtp, verifyTwoFactor, resendTwoFactorCode, logout } =

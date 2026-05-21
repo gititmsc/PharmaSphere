@@ -14,7 +14,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
   Grid,
   IconButton,
   MenuItem,
@@ -39,7 +38,7 @@ import SyncAltIcon     from '@mui/icons-material/SyncAlt';
 import { useSnackbar } from 'notistack';
 import axios           from 'axios';
 import { OrderService }      from '@/services/order.service';
-import { decodeOrderId, ORDER_STATUSES, STATUS_COLOR, ALLOWED_TRANSITIONS } from '@/types/order.types';
+import { decodeOrderId, STATUS_COLOR, ALLOWED_TRANSITIONS } from '@/types/order.types';
 import type { OrderDetail, OrderStatus } from '@/types/order.types';
 
 // ── Progress stepper statuses (no Cancelled in the main flow) ──────────────────
@@ -113,13 +112,6 @@ const SalesOrderDetailPage: React.FC = () => {
   const flowStep = FLOW_STATUSES.indexOf(order.currentStatus as OrderStatus);
 
   const statusChipColor = STATUS_COLOR[order.currentStatus as OrderStatus] ?? 'default';
-
-  const sectionTitle = (title: string) => (
-    <Typography variant="caption" fontWeight={700} color="text.secondary"
-      sx={{ textTransform: 'uppercase', letterSpacing: 0.5, display: 'block', mb: 1 }}>
-      {title}
-    </Typography>
-  );
 
   return (
     <Box>

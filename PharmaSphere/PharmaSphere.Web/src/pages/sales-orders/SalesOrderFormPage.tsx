@@ -9,7 +9,6 @@ import {
   Card,
   CardContent,
   CircularProgress,
-  Divider,
   Grid,
   IconButton,
   InputAdornment,
@@ -51,7 +50,7 @@ interface FldProps {
 const Fld: React.FC<FldProps> = ({
   name, label, control, required, type = 'text',
   multiline = false, rows = 1, readOnly = false,
-  adornment, min, placeholder, shrinkLabel,
+  adornment, placeholder, shrinkLabel,
 }) => (
   <Controller
     name={name}
@@ -111,7 +110,7 @@ const SalesOrderFormPage: React.FC = () => {
   const [sealColors, setSealColors] = useState<string[]>([]);
   const skipAutoCalcRef = useRef(false);
 
-  const { control, handleSubmit, reset, watch, setValue, formState: { isSubmitting, errors } } =
+  const { control, handleSubmit, reset, watch, setValue, formState: { isSubmitting } } =
     useForm<OrderFormValues>({ defaultValues: EMPTY, mode: 'onTouched' });
 
   useEffect(() => {
