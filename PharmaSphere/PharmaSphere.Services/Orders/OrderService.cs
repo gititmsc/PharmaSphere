@@ -7,9 +7,14 @@ namespace PharmaSphere.Services.Orders
 {
     public sealed class OrderService : IOrderService
     {
-        private readonly IOrderRepository _orders;
+        private readonly IOrderRepository  _orders;
+        private readonly ILookupRepository _lookups;
 
-        public OrderService(IOrderRepository orders) => _orders = orders;
+        public OrderService(IOrderRepository orders, ILookupRepository lookups)
+        {
+            _orders  = orders;
+            _lookups = lookups;
+        }
 
         public Task<PagedResultDto<OrderListItemDto>> GetOrdersAsync(
             OrderListQueryDto query, CancellationToken ct = default)
@@ -30,6 +35,12 @@ namespace PharmaSphere.Services.Orders
 
             var order = MapCreate(req, userId, userName);
             await _orders.AddAsync(order, ct);
+
+            // Auto-add new party / brand name to lookup tables
+            if (!string.IsNullOrWhiteSpace(req.Party))
+                await _lookups.EnsurePartyExistsAsync(req.Party, ct);
+            if (!string.IsNullOrWhiteSpace(req.BrandName))
+                await _lookups.EnsureBrandNameExistsAsync(req.BrandName, ct);
 
             await _orders.AddStatusHistoryAsync(new OrderStatusHistory
             {
@@ -101,6 +112,13 @@ namespace PharmaSphere.Services.Orders
             order.UpdatedDate     = now;
 
             await _orders.SaveChangesAsync(ct);
+
+            // Auto-add new party / brand name to lookup tables
+            if (!string.IsNullOrWhiteSpace(req.Party))
+                await _lookups.EnsurePartyExistsAsync(req.Party, ct);
+            if (!string.IsNullOrWhiteSpace(req.BrandName))
+                await _lookups.EnsureBrandNameExistsAsync(req.BrandName, ct);
+
             return ToListItem(order);
         }
 

@@ -24,7 +24,9 @@ namespace PharmaSphere.Infrastructure.Persistence
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderStatusHistory> OrderStatusHistory => Set<OrderStatusHistory>();
         public DbSet<OrderAuditLog> OrderAuditLogs => Set<OrderAuditLog>();
-        public DbSet<SealColor> SealColors => Set<SealColor>();
+        public DbSet<SealColor>       SealColors  => Set<SealColor>();
+        public DbSet<Party>           Parties     => Set<Party>();
+        public DbSet<BrandNameLookup> BrandNames  => Set<BrandNameLookup>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -307,6 +309,30 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(s => s.IsActive).IsRequired().HasDefaultValue(true);
                 e.HasIndex(s => s.ColorName).IsUnique()
                  .HasDatabaseName("UQ_SealColors_ColorName");
+            });
+
+            // ── Parties table ─────────────────────────────────────────────────────
+            modelBuilder.Entity<Party>(e =>
+            {
+                e.ToTable("Parties");
+                e.HasKey(p => p.PartyId);
+                e.Property(p => p.PartyId).ValueGeneratedOnAdd();
+                e.Property(p => p.PartyName).HasMaxLength(200).IsRequired();
+                e.Property(p => p.IsActive).IsRequired().HasDefaultValue(true);
+                e.HasIndex(p => p.PartyName).IsUnique()
+                 .HasDatabaseName("UQ_Parties_PartyName");
+            });
+
+            // ── BrandNames table ──────────────────────────────────────────────────
+            modelBuilder.Entity<BrandNameLookup>(e =>
+            {
+                e.ToTable("BrandNames");
+                e.HasKey(b => b.BrandNameId);
+                e.Property(b => b.BrandNameId).ValueGeneratedOnAdd();
+                e.Property(b => b.BrandName).HasMaxLength(200).IsRequired();
+                e.Property(b => b.IsActive).IsRequired().HasDefaultValue(true);
+                e.HasIndex(b => b.BrandName).IsUnique()
+                 .HasDatabaseName("UQ_BrandNames_BrandName");
             });
         }
     }

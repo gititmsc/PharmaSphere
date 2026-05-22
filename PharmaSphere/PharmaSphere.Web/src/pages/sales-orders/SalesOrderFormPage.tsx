@@ -22,6 +22,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useSnackbar } from 'notistack';
 import axios from 'axios';
 import { OrderService } from '@/services/order.service';
+import { LookupService } from '@/services/lookup.service';
 import { decodeOrderId } from '@/types/order.types';
 import type { OrderFormValues } from '@/types/order.types';
 
@@ -107,7 +108,9 @@ const SalesOrderFormPage: React.FC = () => {
   const [loading, setLoading]       = useState(isEdit);
   const [orderStatus, setOrderStatus] = useState('');
   const [orderNo, setOrderNo]       = useState('');
-  const [sealColors, setSealColors] = useState<string[]>([]);
+  const [sealColors, setSealColors]   = useState<string[]>([]);
+  const [parties, setParties]         = useState<string[]>([]);
+  const [brandNames, setBrandNames]   = useState<string[]>([]);
   const skipAutoCalcRef = useRef(false);
 
   const { control, handleSubmit, reset, watch, setValue, formState: { isSubmitting } } =
@@ -115,6 +118,8 @@ const SalesOrderFormPage: React.FC = () => {
 
   useEffect(() => {
     OrderService.getSealColors().then(setSealColors).catch(() => {});
+    LookupService.getParties().then(setParties).catch(() => {});
+    LookupService.getBrandNames().then(setBrandNames).catch(() => {});
   }, []);
 
   const qty  = watch('qty');
@@ -246,12 +251,48 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="orderDate" label="Order Date *" control={control} required="Order date is required" type="date" readOnly={ro} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="party" label="Party" control={control} readOnly={ro} placeholder="Client / party name" />
+                  <Controller
+                    name="party"
+                    control={control}
+                    render={({ field }) => (
+                      <Autocomplete
+                        freeSolo
+                        options={parties}
+                        value={field.value || null}
+                        inputValue={field.value || ''}
+                        onChange={(_, v) => field.onChange(v ?? '')}
+                        onInputChange={(_, v) => field.onChange(v)}
+                        disabled={ro}
+                        size="small"
+                        renderInput={(params) => (
+                          <TextField {...params} label="Party" placeholder="Select or type party name" onBlur={field.onBlur} />
+                        )}
+                      />
+                    )}
+                  />
                 </Grid>
 
                 {/* Row 2: Product details */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="brandName" label="Brand Name" control={control} readOnly={ro} placeholder="Brand name" />
+                  <Controller
+                    name="brandName"
+                    control={control}
+                    render={({ field }) => (
+                      <Autocomplete
+                        freeSolo
+                        options={brandNames}
+                        value={field.value || null}
+                        inputValue={field.value || ''}
+                        onChange={(_, v) => field.onChange(v ?? '')}
+                        onInputChange={(_, v) => field.onChange(v)}
+                        disabled={ro}
+                        size="small"
+                        renderInput={(params) => (
+                          <TextField {...params} label="Brand Name" placeholder="Select or type brand name" onBlur={field.onBlur} />
+                        )}
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="composition" label="Composition" control={control} readOnly={ro} placeholder="Active ingredients" />

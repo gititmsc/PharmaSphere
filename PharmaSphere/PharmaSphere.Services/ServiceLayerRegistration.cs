@@ -5,6 +5,7 @@ using PharmaSphere.Services.Auth;
 using PharmaSphere.Services.Email;
 using PharmaSphere.Services.Interfaces;
 using PharmaSphere.Services.Users;
+using PharmaSphere.Services.Lookups;
 using PharmaSphere.Services.Orders;
 
 namespace PharmaSphere.Services
@@ -25,6 +26,7 @@ namespace PharmaSphere.Services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<ILookupService, LookupService>();
 
             return services;
         }
