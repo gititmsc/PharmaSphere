@@ -1,16 +1,36 @@
-import QueryProvider from "./app/providers/QueryProvider";
-import AppRoutes from "./app/router/AppRouter";
+// src/App.tsx
 
-import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
+import React, { useMemo, useState } from 'react';
+import { CssBaseline, PaletteMode, ThemeProvider } from '@mui/material';
+import { SnackbarProvider } from 'notistack';
+import { AuthProvider } from '@/contexts/AuthContext';
+import AppRouter from '@/routes/AppRouter';
+import { getAppTheme } from '@/config/theme.config';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
-function App() {
+const App: React.FC = () => {
+  const [mode] = useState<PaletteMode>('light');
+
+  const theme = useMemo(() => getAppTheme(mode), [mode]);
+
   return (
     <ErrorBoundary>
-      <QueryProvider>
-        <AppRoutes />
-      </QueryProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+
+        <SnackbarProvider
+          maxSnack={4}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          autoHideDuration={10000}
+          dense
+        >
+          <AuthProvider>
+            <AppRouter />
+          </AuthProvider>
+        </SnackbarProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
-}
+};
 
 export default App;
