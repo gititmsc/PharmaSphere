@@ -406,6 +406,7 @@ namespace PharmaSphere.Services.Orders
             o.Party,
             o.BrandName,
             o.Qty,
+            o.Rate,
             o.Amount,
             o.CurrentStatus,
             o.CreatedBy,

@@ -21,6 +21,7 @@ namespace PharmaSphere.Core.DTOs
         string? Party,
         string? BrandName,
         int? Qty,
+        decimal? Rate,
         decimal? Amount,
         string CurrentStatus,
         string? CreatedBy,

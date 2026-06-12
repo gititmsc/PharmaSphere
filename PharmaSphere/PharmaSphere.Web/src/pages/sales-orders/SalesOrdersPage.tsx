@@ -56,7 +56,8 @@ const ALL_COLS: ColDef[] = [
   { id: 'orderDate',   label: 'Order Date',   sortKey: 'orderDate',   width: 110 },
   { id: 'party',       label: 'Party',        sortKey: 'party'                   },
   { id: 'brandName',   label: 'Brand Name',   sortKey: 'brandName'               },
-  { id: 'qty',         label: 'Qty',          sortKey: 'qty',         width: 80, align: 'right' },
+  { id: 'qty',         label: 'Qty',          sortKey: 'qty',         width: 80,  align: 'right' },
+  { id: 'rate',        label: 'Rate (₹)',                             width: 100, align: 'right' },
   { id: 'amount',      label: 'Amount (₹)',                           width: 110, align: 'right' },
   { id: 'status',      label: 'Status',       sortKey: 'status',      width: 150 },
   { id: 'createdBy',   label: 'Created By',                           width: 120 },
@@ -64,7 +65,7 @@ const ALL_COLS: ColDef[] = [
   { id: 'updatedDate', label: 'Updated',      sortKey: 'updatedDate', width: 130 },
 ];
 
-const DEFAULT_VISIBLE = new Set(['orderNo','orderDate','party','brandName','qty','status','createdBy','createdDate']);
+const DEFAULT_VISIBLE = new Set(['orderNo','orderDate','party','brandName','qty','rate','amount','status','createdBy','createdDate']);
 
 const SalesOrdersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -299,6 +300,7 @@ const SalesOrdersPage: React.FC = () => {
                         : c.id === 'party'       ? (row.party ?? '—')
                         : c.id === 'brandName'   ? (row.brandName ?? '—')
                         : c.id === 'qty'         ? (row.qty?.toLocaleString() ?? '—')
+                        : c.id === 'rate'        ? (row.rate   != null ? `₹${row.rate.toLocaleString('en-IN',   { minimumFractionDigits: 2 })}` : '—')
                         : c.id === 'amount'      ? (row.amount != null ? `₹${row.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '—')
                         : c.id === 'createdBy'   ? (row.createdBy ?? '—')
                         : c.id === 'createdDate' ? fmtDateTime(row.createdDate)

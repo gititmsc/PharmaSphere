@@ -54,6 +54,7 @@ export interface OrderListItem {
   party: string | null;
   brandName: string | null;
   qty: number | null;
+  rate: number | null;
   amount: number | null;
   currentStatus: string;
   createdBy: string | null;
