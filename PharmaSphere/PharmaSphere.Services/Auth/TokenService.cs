@@ -30,17 +30,22 @@ namespace PharmaSphere.Services.Auth
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.SecretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var fullName = string.Join(" ",
+                new[] { user.FirstName, user.LastName }
+                    .Where(s => !string.IsNullOrWhiteSpace(s)));
+
             // Claims map directly to DB columns / navigation properties
             Claim[] claims =
             [
                 new(JwtRegisteredClaimNames.Sub,   user.UserId.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.EmailAddress),
-            new(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString()),
-            new(ClaimTypes.NameIdentifier,     user.UserId.ToString()),
-            new(ClaimTypes.Email,              user.EmailAddress),
-            new(ClaimTypes.Role,               user.Role?.RoleName ?? string.Empty),
-            new("roleId",                      user.RoleId.ToString()),
-        ];
+                new(JwtRegisteredClaimNames.Email, user.EmailAddress),
+                new(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString()),
+                new(ClaimTypes.NameIdentifier,     user.UserId.ToString()),
+                new(ClaimTypes.Name,               string.IsNullOrWhiteSpace(fullName) ? user.EmailAddress : fullName),
+                new(ClaimTypes.Email,              user.EmailAddress),
+                new(ClaimTypes.Role,               user.Role?.RoleName ?? string.Empty),
+                new("roleId",                      user.RoleId.ToString()),
+            ];
 
             var token = new JwtSecurityToken(
                 issuer: _jwt.Issuer,

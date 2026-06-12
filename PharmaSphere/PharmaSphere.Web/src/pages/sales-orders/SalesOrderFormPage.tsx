@@ -8,12 +8,19 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   CircularProgress,
   Grid,
   IconButton,
   InputAdornment,
   Stack,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Tabs,
   TextField,
   Typography,
@@ -24,7 +31,8 @@ import axios from 'axios';
 import { OrderService } from '@/services/order.service';
 import { LookupService } from '@/services/lookup.service';
 import { decodeOrderId } from '@/types/order.types';
-import type { OrderFormValues } from '@/types/order.types';
+import type { OrderFormValues, OrderAuditLogItem } from '@/types/order.types';
+import { fmtDateTime } from '@/utils/date.utils';
 
 interface TabPanelProps { children: React.ReactNode; value: number; index: number; }
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
@@ -95,6 +103,18 @@ const EMPTY: OrderFormValues = {
   sterility14DaysDate: '', dispatchDate: '',
 };
 
+type ActionColor = 'default' | 'success' | 'info' | 'warning' | 'error' | 'secondary';
+function actionColor(action: string): ActionColor {
+  switch (action) {
+    case 'Created':       return 'success';
+    case 'Updated':       return 'info';
+    case 'StatusChanged': return 'secondary';
+    case 'Deleted':       return 'error';
+    case 'Restored':      return 'warning';
+    default:              return 'default';
+  }
+}
+
 const SalesOrderFormPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -111,6 +131,7 @@ const SalesOrderFormPage: React.FC = () => {
   const [sealColors, setSealColors]   = useState<string[]>([]);
   const [parties, setParties]         = useState<string[]>([]);
   const [brandNames, setBrandNames]   = useState<string[]>([]);
+  const [auditLogs, setAuditLogs]     = useState<OrderAuditLogItem[]>([]);
   const skipAutoCalcRef  = useRef(false);
   const justSelectedRef  = useRef(false);
 
@@ -202,6 +223,7 @@ const SalesOrderFormPage: React.FC = () => {
       .then(o => {
         setOrderStatus(o.currentStatus);
         setOrderNo(o.orderNo);
+        setAuditLogs(o.auditLogs ?? []);
         skipAutoCalcRef.current = true;
         reset({
           orderNo: o.orderNo, orderDate: o.orderDate,
@@ -297,6 +319,7 @@ const SalesOrderFormPage: React.FC = () => {
             <Tab label="Packaging Material" />
             <Tab label="QA Information" />
             <Tab label="Production Info" />
+            {isEdit && <Tab label="History" />}
           </Tabs>
 
           <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -536,6 +559,67 @@ const SalesOrderFormPage: React.FC = () => {
                 </Grid>
               </Grid>
             </TabPanel>
+
+            {/* ── Tab 4: History (edit mode only) ── */}
+            {isEdit && (
+              <TabPanel value={tab} index={4}>
+                {auditLogs.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+                    No history recorded for this order.
+                  </Typography>
+                ) : (
+                  <TableContainer sx={{ maxHeight: 420 }}>
+                    <Table size="small" stickyHeader
+                      sx={{ '& .MuiTableCell-root': { fontSize: '0.8125rem', py: 0.75, px: 1.25 } }}>
+                      <TableHead>
+                        <TableRow sx={{ '& .MuiTableCell-stickyHeader': { bgcolor: 'grey.50', fontWeight: 600 } }}>
+                          <TableCell sx={{ whiteSpace: 'nowrap' }}>Date &amp; Time</TableCell>
+                          <TableCell>Action</TableCell>
+                          <TableCell>Field</TableCell>
+                          <TableCell>Old Value</TableCell>
+                          <TableCell>New Value</TableCell>
+                          <TableCell>Changed By</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {auditLogs.map(log => (
+                          <TableRow key={log.auditLogId} hover>
+                            <TableCell sx={{ whiteSpace: 'nowrap', color: 'text.secondary' }}>
+                              {fmtDateTime(log.changedDate)}
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={log.action}
+                                size="small"
+                                color={actionColor(log.action)}
+                                sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }}
+                              />
+                            </TableCell>
+                            <TableCell sx={{ color: 'text.secondary' }}>
+                              {log.fieldName ?? '—'}
+                            </TableCell>
+                            <TableCell>
+                              {log.oldValue
+                                ? <Typography variant="body2" sx={{ color: 'error.main', fontFamily: 'monospace' }}>{log.oldValue}</Typography>
+                                : <Typography variant="body2" color="text.disabled">—</Typography>}
+                            </TableCell>
+                            <TableCell>
+                              {log.newValue
+                                ? <Typography variant="body2" sx={{ color: 'success.main', fontFamily: 'monospace' }}>{log.newValue}</Typography>
+                                : <Typography variant="body2" color="text.disabled">—</Typography>}
+                            </TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                              {log.changedBy ?? '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </TabPanel>
+            )}
+
           </CardContent>
         </Card>
 

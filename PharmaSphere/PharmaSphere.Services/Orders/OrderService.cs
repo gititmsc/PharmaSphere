@@ -104,14 +104,55 @@ namespace PharmaSphere.Services.Orders
                 }, ct).GetAwaiter().GetResult();
             }
 
-            Track("OrderNo",   order.OrderNo,   req.OrderNo);
-            Track("OrderDate", order.OrderDate.ToString("yyyy-MM-dd"), req.OrderDate);
-            Track("Party",     order.Party,      req.Party);
-            Track("BrandName", order.BrandName,  req.BrandName);
-            Track("Qty",       order.Qty,        req.Qty);
-            Track("Rate",      order.Rate,       req.Rate);
-            Track("MRP",       order.MRP,        req.MRP);
-            Track("Amount",    order.Amount,     req.Amount);
+            // ── General Info ─────────────────────────────────────────────────────
+            Track("Order No",          order.OrderNo,                          req.OrderNo);
+            Track("Order Date",        order.OrderDate.ToString("yyyy-MM-dd"), req.OrderDate);
+            Track("Party",             order.Party,                            req.Party);
+            Track("Brand Name",        order.BrandName,                        req.BrandName);
+            Track("Composition",       order.Composition,                      req.Composition);
+            Track("Qty",               order.Qty,                              req.Qty);
+            Track("Shelf Life (Mths)", order.ShelfLifeMonths,                  req.ShelfLifeMonths);
+            Track("MRP",               order.MRP,                              req.MRP);
+            Track("Rate",              order.Rate,                             req.Rate);
+            Track("Amount",            order.Amount,                           req.Amount);
+            Track("Payment Terms",     order.PaymentTerms,                     req.PaymentTerms);
+            Track("Make",              order.Make,                             req.Make);
+            Track("Delivery Schedule", order.DeliverySchedule?.ToString("yyyy-MM-dd"), req.DeliverySchedule);
+            Track("Admin Remarks",     order.AdminRemarks,                     req.AdminRemarks);
+            Track("Other Remarks",     order.OtherRemarks,                     req.OtherRemarks);
+
+            // ── Packaging Material ────────────────────────────────────────────────
+            Track("Vial",              order.Vial,             req.Vial);
+            Track("Seal Colour",       order.SealColour,       req.SealColour);
+            Track("WFI",               order.WFI,              req.WFI);
+            Track("Label",             order.Label,            req.Label);
+            Track("Mono Box",          order.MonoBox,          req.MonoBox);
+            Track("Tray",              order.Tray,             req.Tray);
+            Track("Leaflet",           order.Leaflet,          req.Leaflet);
+            Track("Syringe & Needle",  order.SyringeAndNeedle, req.SyringeAndNeedle);
+            Track("Shrink",            order.Shrink,           req.Shrink);
+            Track("Shipper",           order.Shipper,          req.Shipper);
+
+            // ── QA Information ────────────────────────────────────────────────────
+            Track("PIS Approval Date",              order.PISApprovalDate?.ToString("yyyy-MM-dd"),                 req.PISApprovalDate);
+            Track("Artwork Approval Date",          order.SanoletPartyArtworkApprovalDate?.ToString("yyyy-MM-dd"), req.SanoletPartyArtworkApprovalDate);
+            Track("MonoBox Vendor Approval",        order.MonoBoxSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"), req.MonoBoxSupplyVendorApprovalDate);
+            Track("Label Vendor Approval",          order.LabelSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),   req.LabelSupplyVendorApprovalDate);
+            Track("Insert Vendor Approval",         order.InsertSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),  req.InsertSupplyVendorApprovalDate);
+            Track("Tray Vendor Approval",           order.TraySupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),    req.TraySupplyVendorApprovalDate);
+            Track("Shipper Vendor Approval",        order.ShipperSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"), req.ShipperSupplyVendorApprovalDate);
+            Track("QA Remarks",                     order.QARemarks,                                               req.QARemarks);
+
+            // ── Production Info ───────────────────────────────────────────────────
+            Track("Production Mono Box", order.ProductionMonoBox,                    req.ProductionMonoBox);
+            Track("Production Label",    order.ProductionLabel,                      req.ProductionLabel);
+            Track("Production Insert",   order.ProductionInsert,                     req.ProductionInsert);
+            Track("Production Tray",     order.ProductionTray,                       req.ProductionTray);
+            Track("Production Shipper",  order.ProductionShipper,                    req.ProductionShipper);
+            Track("Filling Plan",        order.FillingPlan?.ToString("yyyy-MM-dd"),   req.FillingPlan);
+            Track("Packing Plan",        order.PackingPlan?.ToString("yyyy-MM-dd"),   req.PackingPlan);
+            Track("Sterility 14 Days",   order.Sterility14DaysDate?.ToString("yyyy-MM-dd"), req.Sterility14DaysDate);
+            Track("Dispatch Date",       order.DispatchDate?.ToString("yyyy-MM-dd"),  req.DispatchDate);
 
             MapUpdate(order, req);
             order.UpdatedBy       = userName;
