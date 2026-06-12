@@ -111,7 +111,8 @@ const SalesOrderFormPage: React.FC = () => {
   const [sealColors, setSealColors]   = useState<string[]>([]);
   const [parties, setParties]         = useState<string[]>([]);
   const [brandNames, setBrandNames]   = useState<string[]>([]);
-  const skipAutoCalcRef = useRef(false);
+  const skipAutoCalcRef  = useRef(false);
+  const justSelectedRef  = useRef(false);
 
   const { control, handleSubmit, reset, watch, setValue, formState: { isSubmitting } } =
     useForm<OrderFormValues>({ defaultValues: EMPTY, mode: 'onTouched' });
@@ -121,6 +122,67 @@ const SalesOrderFormPage: React.FC = () => {
     LookupService.getParties().then(setParties).catch(() => {});
     LookupService.getBrandNames().then(setBrandNames).catch(() => {});
   }, []);
+
+  const handleBrandNameSelect = async (brandName: string) => {
+    if (isEdit || !brandName.trim()) return;
+    const prev = await OrderService.getLatestByBrand(brandName);
+    if (!prev) return;
+
+    skipAutoCalcRef.current = true;
+    reset({
+      orderNo:      '',
+      orderDate:    new Date().toISOString().slice(0, 10),
+      party:        prev.party ?? '',
+      brandName:    brandName,
+      composition:  prev.composition ?? '',
+      qty:          prev.qty?.toString() ?? '',
+      shelfLifeMonths: prev.shelfLifeMonths?.toString() ?? '',
+      mrp:          prev.mrp?.toString() ?? '',
+      rate:         prev.rate?.toString() ?? '',
+      amount:       prev.amount?.toString() ?? '',
+      paymentTerms: prev.paymentTerms ?? '',
+      make:         prev.make ?? '',
+      adminRemarks: prev.adminRemarks ?? '',
+      deliverySchedule: prev.deliverySchedule ?? '',
+      otherRemarks: prev.otherRemarks ?? '',
+      // Packaging
+      vial:             prev.vial ?? '',
+      sealColour:       prev.sealColour ?? '',
+      wfi:              prev.wfi ?? '',
+      label:            prev.label ?? '',
+      monoBox:          prev.monoBox ?? '',
+      tray:             prev.tray ?? '',
+      leaflet:          prev.leaflet ?? '',
+      syringeAndNeedle: prev.syringeAndNeedle ?? '',
+      shrink:           prev.shrink ?? '',
+      shipper:          prev.shipper ?? '',
+      // QA — text only; dates cleared
+      qaRemarks:                       prev.qaRemarks ?? '',
+      pisApprovalDate:                 '',
+      sanoletPartyArtworkApprovalDate: '',
+      monoBoxSupplyVendorApprovalDate: '',
+      labelSupplyVendorApprovalDate:   '',
+      insertSupplyVendorApprovalDate:  '',
+      traySupplyVendorApprovalDate:    '',
+      shipperSupplyVendorApprovalDate: '',
+      // Production — text only; dates cleared
+      productionMonoBox:   prev.productionMonoBox ?? '',
+      productionLabel:     prev.productionLabel ?? '',
+      productionInsert:    prev.productionInsert ?? '',
+      productionTray:      prev.productionTray ?? '',
+      productionShipper:   prev.productionShipper ?? '',
+      fillingPlan:         '',
+      packingPlan:         '',
+      sterility14DaysDate: '',
+      dispatchDate:        '',
+    });
+    setTimeout(() => { skipAutoCalcRef.current = false; }, 0);
+
+    enqueueSnackbar(`Pre-filled from order ${prev.orderNo}`, {
+      variant: 'info',
+      anchorOrigin: { vertical: 'top', horizontal: 'right' },
+    });
+  };
 
   const qty  = watch('qty');
   const rate = watch('rate');
@@ -261,12 +323,30 @@ const SalesOrderFormPage: React.FC = () => {
                         options={brandNames}
                         value={field.value || null}
                         inputValue={field.value || ''}
-                        onChange={(_, v) => field.onChange(v ?? '')}
+                        onChange={(_, v, reason) => {
+                          field.onChange(v ?? '');
+                          if (reason === 'selectOption' && v) {
+                            justSelectedRef.current = true;
+                            setTimeout(() => { justSelectedRef.current = false; }, 300);
+                            handleBrandNameSelect(v as string);
+                          }
+                        }}
                         onInputChange={(_, v) => field.onChange(v)}
                         disabled={ro}
                         size="small"
                         renderInput={(params) => (
-                          <TextField {...params} label="Brand Name" placeholder="Select or type brand name" onBlur={field.onBlur} />
+                          <TextField
+                            {...params}
+                            label="Brand Name"
+                            placeholder="Select or type brand name"
+                            onBlur={(e) => {
+                              field.onBlur();
+                              const val = (e.target as HTMLInputElement).value?.trim();
+                              if (!isEdit && !justSelectedRef.current && val) {
+                                handleBrandNameSelect(val);
+                              }
+                            }}
+                          />
                         )}
                       />
                     )}

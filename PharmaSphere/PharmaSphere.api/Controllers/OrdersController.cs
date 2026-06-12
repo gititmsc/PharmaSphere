@@ -46,6 +46,23 @@ namespace PharmaSphere.Api.Controllers
             return Ok(result);
         }
 
+        // GET /api/orders/latest-by-brand?brandName=XYZ
+        [HttpGet("latest-by-brand")]
+        [ProducesResponseType(typeof(OrderDetailDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetLatestByBrand(
+            [FromQuery] string brandName, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(brandName))
+                return BadRequest(new { message = "brandName is required." });
+
+            var order = await _orders.GetLatestByBrandNameAsync(brandName, ct);
+            if (order is null)
+                return NotFound(new { message = $"No previous order found for brand '{brandName}'." });
+
+            return Ok(order);
+        }
+
         // GET /api/orders/{id}
         [HttpGet("{id:int}")]
         [ProducesResponseType(typeof(OrderDetailDto), StatusCodes.Status200OK)]

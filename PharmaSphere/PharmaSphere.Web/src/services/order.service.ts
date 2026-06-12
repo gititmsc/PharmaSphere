@@ -87,6 +87,17 @@ export const OrderService = {
     return data;
   },
 
+  async getLatestByBrand(brandName: string): Promise<OrderDetail | null> {
+    try {
+      const { data } = await httpClient.get<OrderDetail>(
+        `/orders/latest-by-brand?brandName=${encodeURIComponent(brandName)}`,
+      );
+      return data;
+    } catch {
+      return null;
+    }
+  },
+
   async createOrder(values: OrderFormValues): Promise<OrderListItem> {
     const { data } = await httpClient.post<OrderListItem>('/orders', toRequest(values));
     return data;

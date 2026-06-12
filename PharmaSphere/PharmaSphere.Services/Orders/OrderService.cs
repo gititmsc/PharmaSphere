@@ -27,6 +27,13 @@ namespace PharmaSphere.Services.Orders
             return ToDetail(o);
         }
 
+        public async Task<OrderDetailDto?> GetLatestByBrandNameAsync(string brandName, CancellationToken ct = default)
+        {
+            var o = await _orders.GetLatestByBrandNameAsync(brandName, ct);
+            if (o is null) return null;
+            return ToDetail(o);
+        }
+
         public async Task<OrderListItemDto> CreateOrderAsync(
             CreateOrderRequestDto req, int userId, string userName, CancellationToken ct = default)
         {

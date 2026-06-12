@@ -87,6 +87,15 @@ namespace PharmaSphere.Repositories.Orders
                 .FirstOrDefaultAsync(o => o.OrderId == orderId, ct);
         }
 
+        public async Task<Order?> GetLatestByBrandNameAsync(string brandName, CancellationToken ct = default)
+        {
+            return await _db.Orders
+                .AsNoTracking()
+                .Where(o => o.IsActive && o.BrandName == brandName.Trim())
+                .OrderByDescending(o => o.CreatedDate)
+                .FirstOrDefaultAsync(ct);
+        }
+
         public async Task<bool> OrderNoExistsAsync(
             string orderNo, int? excludeOrderId = null, CancellationToken ct = default)
         {

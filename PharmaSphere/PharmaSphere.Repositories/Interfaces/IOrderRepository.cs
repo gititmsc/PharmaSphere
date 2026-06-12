@@ -7,6 +7,7 @@ namespace PharmaSphere.Repositories.Interfaces
     {
         Task<PagedResultDto<OrderListItemDto>> GetPagedAsync(OrderListQueryDto query, CancellationToken ct = default);
         Task<Order?> GetByIdAsync(int orderId, CancellationToken ct = default);
+        Task<Order?> GetLatestByBrandNameAsync(string brandName, CancellationToken ct = default);
         Task<bool> OrderNoExistsAsync(string orderNo, int? excludeOrderId = null, CancellationToken ct = default);
         Task AddAsync(Order order, CancellationToken ct = default);
         Task AddStatusHistoryAsync(OrderStatusHistory history, CancellationToken ct = default);

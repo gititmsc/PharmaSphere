@@ -7,6 +7,7 @@ namespace PharmaSphere.Services.Interfaces
     {
         Task<PagedResultDto<OrderListItemDto>> GetOrdersAsync(OrderListQueryDto query, CancellationToken ct = default);
         Task<OrderDetailDto?> GetOrderByIdAsync(int orderId, CancellationToken ct = default);
+        Task<OrderDetailDto?> GetLatestByBrandNameAsync(string brandName, CancellationToken ct = default);
         Task<OrderListItemDto> CreateOrderAsync(CreateOrderRequestDto request, int userId, string userName, CancellationToken ct = default);
         Task<OrderListItemDto> UpdateOrderAsync(int orderId, UpdateOrderRequestDto request, int userId, string userName, CancellationToken ct = default);
         Task DeleteOrderAsync(int orderId, int userId, string userName, CancellationToken ct = default);
