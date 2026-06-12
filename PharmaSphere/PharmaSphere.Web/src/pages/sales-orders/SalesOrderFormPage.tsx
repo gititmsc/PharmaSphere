@@ -250,29 +250,7 @@ const SalesOrderFormPage: React.FC = () => {
                 <Grid item xs={12} sm={4}>
                   <Fld name="orderDate" label="Order Date *" control={control} required="Order date is required" type="date" readOnly={ro} shrinkLabel />
                 </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Controller
-                    name="party"
-                    control={control}
-                    render={({ field }) => (
-                      <Autocomplete
-                        freeSolo
-                        options={parties}
-                        value={field.value || null}
-                        inputValue={field.value || ''}
-                        onChange={(_, v) => field.onChange(v ?? '')}
-                        onInputChange={(_, v) => field.onChange(v)}
-                        disabled={ro}
-                        size="small"
-                        renderInput={(params) => (
-                          <TextField {...params} label="Party" placeholder="Select or type party name" onBlur={field.onBlur} />
-                        )}
-                      />
-                    )}
-                  />
-                </Grid>
-
-                {/* Row 2: Product details */}
+                
                 <Grid item xs={12} sm={4}>
                   <Controller
                     name="brandName"
@@ -289,6 +267,29 @@ const SalesOrderFormPage: React.FC = () => {
                         size="small"
                         renderInput={(params) => (
                           <TextField {...params} label="Brand Name" placeholder="Select or type brand name" onBlur={field.onBlur} />
+                        )}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Row 2: Product details */}
+                <Grid item xs={12} sm={4}>
+                  <Controller
+                    name="party"
+                    control={control}
+                    render={({ field }) => (
+                      <Autocomplete
+                        freeSolo
+                        options={parties}
+                        value={field.value || null}
+                        inputValue={field.value || ''}
+                        onChange={(_, v) => field.onChange(v ?? '')}
+                        onInputChange={(_, v) => field.onChange(v)}
+                        disabled={ro}
+                        size="small"
+                        renderInput={(params) => (
+                          <TextField {...params} label="Party" placeholder="Select or type party name" onBlur={field.onBlur} />
                         )}
                       />
                     )}
