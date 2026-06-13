@@ -196,6 +196,7 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(o => o.OrderDate).IsRequired();
                 e.Property(o => o.BrandName).HasMaxLength(200);
                 e.Property(o => o.Composition).HasMaxLength(500);
+                e.Property(o => o.ShelfLifeMonths).HasMaxLength(200);
                 e.Property(o => o.MRP).HasPrecision(18, 2);
                 e.Property(o => o.Rate).HasPrecision(18, 2);
                 e.Property(o => o.Amount).HasPrecision(18, 2);

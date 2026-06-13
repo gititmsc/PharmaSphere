@@ -10,6 +10,7 @@ import {
   CardContent,
   Chip,
   CircularProgress,
+  Divider,
   Grid,
   IconButton,
   InputAdornment,
@@ -53,13 +54,14 @@ interface FldProps {
   readOnly?: boolean;
   adornment?: string;
   min?: number;
+  step?: number;
   placeholder?: string;
   shrinkLabel?: boolean;
 }
 const Fld: React.FC<FldProps> = ({
   name, label, control, required, type = 'text',
   multiline = false, rows = 1, readOnly = false,
-  adornment, placeholder, shrinkLabel,
+  adornment, min, step, placeholder, shrinkLabel,
 }) => (
   <Controller
     name={name}
@@ -80,6 +82,10 @@ const Fld: React.FC<FldProps> = ({
         InputProps={{
           readOnly,
           ...(adornment ? { startAdornment: <InputAdornment position="start">{adornment}</InputAdornment> } : {}),
+        }}
+        inputProps={{
+          ...(min !== undefined ? { min } : {}),
+          ...(step !== undefined ? { step } : {}),
         }}
         InputLabelProps={shrinkLabel || type === 'date' ? { shrink: true } : undefined}
       />
@@ -157,7 +163,7 @@ const SalesOrderFormPage: React.FC = () => {
       brandName:    brandName,
       composition:  prev.composition ?? '',
       qty:          prev.qty?.toString() ?? '',
-      shelfLifeMonths: prev.shelfLifeMonths?.toString() ?? '',
+      shelfLifeMonths: prev.shelfLifeMonths ?? '',
       mrp:          prev.mrp?.toString() ?? '',
       rate:         prev.rate?.toString() ?? '',
       amount:       prev.amount?.toString() ?? '',
@@ -229,7 +235,7 @@ const SalesOrderFormPage: React.FC = () => {
           orderNo: o.orderNo, orderDate: o.orderDate,
           party: o.party ?? '', brandName: o.brandName ?? '',
           composition: o.composition ?? '',
-          qty: o.qty?.toString() ?? '', shelfLifeMonths: o.shelfLifeMonths?.toString() ?? '',
+          qty: o.qty?.toString() ?? '', shelfLifeMonths: o.shelfLifeMonths ?? '',
           mrp: o.mrp?.toString() ?? '', rate: o.rate?.toString() ?? '',
           amount: o.amount?.toString() ?? '',
           paymentTerms: o.paymentTerms ?? '', make: o.make ?? '',
@@ -328,14 +334,13 @@ const SalesOrderFormPage: React.FC = () => {
             <TabPanel value={tab} index={0}>
               <Grid container spacing={1.5}>
 
-                {/* Row 1: Order identification */}
+                {/* Row 1: Order No | Order Date | Brand Name */}
                 <Grid item xs={12} sm={4}>
                   <Fld name="orderNo" label="Order No *" control={control} required="Order No is required" readOnly={ro} placeholder="e.g. ORD-2025-001" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="orderDate" label="Order Date *" control={control} required="Order date is required" type="date" readOnly={ro} shrinkLabel />
                 </Grid>
-                
                 <Grid item xs={12} sm={4}>
                   <Controller
                     name="brandName"
@@ -376,7 +381,21 @@ const SalesOrderFormPage: React.FC = () => {
                   />
                 </Grid>
 
-                {/* Row 2: Product details */}
+                {/* Row 2: Composition | Qty | Shelf Life */}
+                <Grid item xs={12} sm={4}>
+                  <Fld name="composition" label="Composition" control={control} readOnly={ro} placeholder="Active ingredients" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="qty" label="Quantity" control={control} type="number" readOnly={ro} placeholder="0" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="shelfLifeMonths" label="Shelf Life" control={control} readOnly={ro} placeholder="e.g. 24 months" />
+                </Grid>
+
+                {/* Row 3: Amount | Party | Make */}
+                <Grid item xs={12} sm={4}>
+                  <Fld name="amount" label="Amount (₹)" control={control} type="number" adornment="₹" readOnly={ro} placeholder="0.00" />
+                </Grid>
                 <Grid item xs={12} sm={4}>
                   <Controller
                     name="party"
@@ -399,60 +418,26 @@ const SalesOrderFormPage: React.FC = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="composition" label="Composition" control={control} readOnly={ro} placeholder="Active ingredients" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
                   <Fld name="make" label="Make" control={control} readOnly={ro} placeholder="Manufacturer" />
                 </Grid>
 
-                {/* Row 3: MRP, shelf life, delivery */}
-                <Grid item xs={12} sm={4}>
-                  <Fld name="mrp" label="MRP (₹)" control={control} type="number" adornment="₹" readOnly={ro} placeholder="0.00" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="shelfLifeMonths" label="Shelf Life (Months)" control={control} type="number" readOnly={ro} placeholder="24" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="deliverySchedule" label="Delivery Schedule" control={control} type="date" readOnly={ro} shrinkLabel />
+                {/* Row 4: Admin Remarks — full width */}
+                <Grid item xs={12}>
+                  <Fld name="adminRemarks" label="Admin Remarks" control={control} multiline rows={2} readOnly={ro} placeholder="Internal admin notes" />
                 </Grid>
 
-                {/* Row 4: Rate, qty, amount (auto-calc but editable) */}
-                <Grid item xs={12} sm={4}>
-                  <Fld name="rate" label="Rate (₹)" control={control} type="number" adornment="₹" readOnly={ro} placeholder="0.00" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="qty" label="Quantity" control={control} type="number" readOnly={ro} placeholder="0" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="amount" label="Amount (₹)" control={control} type="number" adornment="₹" readOnly={ro} placeholder="0.00" />
+                {/* ── Packaging Material section ── */}
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Packaging Material</Typography>
+                  </Divider>
                 </Grid>
 
-                {/* Row 5: Terms */}
+                {/* Row 5: Vial | Seal Colour | WFI */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="paymentTerms" label="Payment Terms" control={control} readOnly={ro} placeholder="e.g. Net 30 days" />
-                </Grid>
-                <Grid item xs={12} sm={8} />
-
-                {/* Row 6: Remarks */}
-                <Grid item xs={12} sm={6}>
-                  <Fld name="adminRemarks" label="Admin Remarks" control={control} multiline rows={3} readOnly={ro} placeholder="Internal admin notes" />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Fld name="otherRemarks" label="Other Remarks" control={control} multiline rows={3} readOnly={ro} placeholder="Any other remarks" />
-                </Grid>
-
-              </Grid>
-            </TabPanel>
-
-            {/* ── Tab 1: Packaging Material ── */}
-            <TabPanel value={tab} index={1}>
-              <Grid container spacing={1.5}>
-                <Grid item xs={12} sm={6}>
                   <Fld name="vial" label="Vial" control={control} readOnly={ro} placeholder="Enter vial" />
                 </Grid>
-
-                {/* Seal Colour — autocomplete from SealColors table, allows free-text */}
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={4}>
                   <Controller
                     name="sealColour"
                     control={control}
@@ -478,21 +463,59 @@ const SalesOrderFormPage: React.FC = () => {
                     )}
                   />
                 </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="wfi" label="WFI" control={control} readOnly={ro} placeholder="Enter WFI" />
+                </Grid>
 
-                {([
-                  ['wfi',             'WFI'],
-                  ['label',           'Label'],
-                  ['monoBox',         'Mono Box'],
-                  ['tray',            'Tray'],
-                  ['leaflet',         'Leaflet'],
-                  ['syringeAndNeedle','Syringe & Needle'],
-                  ['shrink',          'Shrink'],
-                  ['shipper',         'Shipper'],
-                ] as [keyof OrderFormValues, string][]).map(([field, lbl]) => (
-                  <Grid item xs={12} sm={6} key={field}>
-                    <Fld name={field} label={lbl} control={control} readOnly={ro} placeholder={`Enter ${lbl.toLowerCase()}`} />
-                  </Grid>
-                ))}
+                {/* Row 6: Label | Mono Box | Tray */}
+                <Grid item xs={12} sm={4}>
+                  <Fld name="label" label="Label" control={control} readOnly={ro} placeholder="Enter label" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="monoBox" label="Mono Box" control={control} readOnly={ro} placeholder="Enter mono box" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="tray" label="Tray" control={control} readOnly={ro} placeholder="Enter tray" />
+                </Grid>
+
+                {/* Row 7: Leaflet | Syringe & Needle | Shrink */}
+                <Grid item xs={12} sm={4}>
+                  <Fld name="leaflet" label="Leaflet" control={control} readOnly={ro} placeholder="Enter leaflet" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="syringeAndNeedle" label="Syringe & Needle" control={control} readOnly={ro} placeholder="Enter syringe & needle" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="shrink" label="Shrink" control={control} readOnly={ro} placeholder="Enter shrink" />
+                </Grid>
+
+                {/* Row 8: Shipper */}
+                <Grid item xs={12} sm={4}>
+                  <Fld name="shipper" label="Shipper" control={control} readOnly={ro} placeholder="Enter shipper" />
+                </Grid>
+
+              </Grid>
+            </TabPanel>
+
+            {/* ── Tab 1: Packaging Material ── */}
+            <TabPanel value={tab} index={1}>
+              <Grid container spacing={1.5}>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="mrp" label="MRP (₹)" control={control} type="number" adornment="₹" readOnly={ro} placeholder="0.00" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="rate" label="Rate (₹)" control={control} type="number" adornment="₹" readOnly={ro} placeholder="0.00" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="paymentTerms" label="Payment Terms" control={control} readOnly={ro} placeholder="e.g. Net 30 days" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="deliverySchedule" label="Delivery Schedule" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={8} />
+                <Grid item xs={12}>
+                  <Fld name="otherRemarks" label="Other Remarks" control={control} multiline rows={3} readOnly={ro} placeholder="Any other remarks" />
+                </Grid>
               </Grid>
             </TabPanel>
 

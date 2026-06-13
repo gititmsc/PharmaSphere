@@ -289,7 +289,7 @@ namespace PharmaSphere.Services.Orders
                 BrandName             = Blank(r.BrandName),
                 Composition           = Blank(r.Composition),
                 Qty                   = r.Qty,
-                ShelfLifeMonths       = r.ShelfLifeMonths,
+                ShelfLifeMonths       = Blank(r.ShelfLifeMonths),
                 MRP                   = r.MRP,
                 Rate                  = r.Rate,
                 Amount                = r.Amount,
@@ -341,7 +341,7 @@ namespace PharmaSphere.Services.Orders
             o.BrandName             = Blank(r.BrandName);
             o.Composition           = Blank(r.Composition);
             o.Qty                   = r.Qty;
-            o.ShelfLifeMonths       = r.ShelfLifeMonths;
+            o.ShelfLifeMonths       = Blank(r.ShelfLifeMonths);
             o.MRP                   = r.MRP;
             o.Rate                  = r.Rate;
             o.Amount                = r.Amount;

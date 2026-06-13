@@ -30,7 +30,7 @@ function toRequest(v: OrderFormValues) {
     brandName:                       n(v.brandName),
     composition:                     n(v.composition),
     qty:                             v.qty === '' ? null : Number(v.qty),
-    shelfLifeMonths:                 v.shelfLifeMonths === '' ? null : Number(v.shelfLifeMonths),
+    shelfLifeMonths:                 n(v.shelfLifeMonths),
     mrp:                             v.mrp === '' ? null : Number(v.mrp),
     rate:                            v.rate === '' ? null : Number(v.rate),
     amount:                          v.amount === '' ? null : Number(v.amount),

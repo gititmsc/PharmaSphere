@@ -10,7 +10,7 @@ namespace PharmaSphere.Core.Models
         public string? BrandName { get; set; }
         public string? Composition { get; set; }
         public int? Qty { get; set; }
-        public int? ShelfLifeMonths { get; set; }
+        public string? ShelfLifeMonths { get; set; }
         public decimal? MRP { get; set; }
         public string? Party { get; set; }
         public string? Make { get; set; }

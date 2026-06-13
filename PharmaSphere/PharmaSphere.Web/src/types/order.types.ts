@@ -72,7 +72,7 @@ export interface OrderDetail {
   brandName: string | null;
   composition: string | null;
   qty: number | null;
-  shelfLifeMonths: number | null;
+  shelfLifeMonths: string | null;
   mrp: number | null;
   rate: number | null;
   amount: number | null;

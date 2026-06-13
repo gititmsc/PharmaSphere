@@ -182,7 +182,7 @@ const SalesOrderDetailPage: React.FC = () => {
                 <Grid item xs={6}><FR label="Brand Name"  value={order.brandName} /></Grid>
                 <Grid item xs={12}><FR label="Composition" value={order.composition} /></Grid>
                 <Grid item xs={4}><FR label="Qty"         value={order.qty?.toLocaleString()} /></Grid>
-                <Grid item xs={4}><FR label="Shelf Life"  value={order.shelfLifeMonths ? `${order.shelfLifeMonths} months` : null} /></Grid>
+                <Grid item xs={4}><FR label="Shelf Life"  value={order.shelfLifeMonths} /></Grid>
                 <Grid item xs={4}><FR label="Make"        value={order.make} /></Grid>
                 <Grid item xs={4}><FR label="Rate (₹)"    value={order.rate != null ? `₹${order.rate.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : null} /></Grid>
                 <Grid item xs={4}><FR label="MRP (₹)"     value={order.mrp != null ? `₹${order.mrp.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : null} /></Grid>
