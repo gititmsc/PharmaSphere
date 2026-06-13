@@ -84,11 +84,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           component="img"
           src={logoImg}
           alt="PharmaSphere"
+          onClick={() => navigate('/dashboard')}
           sx={{
             width: '100%',
             maxWidth: 160,
             maxHeight: 56,
             objectFit: 'contain',
+            cursor: 'pointer',
           }}
         />
       </Box>
@@ -259,7 +261,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 component="img"
                 src={logoImg}
                 alt="PharmaSphere"
-                sx={{ maxHeight: 36, maxWidth: 140, objectFit: 'contain' }}
+                onClick={() => navigate('/dashboard')}
+                sx={{ maxHeight: 36, maxWidth: 140, objectFit: 'contain', cursor: 'pointer' }}
               />
             </Box>
 
