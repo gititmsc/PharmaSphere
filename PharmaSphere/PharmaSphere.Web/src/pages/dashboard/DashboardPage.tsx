@@ -64,11 +64,11 @@ const DashboardPage: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <Box maxWidth={1200} mx="auto">
+    <Box>
       {/* Welcome */}
       <Stack spacing={0.5} mb={4}>
         <Typography variant="h5" fontWeight={700}>
-          Good morning, {user?.email?.split('@')[0]} 👋
+          Hello, {user?.email?.split('@')[0]} 👋
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Here's what's happening with your application today.
