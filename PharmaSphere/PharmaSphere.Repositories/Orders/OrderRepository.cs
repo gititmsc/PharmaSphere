@@ -68,7 +68,6 @@ namespace PharmaSphere.Repositories.Orders
                     o.Party,
                     o.BrandName,
                     o.Qty,
-                    o.Rate,
                     o.Amount,
                     o.CurrentStatus,
                     o.CreatedBy,

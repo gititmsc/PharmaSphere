@@ -183,14 +183,10 @@ const SalesOrderDetailPage: React.FC = () => {
                 <Grid item xs={12}><FR label="Composition" value={order.composition} /></Grid>
                 <Grid item xs={4}><FR label="Qty"         value={order.qty?.toLocaleString()} /></Grid>
                 <Grid item xs={4}><FR label="Shelf Life"  value={order.shelfLifeMonths} /></Grid>
-                <Grid item xs={4}><FR label="Make"        value={order.make} /></Grid>
-                <Grid item xs={4}><FR label="Rate (₹)"    value={order.rate != null ? `₹${order.rate.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : null} /></Grid>
-                <Grid item xs={4}><FR label="MRP (₹)"     value={order.mrp != null ? `₹${order.mrp.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : null} /></Grid>
                 <Grid item xs={4}><FR label="Amount (₹)"  value={order.amount != null ? `₹${order.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : null} /></Grid>
-                <Grid item xs={6}><FR label="Payment Terms"      value={order.paymentTerms} /></Grid>
-                <Grid item xs={6}><FR label="Delivery Schedule"  value={order.deliverySchedule} /></Grid>
+                <Grid item xs={6}><FR label="Make"        value={order.make} /></Grid>
                 <Grid item xs={6}><FR label="Admin Remarks"      value={order.adminRemarks} /></Grid>
-                <Grid item xs={6}><FR label="Other Remarks"      value={order.otherRemarks} /></Grid>
+                <Grid item xs={12}><FR label="Other Remarks"     value={order.otherRemarks} /></Grid>
               </Grid>
             </CardContent>
           </Card>

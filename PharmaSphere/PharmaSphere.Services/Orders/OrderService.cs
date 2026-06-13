@@ -112,12 +112,8 @@ namespace PharmaSphere.Services.Orders
             Track("Composition",       order.Composition,                      req.Composition);
             Track("Qty",               order.Qty,                              req.Qty);
             Track("Shelf Life (Mths)", order.ShelfLifeMonths,                  req.ShelfLifeMonths);
-            Track("MRP",               order.MRP,                              req.MRP);
-            Track("Rate",              order.Rate,                             req.Rate);
             Track("Amount",            order.Amount,                           req.Amount);
-            Track("Payment Terms",     order.PaymentTerms,                     req.PaymentTerms);
             Track("Make",              order.Make,                             req.Make);
-            Track("Delivery Schedule", order.DeliverySchedule?.ToString("yyyy-MM-dd"), req.DeliverySchedule);
             Track("Admin Remarks",     order.AdminRemarks,                     req.AdminRemarks);
             Track("Other Remarks",     order.OtherRemarks,                     req.OtherRemarks);
 
@@ -290,10 +286,7 @@ namespace PharmaSphere.Services.Orders
                 Composition           = Blank(r.Composition),
                 Qty                   = r.Qty,
                 ShelfLifeMonths       = Blank(r.ShelfLifeMonths),
-                MRP                   = r.MRP,
-                Rate                  = r.Rate,
                 Amount                = r.Amount,
-                PaymentTerms          = Blank(r.PaymentTerms),
                 Make                  = Blank(r.Make),
                 AdminRemarks          = Blank(r.AdminRemarks),
                 Vial                  = Blank(r.Vial),
@@ -306,7 +299,6 @@ namespace PharmaSphere.Services.Orders
                 SyringeAndNeedle      = Blank(r.SyringeAndNeedle),
                 Shrink                = Blank(r.Shrink),
                 Shipper               = Blank(r.Shipper),
-                DeliverySchedule      = ParseDateOpt(r.DeliverySchedule),
                 OtherRemarks          = Blank(r.OtherRemarks),
                 PISApprovalDate                 = ParseDateOpt(r.PISApprovalDate),
                 SanoletPartyArtworkApprovalDate = ParseDateOpt(r.SanoletPartyArtworkApprovalDate),
@@ -342,10 +334,7 @@ namespace PharmaSphere.Services.Orders
             o.Composition           = Blank(r.Composition);
             o.Qty                   = r.Qty;
             o.ShelfLifeMonths       = Blank(r.ShelfLifeMonths);
-            o.MRP                   = r.MRP;
-            o.Rate                  = r.Rate;
             o.Amount                = r.Amount;
-            o.PaymentTerms          = Blank(r.PaymentTerms);
             o.Make                  = Blank(r.Make);
             o.AdminRemarks          = Blank(r.AdminRemarks);
             o.Vial                  = Blank(r.Vial);
@@ -358,7 +347,6 @@ namespace PharmaSphere.Services.Orders
             o.SyringeAndNeedle      = Blank(r.SyringeAndNeedle);
             o.Shrink                = Blank(r.Shrink);
             o.Shipper               = Blank(r.Shipper);
-            o.DeliverySchedule      = ParseDateOpt(r.DeliverySchedule);
             o.OtherRemarks          = Blank(r.OtherRemarks);
             o.PISApprovalDate                 = ParseDateOpt(r.PISApprovalDate);
             o.SanoletPartyArtworkApprovalDate = ParseDateOpt(r.SanoletPartyArtworkApprovalDate);
@@ -388,10 +376,7 @@ namespace PharmaSphere.Services.Orders
             o.Composition,
             o.Qty,
             o.ShelfLifeMonths,
-            o.MRP,
-            o.Rate,
             o.Amount,
-            o.PaymentTerms,
             o.Make,
             o.AdminRemarks,
             o.Vial,
@@ -404,7 +389,6 @@ namespace PharmaSphere.Services.Orders
             o.SyringeAndNeedle,
             o.Shrink,
             o.Shipper,
-            o.DeliverySchedule?.ToString("yyyy-MM-dd"),
             o.OtherRemarks,
             o.PISApprovalDate?.ToString("yyyy-MM-dd"),
             o.SanoletPartyArtworkApprovalDate?.ToString("yyyy-MM-dd"),
@@ -447,7 +431,6 @@ namespace PharmaSphere.Services.Orders
             o.Party,
             o.BrandName,
             o.Qty,
-            o.Rate,
             o.Amount,
             o.CurrentStatus,
             o.CreatedBy,

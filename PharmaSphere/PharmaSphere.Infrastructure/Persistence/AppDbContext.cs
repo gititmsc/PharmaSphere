@@ -197,13 +197,10 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(o => o.BrandName).HasMaxLength(200);
                 e.Property(o => o.Composition).HasMaxLength(500);
                 e.Property(o => o.ShelfLifeMonths).HasMaxLength(200);
-                e.Property(o => o.MRP).HasPrecision(18, 2);
-                e.Property(o => o.Rate).HasPrecision(18, 2);
                 e.Property(o => o.Amount).HasPrecision(18, 2);
                 e.Property(o => o.Party).HasMaxLength(200);
                 e.Property(o => o.Make).HasMaxLength(200);
                 e.Property(o => o.AdminRemarks).HasMaxLength(1000);
-                e.Property(o => o.PaymentTerms).HasMaxLength(500);
                 e.Property(o => o.Vial).HasMaxLength(100);
                 e.Property(o => o.SealColour).HasMaxLength(100);
                 e.Property(o => o.WFI).HasMaxLength(100);

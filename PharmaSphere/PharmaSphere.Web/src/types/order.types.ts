@@ -54,7 +54,6 @@ export interface OrderListItem {
   party: string | null;
   brandName: string | null;
   qty: number | null;
-  rate: number | null;
   amount: number | null;
   currentStatus: string;
   createdBy: string | null;
@@ -73,10 +72,7 @@ export interface OrderDetail {
   composition: string | null;
   qty: number | null;
   shelfLifeMonths: string | null;
-  mrp: number | null;
-  rate: number | null;
   amount: number | null;
-  paymentTerms: string | null;
   make: string | null;
   adminRemarks: string | null;
   vial: string | null;
@@ -89,7 +85,6 @@ export interface OrderDetail {
   syringeAndNeedle: string | null;
   shrink: string | null;
   shipper: string | null;
-  deliverySchedule: string | null;
   otherRemarks: string | null;
   // QA
   pisApprovalDate: string | null;
@@ -172,10 +167,7 @@ export interface OrderFormValues {
   composition: string;
   qty: string;
   shelfLifeMonths: string;
-  mrp: string;
-  rate: string;
   amount: string;
-  paymentTerms: string;
   make: string;
   adminRemarks: string;
   vial: string;
@@ -188,7 +180,6 @@ export interface OrderFormValues {
   syringeAndNeedle: string;
   shrink: string;
   shipper: string;
-  deliverySchedule: string;
   otherRemarks: string;
   // QA
   pisApprovalDate: string;

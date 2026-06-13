@@ -96,10 +96,10 @@ const Fld: React.FC<FldProps> = ({
 const EMPTY: OrderFormValues = {
   orderNo: '', orderDate: new Date().toISOString().slice(0, 10),
   party: '', brandName: '', composition: '', qty: '', shelfLifeMonths: '',
-  mrp: '', rate: '', amount: '', paymentTerms: '', make: '', adminRemarks: '',
+  amount: '', make: '', adminRemarks: '',
   vial: '', sealColour: '', wfi: '', label: '', monoBox: '', tray: '',
   leaflet: '', syringeAndNeedle: '', shrink: '', shipper: '',
-  deliverySchedule: '', otherRemarks: '',
+  otherRemarks: '',
   pisApprovalDate: '', sanoletPartyArtworkApprovalDate: '', qaRemarks: '',
   monoBoxSupplyVendorApprovalDate: '', labelSupplyVendorApprovalDate: '',
   insertSupplyVendorApprovalDate: '', traySupplyVendorApprovalDate: '',
@@ -138,10 +138,9 @@ const SalesOrderFormPage: React.FC = () => {
   const [parties, setParties]         = useState<string[]>([]);
   const [brandNames, setBrandNames]   = useState<string[]>([]);
   const [auditLogs, setAuditLogs]     = useState<OrderAuditLogItem[]>([]);
-  const skipAutoCalcRef  = useRef(false);
   const justSelectedRef  = useRef(false);
 
-  const { control, handleSubmit, reset, watch, setValue, formState: { isSubmitting } } =
+  const { control, handleSubmit, reset, formState: { isSubmitting } } =
     useForm<OrderFormValues>({ defaultValues: EMPTY, mode: 'onTouched' });
 
   useEffect(() => {
@@ -164,13 +163,9 @@ const SalesOrderFormPage: React.FC = () => {
       composition:  prev.composition ?? '',
       qty:          prev.qty?.toString() ?? '',
       shelfLifeMonths: prev.shelfLifeMonths ?? '',
-      mrp:          prev.mrp?.toString() ?? '',
-      rate:         prev.rate?.toString() ?? '',
       amount:       prev.amount?.toString() ?? '',
-      paymentTerms: prev.paymentTerms ?? '',
       make:         prev.make ?? '',
       adminRemarks: prev.adminRemarks ?? '',
-      deliverySchedule: prev.deliverySchedule ?? '',
       otherRemarks: prev.otherRemarks ?? '',
       // Packaging
       vial:             prev.vial ?? '',
@@ -203,25 +198,11 @@ const SalesOrderFormPage: React.FC = () => {
       sterility14DaysDate: '',
       dispatchDate:        '',
     });
-    setTimeout(() => { skipAutoCalcRef.current = false; }, 0);
-
     enqueueSnackbar(`Pre-filled from order ${prev.orderNo}`, {
       variant: 'info',
       anchorOrigin: { vertical: 'top', horizontal: 'right' },
     });
   };
-
-  const qty  = watch('qty');
-  const rate = watch('rate');
-
-  useEffect(() => {
-    if (skipAutoCalcRef.current) return;
-    const q = parseFloat(qty);
-    const r = parseFloat(rate);
-    if (!isNaN(q) && !isNaN(r) && qty !== '' && rate !== '') {
-      setValue('amount', (q * r).toFixed(2));
-    }
-  }, [qty, rate, setValue]);
 
   useEffect(() => {
     if (!isEdit || !orderId) return;
@@ -230,21 +211,19 @@ const SalesOrderFormPage: React.FC = () => {
         setOrderStatus(o.currentStatus);
         setOrderNo(o.orderNo);
         setAuditLogs(o.auditLogs ?? []);
-        skipAutoCalcRef.current = true;
         reset({
           orderNo: o.orderNo, orderDate: o.orderDate,
           party: o.party ?? '', brandName: o.brandName ?? '',
           composition: o.composition ?? '',
           qty: o.qty?.toString() ?? '', shelfLifeMonths: o.shelfLifeMonths ?? '',
-          mrp: o.mrp?.toString() ?? '', rate: o.rate?.toString() ?? '',
           amount: o.amount?.toString() ?? '',
-          paymentTerms: o.paymentTerms ?? '', make: o.make ?? '',
+          make: o.make ?? '',
           adminRemarks: o.adminRemarks ?? '',
           vial: o.vial ?? '', sealColour: o.sealColour ?? '', wfi: o.wfi ?? '',
           label: o.label ?? '', monoBox: o.monoBox ?? '', tray: o.tray ?? '',
           leaflet: o.leaflet ?? '', syringeAndNeedle: o.syringeAndNeedle ?? '',
           shrink: o.shrink ?? '', shipper: o.shipper ?? '',
-          deliverySchedule: o.deliverySchedule ?? '', otherRemarks: o.otherRemarks ?? '',
+          otherRemarks: o.otherRemarks ?? '',
           pisApprovalDate: o.pisApprovalDate ?? '',
           sanoletPartyArtworkApprovalDate: o.sanoletPartyArtworkApprovalDate ?? '',
           qaRemarks: o.qaRemarks ?? '',
@@ -263,7 +242,6 @@ const SalesOrderFormPage: React.FC = () => {
           sterility14DaysDate: o.sterility14DaysDate ?? '',
           dispatchDate: o.dispatchDate ?? '',
         });
-        setTimeout(() => { skipAutoCalcRef.current = false; }, 0);
       })
       .catch(() => { enqueueSnackbar('Failed to load order.', { variant: 'error' }); navigate('/sales-orders'); })
       .finally(() => setLoading(false));
@@ -322,7 +300,6 @@ const SalesOrderFormPage: React.FC = () => {
             sx={{ px: 2, borderBottom: 1, borderColor: 'divider', minHeight: 40,
               '& .MuiTab-root': { minHeight: 40, py: 0 } }}>
             <Tab label="General Info" />
-            <Tab label="Packaging Material" />
             <Tab label="QA Information" />
             <Tab label="Production Info" />
             {isEdit && <Tab label="History" />}
@@ -494,40 +471,31 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="shipper" label="Shipper" control={control} readOnly={ro} placeholder="Enter shipper" />
                 </Grid>
 
-              </Grid>
-            </TabPanel>
-
-            {/* ── Tab 1: Packaging Material ── */}
-            <TabPanel value={tab} index={1}>
-              <Grid container spacing={1.5}>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="mrp" label="MRP (₹)" control={control} type="number" adornment="₹" readOnly={ro} placeholder="0.00" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="rate" label="Rate (₹)" control={control} type="number" adornment="₹" readOnly={ro} placeholder="0.00" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="paymentTerms" label="Payment Terms" control={control} readOnly={ro} placeholder="e.g. Net 30 days" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="deliverySchedule" label="Delivery Schedule" control={control} type="date" readOnly={ro} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={8} />
+                {/* ── PIS Approval section ── */}
                 <Grid item xs={12}>
-                  <Fld name="otherRemarks" label="Other Remarks" control={control} multiline rows={3} readOnly={ro} placeholder="Any other remarks" />
+                  <Divider sx={{ my: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>PIS Approval</Typography>
+                  </Divider>
                 </Grid>
-              </Grid>
-            </TabPanel>
 
-            {/* ── Tab 2: QA Information ── */}
-            <TabPanel value={tab} index={2}>
-              <Grid container spacing={1.5}>
                 <Grid item xs={12} sm={4}>
                   <Fld name="pisApprovalDate" label="PIS Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="sanoletPartyArtworkApprovalDate" label="Sanolet Party Artwork Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="sanoletPartyArtworkApprovalDate" label="Sanolet Party Artwork Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
                 </Grid>
+                <Grid item xs={12} sm={4} />
+
+                <Grid item xs={12}>
+                  <Fld name="otherRemarks" label="Other Remarks" control={control} multiline rows={2} readOnly={ro} placeholder="Any other remarks" />
+                </Grid>
+
+              </Grid>
+            </TabPanel>
+
+            {/* ── Tab 1: QA Information ── */}
+            <TabPanel value={tab} index={1}>
+              <Grid container spacing={1.5}>
                 <Grid item xs={12} sm={4}>
                   <Fld name="monoBoxSupplyVendorApprovalDate" label="MonoBox Vendor Approval" control={control} type="date" readOnly={ro} shrinkLabel />
                 </Grid>
@@ -549,8 +517,8 @@ const SalesOrderFormPage: React.FC = () => {
               </Grid>
             </TabPanel>
 
-            {/* ── Tab 3: Production Info ── */}
-            <TabPanel value={tab} index={3}>
+            {/* ── Tab 2: Production Info ── */}
+            <TabPanel value={tab} index={2}>
               <Grid container spacing={1.5}>
                 <Grid item xs={12} sm={4}>
                   <Fld name="productionMonoBox" label="Production Mono Box" control={control} readOnly={ro} placeholder="Lot / details" />
@@ -583,9 +551,9 @@ const SalesOrderFormPage: React.FC = () => {
               </Grid>
             </TabPanel>
 
-            {/* ── Tab 4: History (edit mode only) ── */}
+            {/* ── Tab 3: History (edit mode only) ── */}
             {isEdit && (
-              <TabPanel value={tab} index={4}>
+              <TabPanel value={tab} index={3}>
                 {auditLogs.length === 0 ? (
                   <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
                     No history recorded for this order.
