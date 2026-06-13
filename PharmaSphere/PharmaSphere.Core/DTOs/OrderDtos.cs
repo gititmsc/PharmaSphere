@@ -57,7 +57,6 @@ namespace PharmaSphere.Core.DTOs
         // QA
         string? PISApprovalDate,
         string? SanoletPartyArtworkApprovalDate,
-        string? QARemarks,
         string? MonoBoxSupplyVendorApprovalDate,
         string? LabelSupplyVendorApprovalDate,
         string? InsertSupplyVendorApprovalDate,
@@ -130,7 +129,6 @@ namespace PharmaSphere.Core.DTOs
         string? OtherRemarks,
         string? PISApprovalDate,
         string? SanoletPartyArtworkApprovalDate,
-        string? QARemarks,
         string? MonoBoxSupplyVendorApprovalDate,
         string? LabelSupplyVendorApprovalDate,
         string? InsertSupplyVendorApprovalDate,
@@ -170,7 +168,6 @@ namespace PharmaSphere.Core.DTOs
         string? OtherRemarks,
         string? PISApprovalDate,
         string? SanoletPartyArtworkApprovalDate,
-        string? QARemarks,
         string? MonoBoxSupplyVendorApprovalDate,
         string? LabelSupplyVendorApprovalDate,
         string? InsertSupplyVendorApprovalDate,

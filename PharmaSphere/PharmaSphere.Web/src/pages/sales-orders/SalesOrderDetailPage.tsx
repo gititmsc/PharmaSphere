@@ -214,6 +214,34 @@ const SalesOrderDetailPage: React.FC = () => {
           </Card>
         </Grid>
 
+        {/* Packing Material Order & Receive */}
+        <Grid item xs={12} md={6}>
+          <Card elevation={0} sx={{ border: 1, borderColor: 'divider', borderRadius: 2 }}>
+            <CardHeader title="Packing Material" titleTypographyProps={{ variant: 'body2', fontWeight: 700 }}
+              sx={{ py: 1, px: 2, borderBottom: 1, borderColor: 'divider' }} />
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Grid container spacing={1.5}>
+                <Grid item xs={12}>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Packing Material Order</Typography>
+                </Grid>
+                <Grid item xs={6}><FR label="Mono Box Vendor Approval" value={order.monoBoxSupplyVendorApprovalDate} /></Grid>
+                <Grid item xs={6}><FR label="Label Vendor Approval"    value={order.labelSupplyVendorApprovalDate} /></Grid>
+                <Grid item xs={6}><FR label="Insert Vendor Approval"   value={order.insertSupplyVendorApprovalDate} /></Grid>
+                <Grid item xs={6}><FR label="Tray Vendor Approval"     value={order.traySupplyVendorApprovalDate} /></Grid>
+                <Grid item xs={6}><FR label="Shipper Vendor Approval"  value={order.shipperSupplyVendorApprovalDate} /></Grid>
+                <Grid item xs={12} sx={{ mt: 0.5 }}>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Packing Material Receive</Typography>
+                </Grid>
+                <Grid item xs={6}><FR label="Production MonoBox Date"  value={order.productionMonoBox} /></Grid>
+                <Grid item xs={6}><FR label="Production Label Date"    value={order.productionLabel} /></Grid>
+                <Grid item xs={6}><FR label="Production Insert Date"   value={order.productionInsert} /></Grid>
+                <Grid item xs={6}><FR label="Production Tray Date"     value={order.productionTray} /></Grid>
+                <Grid item xs={6}><FR label="Production Shipper Date"  value={order.productionShipper} /></Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+
         {/* QA Information */}
         <Grid item xs={12} md={6}>
           <Card elevation={0} sx={{ border: 1, borderColor: 'divider', borderRadius: 2 }}>
@@ -223,12 +251,6 @@ const SalesOrderDetailPage: React.FC = () => {
               <Grid container spacing={1.5}>
                 <Grid item xs={6}><FR label="PIS Approval Date"          value={order.pisApprovalDate} /></Grid>
                 <Grid item xs={6}><FR label="Sanolet Party Artwork Date" value={order.sanoletPartyArtworkApprovalDate} /></Grid>
-                <Grid item xs={6}><FR label="MonoBox Vendor Approval"    value={order.monoBoxSupplyVendorApprovalDate} /></Grid>
-                <Grid item xs={6}><FR label="Label Vendor Approval"      value={order.labelSupplyVendorApprovalDate} /></Grid>
-                <Grid item xs={6}><FR label="Insert Vendor Approval"     value={order.insertSupplyVendorApprovalDate} /></Grid>
-                <Grid item xs={6}><FR label="Tray Vendor Approval"       value={order.traySupplyVendorApprovalDate} /></Grid>
-                <Grid item xs={6}><FR label="Shipper Vendor Approval"    value={order.shipperSupplyVendorApprovalDate} /></Grid>
-                <Grid item xs={12}><FR label="QA Remarks"                value={order.qaRemarks} /></Grid>
               </Grid>
             </CardContent>
           </Card>
@@ -241,15 +263,10 @@ const SalesOrderDetailPage: React.FC = () => {
               sx={{ py: 1, px: 2, borderBottom: 1, borderColor: 'divider' }} />
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Grid container spacing={1.5}>
-                <Grid item xs={6}><FR label="Production Mono Box" value={order.productionMonoBox} /></Grid>
-                <Grid item xs={6}><FR label="Production Label"    value={order.productionLabel} /></Grid>
-                <Grid item xs={6}><FR label="Production Insert"   value={order.productionInsert} /></Grid>
-                <Grid item xs={6}><FR label="Production Tray"     value={order.productionTray} /></Grid>
-                <Grid item xs={6}><FR label="Production Shipper"  value={order.productionShipper} /></Grid>
-                <Grid item xs={6}><FR label="Filling Plan"        value={order.fillingPlan} /></Grid>
-                <Grid item xs={6}><FR label="Packing Plan"        value={order.packingPlan} /></Grid>
-                <Grid item xs={6}><FR label="Sterility 14 Days"   value={order.sterility14DaysDate} /></Grid>
-                <Grid item xs={6}><FR label="Dispatch Date"       value={order.dispatchDate} /></Grid>
+                <Grid item xs={6}><FR label="Filling Plan"      value={order.fillingPlan} /></Grid>
+                <Grid item xs={6}><FR label="Packing Plan"      value={order.packingPlan} /></Grid>
+                <Grid item xs={6}><FR label="Sterility 14 Days" value={order.sterility14DaysDate} /></Grid>
+                <Grid item xs={6}><FR label="Dispatch Date"     value={order.dispatchDate} /></Grid>
               </Grid>
             </CardContent>
           </Card>

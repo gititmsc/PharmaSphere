@@ -89,7 +89,6 @@ export interface OrderDetail {
   // QA
   pisApprovalDate: string | null;
   sanoletPartyArtworkApprovalDate: string | null;
-  qaRemarks: string | null;
   monoBoxSupplyVendorApprovalDate: string | null;
   labelSupplyVendorApprovalDate: string | null;
   insertSupplyVendorApprovalDate: string | null;
@@ -184,7 +183,6 @@ export interface OrderFormValues {
   // QA
   pisApprovalDate: string;
   sanoletPartyArtworkApprovalDate: string;
-  qaRemarks: string;
   monoBoxSupplyVendorApprovalDate: string;
   labelSupplyVendorApprovalDate: string;
   insertSupplyVendorApprovalDate: string;

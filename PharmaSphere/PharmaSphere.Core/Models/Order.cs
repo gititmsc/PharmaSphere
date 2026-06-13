@@ -30,7 +30,6 @@ namespace PharmaSphere.Core.Models
         // ── QA Fields ─────────────────────────────────────────────────────────────
         public DateTime? PISApprovalDate { get; set; }
         public DateTime? SanoletPartyArtworkApprovalDate { get; set; }
-        public string? QARemarks { get; set; }
         public DateTime? MonoBoxSupplyVendorApprovalDate { get; set; }
         public DateTime? LabelSupplyVendorApprovalDate { get; set; }
         public DateTime? InsertSupplyVendorApprovalDate { get; set; }
@@ -38,11 +37,11 @@ namespace PharmaSphere.Core.Models
         public DateTime? ShipperSupplyVendorApprovalDate { get; set; }
 
         // ── Production Fields ─────────────────────────────────────────────────────
-        public string? ProductionMonoBox { get; set; }
-        public string? ProductionLabel { get; set; }
-        public string? ProductionInsert { get; set; }
-        public string? ProductionTray { get; set; }
-        public string? ProductionShipper { get; set; }
+        public DateTime? ProductionMonoBox { get; set; }
+        public DateTime? ProductionLabel { get; set; }
+        public DateTime? ProductionInsert { get; set; }
+        public DateTime? ProductionTray { get; set; }
+        public DateTime? ProductionShipper { get; set; }
         public DateTime? FillingPlan { get; set; }
         public DateTime? PackingPlan { get; set; }
         public DateTime? Sterility14DaysDate { get; set; }

@@ -212,12 +212,6 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(o => o.Shrink).HasMaxLength(100);
                 e.Property(o => o.Shipper).HasMaxLength(100);
                 e.Property(o => o.OtherRemarks).HasMaxLength(1000);
-                e.Property(o => o.QARemarks).HasMaxLength(1000);
-                e.Property(o => o.ProductionMonoBox).HasMaxLength(100);
-                e.Property(o => o.ProductionLabel).HasMaxLength(100);
-                e.Property(o => o.ProductionInsert).HasMaxLength(100);
-                e.Property(o => o.ProductionTray).HasMaxLength(100);
-                e.Property(o => o.ProductionShipper).HasMaxLength(100);
                 e.Property(o => o.CurrentStatus).HasMaxLength(50).IsRequired()
                  .HasDefaultValue(OrderStatus.Created);
                 e.Property(o => o.CreatedBy).HasMaxLength(100);

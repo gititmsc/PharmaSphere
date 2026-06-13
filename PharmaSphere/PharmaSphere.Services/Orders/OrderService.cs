@@ -137,14 +137,13 @@ namespace PharmaSphere.Services.Orders
             Track("Insert Vendor Approval",         order.InsertSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),  req.InsertSupplyVendorApprovalDate);
             Track("Tray Vendor Approval",           order.TraySupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),    req.TraySupplyVendorApprovalDate);
             Track("Shipper Vendor Approval",        order.ShipperSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"), req.ShipperSupplyVendorApprovalDate);
-            Track("QA Remarks",                     order.QARemarks,                                               req.QARemarks);
 
             // ── Production Info ───────────────────────────────────────────────────
-            Track("Production Mono Box", order.ProductionMonoBox,                    req.ProductionMonoBox);
-            Track("Production Label",    order.ProductionLabel,                      req.ProductionLabel);
-            Track("Production Insert",   order.ProductionInsert,                     req.ProductionInsert);
-            Track("Production Tray",     order.ProductionTray,                       req.ProductionTray);
-            Track("Production Shipper",  order.ProductionShipper,                    req.ProductionShipper);
+            Track("Production Mono Box", order.ProductionMonoBox?.ToString("yyyy-MM-dd"), req.ProductionMonoBox);
+            Track("Production Label",    order.ProductionLabel?.ToString("yyyy-MM-dd"),   req.ProductionLabel);
+            Track("Production Insert",   order.ProductionInsert?.ToString("yyyy-MM-dd"),  req.ProductionInsert);
+            Track("Production Tray",     order.ProductionTray?.ToString("yyyy-MM-dd"),    req.ProductionTray);
+            Track("Production Shipper",  order.ProductionShipper?.ToString("yyyy-MM-dd"), req.ProductionShipper);
             Track("Filling Plan",        order.FillingPlan?.ToString("yyyy-MM-dd"),   req.FillingPlan);
             Track("Packing Plan",        order.PackingPlan?.ToString("yyyy-MM-dd"),   req.PackingPlan);
             Track("Sterility 14 Days",   order.Sterility14DaysDate?.ToString("yyyy-MM-dd"), req.Sterility14DaysDate);
@@ -302,17 +301,16 @@ namespace PharmaSphere.Services.Orders
                 OtherRemarks          = Blank(r.OtherRemarks),
                 PISApprovalDate                 = ParseDateOpt(r.PISApprovalDate),
                 SanoletPartyArtworkApprovalDate = ParseDateOpt(r.SanoletPartyArtworkApprovalDate),
-                QARemarks                       = Blank(r.QARemarks),
                 MonoBoxSupplyVendorApprovalDate = ParseDateOpt(r.MonoBoxSupplyVendorApprovalDate),
                 LabelSupplyVendorApprovalDate   = ParseDateOpt(r.LabelSupplyVendorApprovalDate),
                 InsertSupplyVendorApprovalDate  = ParseDateOpt(r.InsertSupplyVendorApprovalDate),
                 TraySupplyVendorApprovalDate    = ParseDateOpt(r.TraySupplyVendorApprovalDate),
                 ShipperSupplyVendorApprovalDate = ParseDateOpt(r.ShipperSupplyVendorApprovalDate),
-                ProductionMonoBox     = Blank(r.ProductionMonoBox),
-                ProductionLabel       = Blank(r.ProductionLabel),
-                ProductionInsert      = Blank(r.ProductionInsert),
-                ProductionTray        = Blank(r.ProductionTray),
-                ProductionShipper     = Blank(r.ProductionShipper),
+                ProductionMonoBox     = ParseDateOpt(r.ProductionMonoBox),
+                ProductionLabel       = ParseDateOpt(r.ProductionLabel),
+                ProductionInsert      = ParseDateOpt(r.ProductionInsert),
+                ProductionTray        = ParseDateOpt(r.ProductionTray),
+                ProductionShipper     = ParseDateOpt(r.ProductionShipper),
                 FillingPlan           = ParseDateOpt(r.FillingPlan),
                 PackingPlan           = ParseDateOpt(r.PackingPlan),
                 Sterility14DaysDate   = ParseDateOpt(r.Sterility14DaysDate),
@@ -350,17 +348,16 @@ namespace PharmaSphere.Services.Orders
             o.OtherRemarks          = Blank(r.OtherRemarks);
             o.PISApprovalDate                 = ParseDateOpt(r.PISApprovalDate);
             o.SanoletPartyArtworkApprovalDate = ParseDateOpt(r.SanoletPartyArtworkApprovalDate);
-            o.QARemarks                       = Blank(r.QARemarks);
             o.MonoBoxSupplyVendorApprovalDate = ParseDateOpt(r.MonoBoxSupplyVendorApprovalDate);
             o.LabelSupplyVendorApprovalDate   = ParseDateOpt(r.LabelSupplyVendorApprovalDate);
             o.InsertSupplyVendorApprovalDate  = ParseDateOpt(r.InsertSupplyVendorApprovalDate);
             o.TraySupplyVendorApprovalDate    = ParseDateOpt(r.TraySupplyVendorApprovalDate);
             o.ShipperSupplyVendorApprovalDate = ParseDateOpt(r.ShipperSupplyVendorApprovalDate);
-            o.ProductionMonoBox     = Blank(r.ProductionMonoBox);
-            o.ProductionLabel       = Blank(r.ProductionLabel);
-            o.ProductionInsert      = Blank(r.ProductionInsert);
-            o.ProductionTray        = Blank(r.ProductionTray);
-            o.ProductionShipper     = Blank(r.ProductionShipper);
+            o.ProductionMonoBox     = ParseDateOpt(r.ProductionMonoBox);
+            o.ProductionLabel       = ParseDateOpt(r.ProductionLabel);
+            o.ProductionInsert      = ParseDateOpt(r.ProductionInsert);
+            o.ProductionTray        = ParseDateOpt(r.ProductionTray);
+            o.ProductionShipper     = ParseDateOpt(r.ProductionShipper);
             o.FillingPlan           = ParseDateOpt(r.FillingPlan);
             o.PackingPlan           = ParseDateOpt(r.PackingPlan);
             o.Sterility14DaysDate   = ParseDateOpt(r.Sterility14DaysDate);
@@ -392,17 +389,16 @@ namespace PharmaSphere.Services.Orders
             o.OtherRemarks,
             o.PISApprovalDate?.ToString("yyyy-MM-dd"),
             o.SanoletPartyArtworkApprovalDate?.ToString("yyyy-MM-dd"),
-            o.QARemarks,
             o.MonoBoxSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.LabelSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.InsertSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.TraySupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.ShipperSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
-            o.ProductionMonoBox,
-            o.ProductionLabel,
-            o.ProductionInsert,
-            o.ProductionTray,
-            o.ProductionShipper,
+            o.ProductionMonoBox?.ToString("yyyy-MM-dd"),
+            o.ProductionLabel?.ToString("yyyy-MM-dd"),
+            o.ProductionInsert?.ToString("yyyy-MM-dd"),
+            o.ProductionTray?.ToString("yyyy-MM-dd"),
+            o.ProductionShipper?.ToString("yyyy-MM-dd"),
             o.FillingPlan?.ToString("yyyy-MM-dd"),
             o.PackingPlan?.ToString("yyyy-MM-dd"),
             o.Sterility14DaysDate?.ToString("yyyy-MM-dd"),

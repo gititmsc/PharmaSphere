@@ -100,7 +100,7 @@ const EMPTY: OrderFormValues = {
   vial: '', sealColour: '', wfi: '', label: '', monoBox: '', tray: '',
   leaflet: '', syringeAndNeedle: '', shrink: '', shipper: '',
   otherRemarks: '',
-  pisApprovalDate: '', sanoletPartyArtworkApprovalDate: '', qaRemarks: '',
+  pisApprovalDate: '', sanoletPartyArtworkApprovalDate: '',
   monoBoxSupplyVendorApprovalDate: '', labelSupplyVendorApprovalDate: '',
   insertSupplyVendorApprovalDate: '', traySupplyVendorApprovalDate: '',
   shipperSupplyVendorApprovalDate: '',
@@ -154,7 +154,6 @@ const SalesOrderFormPage: React.FC = () => {
     const prev = await OrderService.getLatestByBrand(brandName);
     if (!prev) return;
 
-    skipAutoCalcRef.current = true;
     reset({
       orderNo:      '',
       orderDate:    new Date().toISOString().slice(0, 10),
@@ -178,8 +177,7 @@ const SalesOrderFormPage: React.FC = () => {
       syringeAndNeedle: prev.syringeAndNeedle ?? '',
       shrink:           prev.shrink ?? '',
       shipper:          prev.shipper ?? '',
-      // QA — text only; dates cleared
-      qaRemarks:                       prev.qaRemarks ?? '',
+      // QA dates cleared
       pisApprovalDate:                 '',
       sanoletPartyArtworkApprovalDate: '',
       monoBoxSupplyVendorApprovalDate: '',
@@ -187,12 +185,12 @@ const SalesOrderFormPage: React.FC = () => {
       insertSupplyVendorApprovalDate:  '',
       traySupplyVendorApprovalDate:    '',
       shipperSupplyVendorApprovalDate: '',
-      // Production — text only; dates cleared
-      productionMonoBox:   prev.productionMonoBox ?? '',
-      productionLabel:     prev.productionLabel ?? '',
-      productionInsert:    prev.productionInsert ?? '',
-      productionTray:      prev.productionTray ?? '',
-      productionShipper:   prev.productionShipper ?? '',
+      // Production dates cleared
+      productionMonoBox:   '',
+      productionLabel:     '',
+      productionInsert:    '',
+      productionTray:      '',
+      productionShipper:   '',
       fillingPlan:         '',
       packingPlan:         '',
       sterility14DaysDate: '',
@@ -226,7 +224,6 @@ const SalesOrderFormPage: React.FC = () => {
           otherRemarks: o.otherRemarks ?? '',
           pisApprovalDate: o.pisApprovalDate ?? '',
           sanoletPartyArtworkApprovalDate: o.sanoletPartyArtworkApprovalDate ?? '',
-          qaRemarks: o.qaRemarks ?? '',
           monoBoxSupplyVendorApprovalDate: o.monoBoxSupplyVendorApprovalDate ?? '',
           labelSupplyVendorApprovalDate: o.labelSupplyVendorApprovalDate ?? '',
           insertSupplyVendorApprovalDate: o.insertSupplyVendorApprovalDate ?? '',
@@ -300,7 +297,7 @@ const SalesOrderFormPage: React.FC = () => {
             sx={{ px: 2, borderBottom: 1, borderColor: 'divider', minHeight: 40,
               '& .MuiTab-root': { minHeight: 40, py: 0 } }}>
             <Tab label="General Info" />
-            <Tab label="QA Information" />
+            <Tab label="Packaging Material" />
             <Tab label="Production Info" />
             {isEdit && <Tab label="History" />}
           </Tabs>
@@ -493,49 +490,61 @@ const SalesOrderFormPage: React.FC = () => {
               </Grid>
             </TabPanel>
 
-            {/* ── Tab 1: QA Information ── */}
+            {/* ── Tab 1: Packaging Material ── */}
             <TabPanel value={tab} index={1}>
               <Grid container spacing={1.5}>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="monoBoxSupplyVendorApprovalDate" label="MonoBox Vendor Approval" control={control} type="date" readOnly={ro} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="labelSupplyVendorApprovalDate" label="Label Vendor Approval" control={control} type="date" readOnly={ro} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="insertSupplyVendorApprovalDate" label="Insert Vendor Approval" control={control} type="date" readOnly={ro} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="traySupplyVendorApprovalDate" label="Tray Vendor Approval" control={control} type="date" readOnly={ro} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="shipperSupplyVendorApprovalDate" label="Shipper Vendor Approval" control={control} type="date" readOnly={ro} shrinkLabel />
-                </Grid>
+
                 <Grid item xs={12}>
-                  <Fld name="qaRemarks" label="QA Remarks" control={control} multiline rows={3} readOnly={ro} placeholder="QA team remarks" />
+                  <Divider sx={{ my: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Packing Material Order</Typography>
+                  </Divider>
                 </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Fld name="monoBoxSupplyVendorApprovalDate" label="Mono Box Supply Vendor Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="labelSupplyVendorApprovalDate" label="Label Supply Vendor Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="insertSupplyVendorApprovalDate" label="Insert Supply Vendor Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="traySupplyVendorApprovalDate" label="Tray Supply Vendor Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="shipperSupplyVendorApprovalDate" label="Shipper Supply Vendor Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4} />
+
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Packing Material Receive</Typography>
+                  </Divider>
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Fld name="productionMonoBox" label="Production MonoBox Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="productionLabel" label="Production Label Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="productionInsert" label="Production Insert Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="productionTray" label="Production Tray Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="productionShipper" label="Production Shipper Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                </Grid>
+
               </Grid>
             </TabPanel>
 
             {/* ── Tab 2: Production Info ── */}
             <TabPanel value={tab} index={2}>
               <Grid container spacing={1.5}>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="productionMonoBox" label="Production Mono Box" control={control} readOnly={ro} placeholder="Lot / details" />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="productionLabel" label="Production Label" control={control} readOnly={ro} />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="productionInsert" label="Production Insert" control={control} readOnly={ro} />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="productionTray" label="Production Tray" control={control} readOnly={ro} />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="productionShipper" label="Production Shipper" control={control} readOnly={ro} />
-                </Grid>
-                <Grid item xs={12} sm={4} />
                 <Grid item xs={12} sm={4}>
                   <Fld name="fillingPlan" label="Filling Plan Date" control={control} type="date" readOnly={ro} shrinkLabel />
                 </Grid>
