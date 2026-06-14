@@ -42,6 +42,7 @@ import FilterAltIcon         from '@mui/icons-material/FilterAlt';
 import { useNavigate }       from 'react-router-dom';
 import { useSnackbar }       from 'notistack';
 import axios                 from 'axios';
+import { useAuth }           from '@/contexts/AuthContext';
 import { OrderService }      from '@/services/order.service';
 import { encodeOrderId, ORDER_STATUSES, STATUS_COLOR } from '@/types/order.types';
 import type { OrderListItem, SortField, SortDir }      from '@/types/order.types';
@@ -69,6 +70,8 @@ const DEFAULT_VISIBLE = new Set(['orderNo','orderDate','party','brandName','qty'
 const SalesOrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const { user } = useAuth();
+  const isAdmin = user?.roleName === 'Admin';
 
   const [rows, setRows]             = useState<OrderListItem[]>([]);
   const [totalCount, setTotal]      = useState(0);
@@ -174,10 +177,12 @@ const SalesOrdersPage: React.FC = () => {
           </Typography>
         </Stack>
         <Stack direction="row" gap={1}>
-          <Button variant="contained" size="small" startIcon={<AddIcon />}
-            onClick={() => navigate('/sales-orders/form')} disableElevation>
-            Add Order
-          </Button>
+          {isAdmin && (
+            <Button variant="contained" size="small" startIcon={<AddIcon />}
+              onClick={() => navigate('/sales-orders/form')} disableElevation>
+              Add Order
+            </Button>
+          )}
         </Stack>
       </Stack>
 

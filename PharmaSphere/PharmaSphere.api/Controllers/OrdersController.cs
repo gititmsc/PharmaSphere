@@ -74,8 +74,9 @@ namespace PharmaSphere.Api.Controllers
             return Ok(order);
         }
 
-        // POST /api/orders
+        // POST /api/orders  (Admin only)
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(OrderListItemDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateOrder(

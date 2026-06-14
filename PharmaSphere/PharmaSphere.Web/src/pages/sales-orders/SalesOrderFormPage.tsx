@@ -34,6 +34,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useSnackbar } from 'notistack';
 import axios from 'axios';
+import { useAuth } from '@/contexts/AuthContext';
 import { OrderService } from '@/services/order.service';
 import { LookupService } from '@/services/lookup.service';
 import { decodeOrderId } from '@/types/order.types';
@@ -131,6 +132,9 @@ const SalesOrderFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
+  const { user } = useAuth();
+  const isAdmin = user?.roleName === 'Admin';
+
   const encodedId = searchParams.get('id');
   const orderId   = encodedId ? decodeOrderId(encodedId) : null;
   const isEdit    = orderId !== null;
@@ -149,6 +153,13 @@ const SalesOrderFormPage: React.FC = () => {
 
   const { control, handleSubmit, reset, formState: { isSubmitting } } =
     useForm<OrderFormValues>({ defaultValues: EMPTY, mode: 'onTouched' });
+
+  useEffect(() => {
+    if (!isEdit && !isAdmin) {
+      enqueueSnackbar('Only Admin can create new sales orders.', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      navigate('/sales-orders');
+    }
+  }, [isEdit, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     OrderService.getSealColors().then(setSealColors).catch(() => {});
@@ -292,6 +303,7 @@ const SalesOrderFormPage: React.FC = () => {
   );
 
   const ro = orderStatus === 'Dispatched' || orderStatus === 'Cancelled';
+  const roGeneralInfo = ro || !isAdmin;
 
   return (
     <Box>
@@ -330,14 +342,19 @@ const SalesOrderFormPage: React.FC = () => {
 
             {/* ── Tab 0: General Info ── */}
             <TabPanel value={tab} index={0}>
+              {!isAdmin && isEdit && (
+                <Alert severity="info" sx={{ mb: 1.5 }}>
+                  General Info fields are view-only for your role.
+                </Alert>
+              )}
               <Grid container spacing={1.5}>
 
                 {/* Row 1: Order No | Order Date | Brand Name */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="orderNo" label="Order No *" control={control} required="Order No is required" readOnly={ro} placeholder="e.g. ORD-2025-001" />
+                  <Fld name="orderNo" label="Order No *" control={control} required="Order No is required" readOnly={roGeneralInfo} placeholder="e.g. ORD-2025-001" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="orderDate" label="Order Date *" control={control} required="Order date is required" type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="orderDate" label="Order Date *" control={control} required="Order date is required" type="date" readOnly={roGeneralInfo} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Controller
@@ -358,7 +375,7 @@ const SalesOrderFormPage: React.FC = () => {
                           }
                         }}
                         onInputChange={(_, v) => field.onChange(v)}
-                        disabled={ro}
+                        disabled={roGeneralInfo}
                         size="small"
                         renderInput={(params) => (
                           <TextField
@@ -381,18 +398,18 @@ const SalesOrderFormPage: React.FC = () => {
 
                 {/* Row 2: Composition | Qty | Shelf Life */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="composition" label="Composition" control={control} readOnly={ro} placeholder="Active ingredients" />
+                  <Fld name="composition" label="Composition" control={control} readOnly={roGeneralInfo} placeholder="Active ingredients" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="qty" label="Quantity" control={control} type="number" readOnly={ro} placeholder="0" />
+                  <Fld name="qty" label="Quantity" control={control} type="number" readOnly={roGeneralInfo} placeholder="0" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="shelfLifeMonths" label="Shelf Life" control={control} readOnly={ro} placeholder="e.g. 24 months" />
+                  <Fld name="shelfLifeMonths" label="Shelf Life" control={control} readOnly={roGeneralInfo} placeholder="e.g. 24 months" />
                 </Grid>
 
                 {/* Row 3: Amount | Party | Make */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="amount" label="Amount (₹)" control={control} type="number" adornment="₹" readOnly={ro} placeholder="0.00" />
+                  <Fld name="amount" label="Amount (₹)" control={control} type="number" adornment="₹" readOnly={roGeneralInfo} placeholder="0.00" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Controller
@@ -406,7 +423,7 @@ const SalesOrderFormPage: React.FC = () => {
                         inputValue={field.value || ''}
                         onChange={(_, v) => field.onChange(v ?? '')}
                         onInputChange={(_, v) => field.onChange(v)}
-                        disabled={ro}
+                        disabled={roGeneralInfo}
                         size="small"
                         renderInput={(params) => (
                           <TextField {...params} label="Party" placeholder="Select or type party name" onBlur={field.onBlur} />
@@ -416,12 +433,12 @@ const SalesOrderFormPage: React.FC = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="make" label="Make" control={control} readOnly={ro} placeholder="Manufacturer" />
+                  <Fld name="make" label="Make" control={control} readOnly={roGeneralInfo} placeholder="Manufacturer" />
                 </Grid>
 
                 {/* Row 4: Admin Remarks — full width */}
                 <Grid item xs={12}>
-                  <Fld name="adminRemarks" label="Admin Remarks" control={control} multiline rows={2} readOnly={ro} placeholder="Internal admin notes" />
+                  <Fld name="adminRemarks" label="Admin Remarks" control={control} multiline rows={2} readOnly={roGeneralInfo} placeholder="Internal admin notes" />
                 </Grid>
 
                 {/* ── Packaging Material section ── */}
@@ -433,7 +450,7 @@ const SalesOrderFormPage: React.FC = () => {
 
                 {/* Row 5: Vial | Seal Colour | WFI */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="vial" label="Vial" control={control} readOnly={ro} placeholder="Enter vial" />
+                  <Fld name="vial" label="Vial" control={control} readOnly={roGeneralInfo} placeholder="Enter vial" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Controller
@@ -447,7 +464,7 @@ const SalesOrderFormPage: React.FC = () => {
                         inputValue={field.value || ''}
                         onChange={(_, newValue) => field.onChange(newValue ?? '')}
                         onInputChange={(_, newInputValue) => field.onChange(newInputValue)}
-                        disabled={ro}
+                        disabled={roGeneralInfo}
                         size="small"
                         renderInput={(params) => (
                           <TextField
@@ -462,34 +479,34 @@ const SalesOrderFormPage: React.FC = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="wfi" label="WFI" control={control} readOnly={ro} placeholder="Enter WFI" />
+                  <Fld name="wfi" label="WFI" control={control} readOnly={roGeneralInfo} placeholder="Enter WFI" />
                 </Grid>
 
                 {/* Row 6: Label | Mono Box | Tray */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="label" label="Label" control={control} readOnly={ro} placeholder="Enter label" />
+                  <Fld name="label" label="Label" control={control} readOnly={roGeneralInfo} placeholder="Enter label" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="monoBox" label="Mono Box" control={control} readOnly={ro} placeholder="Enter mono box" />
+                  <Fld name="monoBox" label="Mono Box" control={control} readOnly={roGeneralInfo} placeholder="Enter mono box" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="tray" label="Tray" control={control} readOnly={ro} placeholder="Enter tray" />
+                  <Fld name="tray" label="Tray" control={control} readOnly={roGeneralInfo} placeholder="Enter tray" />
                 </Grid>
 
                 {/* Row 7: Leaflet | Syringe & Needle | Shrink */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="leaflet" label="Leaflet" control={control} readOnly={ro} placeholder="Enter leaflet" />
+                  <Fld name="leaflet" label="Leaflet" control={control} readOnly={roGeneralInfo} placeholder="Enter leaflet" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="syringeAndNeedle" label="Syringe & Needle" control={control} readOnly={ro} placeholder="Enter syringe & needle" />
+                  <Fld name="syringeAndNeedle" label="Syringe & Needle" control={control} readOnly={roGeneralInfo} placeholder="Enter syringe & needle" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="shrink" label="Shrink" control={control} readOnly={ro} placeholder="Enter shrink" />
+                  <Fld name="shrink" label="Shrink" control={control} readOnly={roGeneralInfo} placeholder="Enter shrink" />
                 </Grid>
 
                 {/* Row 8: Shipper */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="shipper" label="Shipper" control={control} readOnly={ro} placeholder="Enter shipper" />
+                  <Fld name="shipper" label="Shipper" control={control} readOnly={roGeneralInfo} placeholder="Enter shipper" />
                 </Grid>
 
                 {/* ── PIS Approval section ── */}
@@ -500,15 +517,15 @@ const SalesOrderFormPage: React.FC = () => {
                 </Grid>
 
                 <Grid item xs={12} sm={4}>
-                  <Fld name="pisApprovalDate" label="PIS Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="pisApprovalDate" label="PIS Approval Date" control={control} type="date" readOnly={roGeneralInfo} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="sanoletPartyArtworkApprovalDate" label="Sanolet Party Artwork Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="sanoletPartyArtworkApprovalDate" label="Sanolet Party Artwork Approval Date" control={control} type="date" readOnly={roGeneralInfo} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4} />
 
                 <Grid item xs={12}>
-                  <Fld name="otherRemarks" label="Other Remarks" control={control} multiline rows={2} readOnly={ro} placeholder="Any other remarks" />
+                  <Fld name="otherRemarks" label="Other Remarks" control={control} multiline rows={2} readOnly={roGeneralInfo} placeholder="Any other remarks" />
                 </Grid>
 
               </Grid>
