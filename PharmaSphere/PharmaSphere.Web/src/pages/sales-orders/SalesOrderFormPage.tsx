@@ -10,6 +10,11 @@ import {
   CardContent,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   Grid,
   IconButton,
@@ -138,6 +143,8 @@ const SalesOrderFormPage: React.FC = () => {
   const [parties, setParties]         = useState<string[]>([]);
   const [brandNames, setBrandNames]   = useState<string[]>([]);
   const [auditLogs, setAuditLogs]     = useState<OrderAuditLogItem[]>([]);
+  const [cancelOpen, setCancelOpen]   = useState(false);
+  const [cancelling, setCancelling]   = useState(false);
   const justSelectedRef  = useRef(false);
 
   const { control, handleSubmit, reset, formState: { isSubmitting } } =
@@ -243,6 +250,23 @@ const SalesOrderFormPage: React.FC = () => {
       .catch(() => { enqueueSnackbar('Failed to load order.', { variant: 'error' }); navigate('/sales-orders'); })
       .finally(() => setLoading(false));
   }, [isEdit, orderId, reset, navigate, enqueueSnackbar]);
+
+  const handleCancelOrder = async () => {
+    if (!orderId) return;
+    setCancelling(true);
+    try {
+      await OrderService.changeStatus(orderId, 'Cancelled');
+      enqueueSnackbar('Order cancelled.', { variant: 'success', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      navigate('/sales-orders');
+    } catch (err) {
+      let msg = 'Failed to cancel order.';
+      if (axios.isAxiosError(err)) msg = err.response?.data?.message ?? msg;
+      enqueueSnackbar(msg, { variant: 'error', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+    } finally {
+      setCancelling(false);
+      setCancelOpen(false);
+    }
+  };
 
   const onSubmit = async (data: OrderFormValues) => {
     try {
@@ -624,11 +648,16 @@ const SalesOrderFormPage: React.FC = () => {
         </Card>
 
         <Stack direction="row" justifyContent="flex-end" gap={1.5}>
-          <Button variant="outlined" color="inherit" onClick={() => navigate('/sales-orders')} disabled={isSubmitting}>
-            Cancel
+          <Button variant="outlined" color="inherit" onClick={() => navigate('/sales-orders')} disabled={isSubmitting || cancelling}>
+            Back
           </Button>
+          {isEdit && !ro && (
+            <Button variant="outlined" color="error" onClick={() => setCancelOpen(true)} disabled={isSubmitting || cancelling}>
+              Cancel Sales Order
+            </Button>
+          )}
           {!ro && (
-            <Button type="submit" variant="contained" disabled={isSubmitting}
+            <Button type="submit" variant="contained" disabled={isSubmitting || cancelling}
               startIcon={isSubmitting ? <CircularProgress size={14} color="inherit" /> : undefined}
               disableElevation>
               {isSubmitting ? (isEdit ? 'Saving…' : 'Creating…') : (isEdit ? 'Save Changes' : 'Create Order')}
@@ -636,6 +665,25 @@ const SalesOrderFormPage: React.FC = () => {
           )}
         </Stack>
       </Box>
+
+      <Dialog open={cancelOpen} onClose={() => !cancelling && setCancelOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight={700}>Cancel Sales Order</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to cancel order <strong>{orderNo}</strong>? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button variant="outlined" color="inherit" onClick={() => setCancelOpen(false)} disabled={cancelling}>
+            Back
+          </Button>
+          <Button variant="contained" color="error" onClick={handleCancelOrder} disabled={cancelling}
+            startIcon={cancelling ? <CircularProgress size={14} color="inherit" /> : undefined}
+            disableElevation>
+            {cancelling ? 'Cancelling…' : 'Cancel Sales Order'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
