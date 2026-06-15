@@ -1,33 +1,14 @@
-// ── Statuses ──────────────────────────────────────────────────────────────────
+// ── Status Config (fetched from API) ──────────────────────────────────────────
 
-export const ORDER_STATUSES = [
-  'Created',
-  'Artwork Pending',
-  'QA Pending',
-  'Production Pending',
-  'Dispatched',
-  'Cancelled',
-] as const;
-
-export type OrderStatus = (typeof ORDER_STATUSES)[number];
-
-export const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  'Created':            ['Artwork Pending', 'Cancelled'],
-  'Artwork Pending':    ['QA Pending', 'Cancelled'],
-  'QA Pending':         ['Production Pending', 'Cancelled'],
-  'Production Pending': ['Dispatched', 'Cancelled'],
-  'Dispatched':         [],
-  'Cancelled':          [],
-};
-
-export const STATUS_COLOR: Record<OrderStatus, 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info'> = {
-  'Created':            'default',
-  'Artwork Pending':    'info',
-  'QA Pending':         'warning',
-  'Production Pending': 'secondary',
-  'Dispatched':         'success',
-  'Cancelled':          'error',
-};
+export interface OrderStatusConfig {
+  statusName: string;
+  displayOrder: number;
+  color: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
+  isInitial: boolean;
+  isTerminal: boolean;
+  showInFlow: boolean;
+  allowedNext: string[];
+}
 
 // ── ID encoding (obfuscation) ─────────────────────────────────────────────────
 

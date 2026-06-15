@@ -48,7 +48,7 @@ namespace PharmaSphere.Core.Models
         public DateTime? DispatchDate { get; set; }
 
         // ── Status ────────────────────────────────────────────────────────────────
-        public string CurrentStatus { get; set; } = OrderStatus.Created;
+        public string CurrentStatus { get; set; } = "PIS Pending";
 
         // ── Audit ─────────────────────────────────────────────────────────────────
         public string? CreatedBy { get; set; }
@@ -68,27 +68,7 @@ namespace PharmaSphere.Core.Models
 
     public static class OrderStatus
     {
-        public const string Created           = "Created";
-        public const string ArtworkPending    = "Artwork Pending";
-        public const string QAPending         = "QA Pending";
-        public const string ProductionPending = "Production Pending";
-        public const string Dispatched        = "Dispatched";
-        public const string Cancelled         = "Cancelled";
-
-        public static readonly IReadOnlyList<string> All = new[]
-        {
-            Created, ArtworkPending, QAPending, ProductionPending, Dispatched, Cancelled
-        };
-
-        public static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> AllowedTransitions =
-            new Dictionary<string, IReadOnlyList<string>>
-            {
-                [Created]           = new[] { ArtworkPending, Cancelled },
-                [ArtworkPending]    = new[] { QAPending, Cancelled },
-                [QAPending]         = new[] { ProductionPending, Cancelled },
-                [ProductionPending] = new[] { Dispatched, Cancelled },
-                [Dispatched]        = Array.Empty<string>(),
-                [Cancelled]         = Array.Empty<string>(),
-            };
+        public const string Dispatched = "Dispatched";
+        public const string Cancelled  = "Cancelled";
     }
 }

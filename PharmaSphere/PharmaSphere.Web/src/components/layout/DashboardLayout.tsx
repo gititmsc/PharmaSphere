@@ -26,16 +26,12 @@ import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PeopleIcon from '@mui/icons-material/People';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import logoImg from '@/assets/logo.jpg';
 
 const DRAWER_WIDTH = 240;
-
-const navItems = [
-  { label: 'Sales Orders', icon: <ListAltIcon />, path: '/sales-orders' },
-  { label: 'Users', icon: <PeopleIcon />, path: '/users' },
-];
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -43,6 +39,13 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
+  const isAdmin = user?.roleName === 'Admin';
+
+  const navItems = [
+    { label: 'Dashboard',    icon: <DashboardIcon />, path: '/dashboard' },
+    { label: 'Sales Orders', icon: <ListAltIcon />,   path: '/sales-orders' },
+    ...(isAdmin ? [{ label: 'Users', icon: <PeopleIcon />, path: '/users' }] : []),
+  ];
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [desktopOpen, setDesktopOpen] = useState(true);

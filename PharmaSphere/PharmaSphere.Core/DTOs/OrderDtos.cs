@@ -187,4 +187,15 @@ namespace PharmaSphere.Core.DTOs
         string NewStatus,
         string? Remarks = null);
 
+    // ── Order Status Config ───────────────────────────────────────────────────────
+
+    public sealed record OrderStatusDto(
+        string StatusName,
+        int DisplayOrder,
+        string Color,
+        bool IsInitial,
+        bool IsTerminal,
+        bool ShowInFlow,
+        IReadOnlyList<string> AllowedNext);
+
 }

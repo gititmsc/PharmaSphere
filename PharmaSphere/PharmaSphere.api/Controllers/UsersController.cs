@@ -7,7 +7,7 @@ namespace PharmaSphere.Api.Controllers
 {
     [ApiController]
     [Route("api/users")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [Produces("application/json")]
     public sealed class UsersController : ControllerBase
     {

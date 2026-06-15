@@ -38,13 +38,9 @@ import SyncAltIcon     from '@mui/icons-material/SyncAlt';
 import { useSnackbar } from 'notistack';
 import axios           from 'axios';
 import { OrderService }      from '@/services/order.service';
-import { decodeOrderId, STATUS_COLOR, ALLOWED_TRANSITIONS } from '@/types/order.types';
-import type { OrderDetail, OrderStatus } from '@/types/order.types';
-
-// ── Progress stepper statuses (no Cancelled in the main flow) ──────────────────
-const FLOW_STATUSES: OrderStatus[] = [
-  'Created', 'Artwork Pending', 'QA Pending', 'Production Pending', 'Dispatched',
-];
+import { decodeOrderId }      from '@/types/order.types';
+import type { OrderDetail }   from '@/types/order.types';
+import { useOrderStatuses }   from '@/hooks/useOrderStatuses';
 
 interface FieldRowProps { label: string; value?: string | number | null; }
 const FR: React.FC<FieldRowProps> = ({ label, value }) => (
@@ -60,6 +56,8 @@ const SalesOrderDetailPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const orderId = encodedId ? decodeOrderId(encodedId) : null;
+
+  const { statuses } = useOrderStatuses();
 
   const [order, setOrder]         = useState<OrderDetail | null>(null);
   const [loading, setLoading]     = useState(true);
@@ -108,10 +106,11 @@ const SalesOrderDetailPage: React.FC = () => {
 
   if (!order) return null;
 
-  const allowed = ALLOWED_TRANSITIONS[order.currentStatus as OrderStatus] ?? [];
-  const flowStep = FLOW_STATUSES.indexOf(order.currentStatus as OrderStatus);
-
-  const statusChipColor = STATUS_COLOR[order.currentStatus as OrderStatus] ?? 'default';
+  const currentStatusConfig = statuses.find(s => s.statusName === order.currentStatus);
+  const allowed = currentStatusConfig?.allowedNext ?? [];
+  const flowStatuses = statuses.filter(s => s.showInFlow).map(s => s.statusName);
+  const flowStep = flowStatuses.indexOf(order.currentStatus);
+  const statusChipColor = currentStatusConfig?.color ?? 'default';
 
   return (
     <Box>
@@ -153,7 +152,7 @@ const SalesOrderDetailPage: React.FC = () => {
       {order.currentStatus !== 'Cancelled' && (
         <Card elevation={0} sx={{ border: 1, borderColor: 'divider', borderRadius: 2, mb: 1.5, p: 2 }}>
           <Stepper activeStep={Math.max(flowStep, 0)} alternativeLabel>
-            {FLOW_STATUSES.map((s, i) => (
+            {flowStatuses.map((s, i) => (
               <Step key={s} completed={flowStep > i}>
                 <StepLabel>{s}</StepLabel>
               </Step>
@@ -300,7 +299,7 @@ const SalesOrderDetailPage: React.FC = () => {
                             </>
                           )}
                           <Chip label={h.toStatus} size="small"
-                            color={STATUS_COLOR[h.toStatus as OrderStatus] ?? 'default'}
+                            color={statuses.find(s => s.statusName === h.toStatus)?.color ?? 'default'}
                             sx={{ height: 18, fontSize: '0.68rem' }} />
                         </Stack>
                         <Typography variant="caption" color="text.secondary" display="block" mt={0.25}>

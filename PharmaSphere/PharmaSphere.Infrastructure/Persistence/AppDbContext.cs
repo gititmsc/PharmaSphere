@@ -24,9 +24,11 @@ namespace PharmaSphere.Infrastructure.Persistence
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderStatusHistory> OrderStatusHistory => Set<OrderStatusHistory>();
         public DbSet<OrderAuditLog> OrderAuditLogs => Set<OrderAuditLog>();
-        public DbSet<SealColor>       SealColors  => Set<SealColor>();
-        public DbSet<Party>           Parties     => Set<Party>();
-        public DbSet<BrandNameLookup> BrandNames  => Set<BrandNameLookup>();
+        public DbSet<SealColor>           SealColors       => Set<SealColor>();
+        public DbSet<Party>               Parties          => Set<Party>();
+        public DbSet<BrandNameLookup>     BrandNames       => Set<BrandNameLookup>();
+        public DbSet<OrderStatusConfig>   OrderStatuses    => Set<OrderStatusConfig>();
+        public DbSet<OrderStatusTransition> OrderStatusTransitions => Set<OrderStatusTransition>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -213,7 +215,7 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(o => o.Shipper).HasMaxLength(100);
                 e.Property(o => o.OtherRemarks).HasMaxLength(1000);
                 e.Property(o => o.CurrentStatus).HasMaxLength(50).IsRequired()
-                 .HasDefaultValue(OrderStatus.Created);
+                 .HasDefaultValue("PIS Pending");
                 e.Property(o => o.CreatedBy).HasMaxLength(100);
                 e.Property(o => o.CreatedDate).IsRequired();
                 e.Property(o => o.UpdatedBy).HasMaxLength(100);
@@ -325,6 +327,35 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(b => b.IsActive).IsRequired().HasDefaultValue(true);
                 e.HasIndex(b => b.BrandName).IsUnique()
                  .HasDatabaseName("UQ_BrandNames_BrandName");
+            });
+
+            // ── OrderStatuses table ───────────────────────────────────────────────
+            modelBuilder.Entity<OrderStatusConfig>(e =>
+            {
+                e.ToTable("OrderStatuses");
+                e.HasKey(s => s.StatusId);
+                e.Property(s => s.StatusId).ValueGeneratedOnAdd();
+                e.Property(s => s.StatusName).HasMaxLength(100).IsRequired();
+                e.Property(s => s.DisplayOrder).IsRequired();
+                e.Property(s => s.Color).HasMaxLength(50).IsRequired().HasDefaultValue("default");
+                e.Property(s => s.IsInitial).IsRequired().HasDefaultValue(false);
+                e.Property(s => s.IsTerminal).IsRequired().HasDefaultValue(false);
+                e.Property(s => s.ShowInFlow).IsRequired().HasDefaultValue(true);
+                e.Property(s => s.IsActive).IsRequired().HasDefaultValue(true);
+                e.HasIndex(s => s.StatusName).IsUnique()
+                 .HasDatabaseName("UQ_OrderStatuses_StatusName");
+            });
+
+            // ── OrderStatusTransitions table ──────────────────────────────────────
+            modelBuilder.Entity<OrderStatusTransition>(e =>
+            {
+                e.ToTable("OrderStatusTransitions");
+                e.HasKey(t => t.TransitionId);
+                e.Property(t => t.TransitionId).ValueGeneratedOnAdd();
+                e.Property(t => t.FromStatus).HasMaxLength(100).IsRequired();
+                e.Property(t => t.ToStatus).HasMaxLength(100).IsRequired();
+                e.HasIndex(t => new { t.FromStatus, t.ToStatus }).IsUnique()
+                 .HasDatabaseName("UQ_OrderStatusTransitions");
             });
         }
     }

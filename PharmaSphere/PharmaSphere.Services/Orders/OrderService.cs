@@ -7,13 +7,15 @@ namespace PharmaSphere.Services.Orders
 {
     public sealed class OrderService : IOrderService
     {
-        private readonly IOrderRepository  _orders;
-        private readonly ILookupRepository _lookups;
+        private readonly IOrderRepository        _orders;
+        private readonly ILookupRepository       _lookups;
+        private readonly IOrderStatusRepository  _statuses;
 
-        public OrderService(IOrderRepository orders, ILookupRepository lookups)
+        public OrderService(IOrderRepository orders, ILookupRepository lookups, IOrderStatusRepository statuses)
         {
-            _orders  = orders;
-            _lookups = lookups;
+            _orders   = orders;
+            _lookups  = lookups;
+            _statuses = statuses;
         }
 
         public Task<PagedResultDto<OrderListItemDto>> GetOrdersAsync(
@@ -40,7 +42,8 @@ namespace PharmaSphere.Services.Orders
             if (await _orders.OrderNoExistsAsync(req.OrderNo, null, ct))
                 throw new InvalidOperationException($"Order number '{req.OrderNo}' already exists.");
 
-            var order = MapCreate(req, userId, userName);
+            var initialStatus = await _statuses.GetInitialStatusNameAsync(ct) ?? "PIS Pending";
+            var order = MapCreate(req, userId, userName, initialStatus);
             await _orders.AddAsync(order, ct);
 
             // Auto-add new party / brand name to lookup tables
@@ -53,7 +56,7 @@ namespace PharmaSphere.Services.Orders
             {
                 OrderId         = order.OrderId,
                 FromStatus      = null,
-                ToStatus        = OrderStatus.Created,
+                ToStatus        = initialStatus,
                 Remarks         = "Order created",
                 ChangedBy       = userName,
                 ChangedByUserId = userId,
@@ -228,8 +231,8 @@ namespace PharmaSphere.Services.Orders
             if (!order.IsActive)
                 throw new InvalidOperationException("Cannot change status of an inactive order.");
 
-            if (!OrderStatus.AllowedTransitions.TryGetValue(order.CurrentStatus, out var allowed) ||
-                !allowed.Contains(req.NewStatus))
+            var allowed = await _statuses.GetAllowedNextAsync(order.CurrentStatus, ct);
+            if (!allowed.Contains(req.NewStatus))
                 throw new InvalidOperationException(
                     $"Transition from '{order.CurrentStatus}' to '{req.NewStatus}' is not allowed.");
 
@@ -273,7 +276,7 @@ namespace PharmaSphere.Services.Orders
 
         // ── Mapping helpers ───────────────────────────────────────────────────────
 
-        private static Order MapCreate(CreateOrderRequestDto r, int userId, string userName)
+        private static Order MapCreate(CreateOrderRequestDto r, int userId, string userName, string initialStatus)
         {
             var now = DateTime.UtcNow;
             return new Order
@@ -315,7 +318,7 @@ namespace PharmaSphere.Services.Orders
                 PackingPlan           = ParseDateOpt(r.PackingPlan),
                 Sterility14DaysDate   = ParseDateOpt(r.Sterility14DaysDate),
                 DispatchDate          = ParseDateOpt(r.DispatchDate),
-                CurrentStatus         = OrderStatus.Created,
+                CurrentStatus         = initialStatus,
                 CreatedBy             = userName,
                 CreatedByUserId       = userId,
                 CreatedDate           = now,

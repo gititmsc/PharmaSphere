@@ -4,6 +4,7 @@ import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import ProtectedRoute from './ProtectedRoute';
+import AdminRoute from './AdminRoute';
 import GuestRoute from './GuestRoute';
 import TwoFactorRoute from './TwoFactorRoute';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -46,12 +47,16 @@ const AppRouter: React.FC = () => (
         {/* Protected routes — shared DashboardLayout wraps all pages */}
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout><Outlet /></DashboardLayout>}>
-            <Route path="/dashboard"    element={<DashboardPage />} />
-            <Route path="/sales-orders"        element={<SalesOrdersPage />} />
-            <Route path="/sales-orders/form"   element={<SalesOrderFormPage />} />
-            <Route path="/sales-orders/:id"    element={<SalesOrderDetailPage />} />
-            <Route path="/users"        element={<UsersPage />} />
-            <Route path="/users/form"   element={<UserFormPage />} />
+            <Route path="/dashboard"             element={<DashboardPage />} />
+            <Route path="/sales-orders"          element={<SalesOrdersPage />} />
+            <Route path="/sales-orders/form"     element={<SalesOrderFormPage />} />
+            <Route path="/sales-orders/:id"      element={<SalesOrderDetailPage />} />
+
+            {/* Admin-only routes */}
+            <Route element={<AdminRoute />}>
+              <Route path="/users"      element={<UsersPage />} />
+              <Route path="/users/form" element={<UserFormPage />} />
+            </Route>
           </Route>
         </Route>
 

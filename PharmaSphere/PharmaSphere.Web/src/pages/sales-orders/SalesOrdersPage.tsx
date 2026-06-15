@@ -44,8 +44,9 @@ import { useSnackbar }       from 'notistack';
 import axios                 from 'axios';
 import { useAuth }           from '@/contexts/AuthContext';
 import { OrderService }      from '@/services/order.service';
-import { encodeOrderId, ORDER_STATUSES, STATUS_COLOR } from '@/types/order.types';
-import type { OrderListItem, SortField, SortDir }      from '@/types/order.types';
+import { encodeOrderId }     from '@/types/order.types';
+import type { OrderListItem, SortField, SortDir } from '@/types/order.types';
+import { useOrderStatuses }  from '@/hooks/useOrderStatuses';
 import { fmtDate, fmtDateTime }                        from '@/utils/date.utils';
 
 const PAGE_SIZES = [10, 25, 50, 100];
@@ -72,6 +73,7 @@ const SalesOrdersPage: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { user } = useAuth();
   const isAdmin = user?.roleName === 'Admin';
+  const { statuses } = useOrderStatuses();
 
   const [rows, setRows]             = useState<OrderListItem[]>([]);
   const [totalCount, setTotal]      = useState(0);
@@ -199,7 +201,7 @@ const SalesOrdersPage: React.FC = () => {
             <InputLabel>Status</InputLabel>
             <Select value={statusFilter} label="Status" onChange={e => { setStatus(e.target.value); setPage(1); }}>
               <MenuItem value="">All Statuses</MenuItem>
-              {ORDER_STATUSES.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+              {statuses.map(s => <MenuItem key={s.statusName} value={s.statusName}>{s.statusName}</MenuItem>)}
             </Select>
           </FormControl>
           <TextField
@@ -296,7 +298,7 @@ const SalesOrdersPage: React.FC = () => {
                         <Chip
                           label={row.currentStatus}
                           size="small"
-                          color={STATUS_COLOR[row.currentStatus as keyof typeof STATUS_COLOR] ?? 'default'}
+                          color={statuses.find(s => s.statusName === row.currentStatus)?.color ?? 'default'}
                           sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }}
                         />
                       ) : c.id === 'orderNo'     ? row.orderNo
