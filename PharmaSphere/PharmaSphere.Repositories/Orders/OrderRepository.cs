@@ -134,5 +134,47 @@ namespace PharmaSphere.Repositories.Orders
 
         public async Task SaveChangesAsync(CancellationToken ct = default)
             => await _db.SaveChangesAsync(ct);
+
+        public async Task<Dictionary<string, int>> GetStatusCountsAsync(CancellationToken ct = default)
+        {
+            return await _db.Orders
+                .AsNoTracking()
+                .Where(o => o.IsActive)
+                .GroupBy(o => o.CurrentStatus)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.Status, x => x.Count, ct);
+        }
+
+        public async Task<IReadOnlyList<DashboardOrderItemDto>> GetRecentOrdersAsync(
+            int count, CancellationToken ct = default)
+        {
+            return await _db.Orders
+                .AsNoTracking()
+                .Where(o => o.IsActive)
+                .OrderByDescending(o => o.CreatedDate)
+                .Take(count)
+                .Select(o => new DashboardOrderItemDto(
+                    o.OrderId, o.OrderNo, o.Party, o.BrandName, o.Qty,
+                    o.CurrentStatus,
+                    o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
+                    o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null))
+                .ToListAsync(ct);
+        }
+
+        public async Task<IReadOnlyList<DashboardOrderItemDto>> GetOrdersByStatusAsync(
+            string status, int count, CancellationToken ct = default)
+        {
+            return await _db.Orders
+                .AsNoTracking()
+                .Where(o => o.IsActive && o.CurrentStatus == status)
+                .OrderByDescending(o => o.CreatedDate)
+                .Take(count)
+                .Select(o => new DashboardOrderItemDto(
+                    o.OrderId, o.OrderNo, o.Party, o.BrandName, o.Qty,
+                    o.CurrentStatus,
+                    o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
+                    o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null))
+                .ToListAsync(ct);
+        }
     }
 }

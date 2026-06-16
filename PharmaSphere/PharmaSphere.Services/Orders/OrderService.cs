@@ -313,6 +313,36 @@ namespace PharmaSphere.Services.Orders
         public Task<IReadOnlyList<string>> GetSealColorsAsync(CancellationToken ct = default)
             => _orders.GetSealColorsAsync(ct);
 
+        public async Task<AdminDashboardDto> GetAdminDashboardAsync(CancellationToken ct = default)
+        {
+            var statusConfigs = await _statuses.GetAllActiveAsync(ct);
+            var counts        = await _orders.GetStatusCountsAsync(ct);
+            var recent        = await _orders.GetRecentOrdersAsync(10, ct);
+
+            var pipeline = statusConfigs
+                .Where(s => s.ShowInFlow)
+                .OrderBy(s => s.DisplayOrder)
+                .Select(s => new DashboardStatusCountDto(
+                    s.StatusName,
+                    counts.TryGetValue(s.StatusName, out var c) ? c : 0,
+                    s.Color))
+                .ToList();
+
+            var totalDispatched = counts.TryGetValue(OrderStatus.Dispatched, out var d) ? d : 0;
+            var totalCancelled  = counts.TryGetValue(OrderStatus.Cancelled,  out var cc) ? cc : 0;
+            var totalActive     = counts.Values.Sum() - totalDispatched - totalCancelled;
+            var totalOrders     = counts.Values.Sum();
+
+            return new AdminDashboardDto(totalOrders, totalActive, totalDispatched, totalCancelled, pipeline, recent);
+        }
+
+        public async Task<RoleDashboardDto> GetRoleDashboardAsync(string status, CancellationToken ct = default)
+        {
+            var orders  = await _orders.GetOrdersByStatusAsync(status, 50, ct);
+            var pending = orders.Count;
+            return new RoleDashboardDto(status, pending, orders);
+        }
+
         // ── Mapping helpers ───────────────────────────────────────────────────────
 
         private static Order MapCreate(CreateOrderRequestDto r, int userId, string userName, string initialStatus)

@@ -14,5 +14,8 @@ namespace PharmaSphere.Repositories.Interfaces
         Task AddAuditLogAsync(OrderAuditLog log, CancellationToken ct = default);
         Task<IReadOnlyList<string>> GetSealColorsAsync(CancellationToken ct = default);
         Task SaveChangesAsync(CancellationToken ct = default);
+        Task<Dictionary<string, int>> GetStatusCountsAsync(CancellationToken ct = default);
+        Task<IReadOnlyList<DashboardOrderItemDto>> GetRecentOrdersAsync(int count, CancellationToken ct = default);
+        Task<IReadOnlyList<DashboardOrderItemDto>> GetOrdersByStatusAsync(string status, int count, CancellationToken ct = default);
     }
 }

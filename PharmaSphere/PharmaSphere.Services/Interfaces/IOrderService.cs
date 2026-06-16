@@ -14,5 +14,7 @@ namespace PharmaSphere.Services.Interfaces
         Task RestoreOrderAsync(int orderId, int userId, string userName, CancellationToken ct = default);
         Task ChangeStatusAsync(int orderId, ChangeStatusRequestDto request, int userId, string userName, CancellationToken ct = default);
         Task<IReadOnlyList<string>> GetSealColorsAsync(CancellationToken ct = default);
+        Task<AdminDashboardDto> GetAdminDashboardAsync(CancellationToken ct = default);
+        Task<RoleDashboardDto> GetRoleDashboardAsync(string status, CancellationToken ct = default);
     }
 }

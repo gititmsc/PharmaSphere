@@ -187,6 +187,36 @@ namespace PharmaSphere.Core.DTOs
         string NewStatus,
         string? Remarks = null);
 
+    // ── Dashboard ─────────────────────────────────────────────────────────────────
+
+    public sealed record DashboardOrderItemDto(
+        int OrderId,
+        string OrderNo,
+        string? Party,
+        string? BrandName,
+        int? Qty,
+        string CurrentStatus,
+        string CreatedDate,
+        string? UpdatedDate);
+
+    public sealed record DashboardStatusCountDto(
+        string Status,
+        int Count,
+        string Color);
+
+    public sealed record AdminDashboardDto(
+        int TotalOrders,
+        int TotalActive,
+        int TotalDispatched,
+        int TotalCancelled,
+        IReadOnlyList<DashboardStatusCountDto> Pipeline,
+        IReadOnlyList<DashboardOrderItemDto> RecentOrders);
+
+    public sealed record RoleDashboardDto(
+        string RoleStatus,
+        int PendingCount,
+        IReadOnlyList<DashboardOrderItemDto> PendingOrders);
+
     // ── Order Status Config ───────────────────────────────────────────────────────
 
     public sealed record OrderStatusDto(
