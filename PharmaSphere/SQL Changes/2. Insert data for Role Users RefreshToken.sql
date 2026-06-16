@@ -58,10 +58,10 @@ USING (VALUES
         1       -- RoleId  = Administrator
     ),
 
-    -- ── Pharmacists ───────────────────────────────────────────────────────────
+    -- ── Dispatcher@pharmasphere.com ───────────────────────────────────────────────────────────
     (
         2,
-        'sarah.jones@pharmasphere.com',
+        'Dispatcher@pharmasphere.com',
         LOWER(CONVERT(VARCHAR(64), HASHBYTES('SHA2_256', 'Pharma@123'), 2)),
         1,
         2       -- RoleId = Pharmacist

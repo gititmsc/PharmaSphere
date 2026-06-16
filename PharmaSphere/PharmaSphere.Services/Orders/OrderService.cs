@@ -157,6 +157,19 @@ namespace PharmaSphere.Services.Orders
             order.UpdatedByUserId = userId;
             order.UpdatedDate     = now;
 
+            // Auto-advance status based on completed fields (only forward, never touch Cancelled)
+            var statusBeforeUpdate = order.CurrentStatus;
+            string? autoAdvancedTo = null;
+            if (order.CurrentStatus != OrderStatus.Cancelled)
+            {
+                var targetStatus = ComputeTargetStatus(order);
+                if (WorkflowIndex(targetStatus) > WorkflowIndex(order.CurrentStatus))
+                {
+                    autoAdvancedTo      = targetStatus;
+                    order.CurrentStatus = targetStatus;
+                }
+            }
+
             await _orders.SaveChangesAsync(ct);
 
             // Auto-add new party / brand name to lookup tables
@@ -164,6 +177,32 @@ namespace PharmaSphere.Services.Orders
                 await _lookups.EnsurePartyExistsAsync(req.Party, ct);
             if (!string.IsNullOrWhiteSpace(req.BrandName))
                 await _lookups.EnsureBrandNameExistsAsync(req.BrandName, ct);
+
+            // Record the auto-status advance in history + audit log
+            if (autoAdvancedTo != null)
+            {
+                await _orders.AddStatusHistoryAsync(new OrderStatusHistory
+                {
+                    OrderId         = orderId,
+                    FromStatus      = statusBeforeUpdate,
+                    ToStatus        = autoAdvancedTo,
+                    Remarks         = "Status auto-updated by system",
+                    ChangedBy       = userName,
+                    ChangedByUserId = userId,
+                    ChangedDate     = now,
+                }, ct);
+                await _orders.AddAuditLogAsync(new OrderAuditLog
+                {
+                    OrderId         = orderId,
+                    Action          = AuditAction.StatusChanged,
+                    FieldName       = "CurrentStatus",
+                    OldValue        = statusBeforeUpdate,
+                    NewValue        = autoAdvancedTo,
+                    ChangedBy       = userName,
+                    ChangedByUserId = userId,
+                    ChangedDate     = now,
+                }, ct);
+            }
 
             return ToListItem(order);
         }
@@ -446,5 +485,49 @@ namespace PharmaSphere.Services.Orders
 
         private static string? Blank(string? s) =>
             string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
+        // ── Auto-status workflow ──────────────────────────────────────────────────
+
+        private static readonly string[] WorkflowOrder =
+        {
+            "PIS Pending", "Artwork Pending", "PM Supply Pending",
+            "Production Pending", "Packing Pending", "Dispatch Pending",
+            OrderStatus.Dispatched,
+        };
+
+        private static int WorkflowIndex(string status) => Array.IndexOf(WorkflowOrder, status);
+
+        private static string ComputeTargetStatus(Order o)
+        {
+            var pisApproved     = o.PISApprovalDate.HasValue;
+            var artworkApproved = o.SanoletPartyArtworkApprovalDate.HasValue;
+            var allPMFilled     = o.MonoBoxSupplyVendorApprovalDate.HasValue
+                               && o.LabelSupplyVendorApprovalDate.HasValue
+                               && o.InsertSupplyVendorApprovalDate.HasValue
+                               && o.TraySupplyVendorApprovalDate.HasValue
+                               && o.ShipperSupplyVendorApprovalDate.HasValue
+                               && o.ProductionMonoBox.HasValue
+                               && o.ProductionLabel.HasValue
+                               && o.ProductionInsert.HasValue
+                               && o.ProductionTray.HasValue
+                               && o.ProductionShipper.HasValue;
+            var fillingDone  = o.FillingPlan.HasValue;
+            var packingDone  = o.PackingPlan.HasValue;
+            var dispatchDone = o.DispatchDate.HasValue;
+
+            if (dispatchDone && packingDone && fillingDone && allPMFilled && artworkApproved && pisApproved)
+                return OrderStatus.Dispatched;
+            if (packingDone  && fillingDone && allPMFilled && artworkApproved && pisApproved)
+                return "Dispatch Pending";
+            if (fillingDone  && allPMFilled && artworkApproved && pisApproved)
+                return "Packing Pending";
+            if (allPMFilled  && artworkApproved && pisApproved)
+                return "Production Pending";
+            if (artworkApproved && pisApproved)
+                return "PM Supply Pending";
+            if (pisApproved)
+                return "Artwork Pending";
+            return "PIS Pending";
+        }
     }
 }

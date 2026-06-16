@@ -37,6 +37,7 @@ import axios from 'axios';
 import { useAuth } from '@/contexts/AuthContext';
 import { OrderService } from '@/services/order.service';
 import { LookupService } from '@/services/lookup.service';
+import { useOrderStatuses } from '@/hooks/useOrderStatuses';
 import { decodeOrderId } from '@/types/order.types';
 import type { OrderFormValues, OrderAuditLogItem } from '@/types/order.types';
 import { fmtDateTime } from '@/utils/date.utils';
@@ -134,6 +135,7 @@ const SalesOrderFormPage: React.FC = () => {
 
   const { user } = useAuth();
   const isAdmin = user?.roleName === 'Admin';
+  const { statuses: orderStatuses } = useOrderStatuses();
 
   const encodedId = searchParams.get('id');
   const orderId   = encodedId ? decodeOrderId(encodedId) : null;
@@ -302,8 +304,30 @@ const SalesOrderFormPage: React.FC = () => {
     </Box>
   );
 
-  const ro = orderStatus === 'Dispatched' || orderStatus === 'Cancelled';
+  const isQA         = user?.roleName === 'QA';
+  const isDesigner   = user?.roleName === 'Designer';
+  const isPPMC       = user?.roleName === 'PPMC';
+  const isProduction = user?.roleName === 'Production';
+  const isPacking    = user?.roleName === 'Packing';
+  const isDispatch   = user?.roleName === 'Dispatch';
+
+  // Fully locked: Cancelled (all), or Dispatched for non-Admin
+  const ro = orderStatus === 'Cancelled' || (orderStatus === 'Dispatched' && !isAdmin);
   const roGeneralInfo = ro || !isAdmin;
+
+  // Per-field role gates (base ro applies first, then role check)
+  // QA may only fill pisApprovalDate while the order is still in 'PIS Pending'
+  const roPISDate     = ro || (!isAdmin && !(isQA && orderStatus === 'PIS Pending'));
+  // Designer may only fill sanoletPartyArtworkApprovalDate while the order is still in 'Artwork Pending'
+  const roArtworkDate = ro || (!isAdmin && !(isDesigner && orderStatus === 'Artwork Pending'));
+  // PPMC may only fill PM fields while the order is still in 'PM Supply Pending'
+  const roPMFields    = ro || (!isAdmin && !(isPPMC && orderStatus === 'PM Supply Pending'));
+  // Production may only fill filling plan fields while the order is still in 'Production Pending'
+  const roFilling     = ro || (!isAdmin && !(isProduction && orderStatus === 'Production Pending'));
+  // Packing may only fill packing plan date while the order is still in 'Packing Pending'
+  const roPackingPlan = ro || (!isAdmin && !(isPacking && orderStatus === 'Packing Pending'));
+  // Dispatch may only fill dispatch date while the order is still in 'Dispatch Pending'
+  const roDispatch    = ro || (!isAdmin && !(isDispatch && orderStatus === 'Dispatch Pending'));
 
   return (
     <Box>
@@ -319,6 +343,20 @@ const SalesOrderFormPage: React.FC = () => {
             Sales Orders › {isEdit ? 'Edit' : 'Add'}
           </Typography>
         </Box>
+
+        {isEdit && orderStatus && (
+          <Box sx={{ ml: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.25 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
+              Current Status
+            </Typography>
+            <Chip
+              label={orderStatus}
+              color={orderStatuses.find(s => s.statusName === orderStatus)?.color ?? 'default'}
+              size="medium"
+              sx={{ fontWeight: 700, fontSize: '0.8rem', height: 28 }}
+            />
+          </Box>
+        )}
       </Stack>
 
       {ro && (
@@ -407,10 +445,12 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="shelfLifeMonths" label="Shelf Life" control={control} readOnly={roGeneralInfo} placeholder="e.g. 24 months" />
                 </Grid>
 
-                {/* Row 3: Amount | Party | Make */}
-                <Grid item xs={12} sm={4}>
-                  <Fld name="amount" label="Amount (₹)" control={control} type="number" adornment="₹" readOnly={roGeneralInfo} placeholder="0.00" />
-                </Grid>
+                {/* Row 3: Amount (Admin only) | Party | Make */}
+                {isAdmin && (
+                  <Grid item xs={12} sm={4}>
+                    <Fld name="amount" label="Amount (₹)" control={control} type="number" adornment="₹" readOnly={roGeneralInfo} placeholder="0.00" />
+                  </Grid>
+                )}
                 <Grid item xs={12} sm={4}>
                   <Controller
                     name="party"
@@ -509,21 +549,6 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="shipper" label="Shipper" control={control} readOnly={roGeneralInfo} placeholder="Enter shipper" />
                 </Grid>
 
-                {/* ── PIS Approval section ── */}
-                <Grid item xs={12}>
-                  <Divider sx={{ my: 0.5 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>PIS Approval</Typography>
-                  </Divider>
-                </Grid>
-
-                <Grid item xs={12} sm={4}>
-                  <Fld name="pisApprovalDate" label="PIS Approval Date" control={control} type="date" readOnly={roGeneralInfo} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="sanoletPartyArtworkApprovalDate" label="Sanolet Party Artwork Approval Date" control={control} type="date" readOnly={roGeneralInfo} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4} />
-
                 <Grid item xs={12}>
                   <Fld name="otherRemarks" label="Other Remarks" control={control} multiline rows={2} readOnly={roGeneralInfo} placeholder="Any other remarks" />
                 </Grid>
@@ -533,51 +558,77 @@ const SalesOrderFormPage: React.FC = () => {
 
             {/* ── Tab 1: Packaging Material ── */}
             <TabPanel value={tab} index={1}>
+              {isEdit && !isAdmin && ((isQA && orderStatus === 'PIS Pending') || (isDesigner && orderStatus === 'Artwork Pending')) && (
+                <Alert severity="info" sx={{ mb: 1.5 }}>
+                  {isQA
+                    ? 'You can enter the PIS Approval Date.'
+                    : 'You can enter the Sanolet Party Artwork Approval Date.'}
+                </Alert>
+              )}
+              {isEdit && !isAdmin && isPPMC && orderStatus === 'PM Supply Pending' && (
+                <Alert severity="info" sx={{ mb: 1.5 }}>
+                  Complete all Packing Material Order and Receive dates to advance the status.
+                </Alert>
+              )}
               <Grid container spacing={1.5}>
 
+                {/* ── QA Approval ── */}
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>QA Approval</Typography>
+                  </Divider>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="pisApprovalDate" label="PIS Approval Date" control={control} type="date" readOnly={roPISDate} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="sanoletPartyArtworkApprovalDate" label="Sanolet Party Artwork Approval Date" control={control} type="date" readOnly={roArtworkDate} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4} />
+
+                {/* ── Packing Material Order ── */}
                 <Grid item xs={12}>
                   <Divider sx={{ my: 0.5 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Packing Material Order</Typography>
                   </Divider>
                 </Grid>
-
                 <Grid item xs={12} sm={4}>
-                  <Fld name="monoBoxSupplyVendorApprovalDate" label="Mono Box Supply Vendor Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="monoBoxSupplyVendorApprovalDate" label="Mono Box Supply Vendor Approval Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="labelSupplyVendorApprovalDate" label="Label Supply Vendor Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="labelSupplyVendorApprovalDate" label="Label Supply Vendor Approval Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="insertSupplyVendorApprovalDate" label="Insert Supply Vendor Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="insertSupplyVendorApprovalDate" label="Insert Supply Vendor Approval Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="traySupplyVendorApprovalDate" label="Tray Supply Vendor Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="traySupplyVendorApprovalDate" label="Tray Supply Vendor Approval Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="shipperSupplyVendorApprovalDate" label="Shipper Supply Vendor Approval Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="shipperSupplyVendorApprovalDate" label="Shipper Supply Vendor Approval Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4} />
 
+                {/* ── Packing Material Receive ── */}
                 <Grid item xs={12}>
                   <Divider sx={{ my: 0.5 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Packing Material Receive</Typography>
                   </Divider>
                 </Grid>
-
                 <Grid item xs={12} sm={4}>
-                  <Fld name="productionMonoBox" label="Production MonoBox Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="productionMonoBox" label="Production MonoBox Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="productionLabel" label="Production Label Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="productionLabel" label="Production Label Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="productionInsert" label="Production Insert Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="productionInsert" label="Production Insert Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="productionTray" label="Production Tray Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="productionTray" label="Production Tray Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="productionShipper" label="Production Shipper Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="productionShipper" label="Production Shipper Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
 
               </Grid>
@@ -585,18 +636,25 @@ const SalesOrderFormPage: React.FC = () => {
 
             {/* ── Tab 2: Production Info ── */}
             <TabPanel value={tab} index={2}>
+              {isEdit && !isAdmin && ((isProduction && orderStatus === 'Production Pending') || (isPacking && orderStatus === 'Packing Pending') || (isDispatch && orderStatus === 'Dispatch Pending')) && (
+                <Alert severity="info" sx={{ mb: 1.5 }}>
+                  {isProduction && 'Enter the Filling Plan Date and Sterility Date to advance the status.'}
+                  {isPacking    && 'Enter the Packing Plan Date to advance the status.'}
+                  {isDispatch   && 'Enter the Dispatch Date to complete the order.'}
+                </Alert>
+              )}
               <Grid container spacing={1.5}>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="fillingPlan" label="Filling Plan Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="fillingPlan" label="Filling Plan Date" control={control} type="date" readOnly={roFilling} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="packingPlan" label="Packing Plan Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="packingPlan" label="Packing Plan Date" control={control} type="date" readOnly={roPackingPlan} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="sterility14DaysDate" label="Sterility 14 Days Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="sterility14DaysDate" label="Sterility 14 Days Date" control={control} type="date" readOnly={roFilling} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="dispatchDate" label="Dispatch Date" control={control} type="date" readOnly={ro} shrinkLabel />
+                  <Fld name="dispatchDate" label="Dispatch Date" control={control} type="date" readOnly={roDispatch} shrinkLabel />
                 </Grid>
               </Grid>
             </TabPanel>
@@ -668,7 +726,7 @@ const SalesOrderFormPage: React.FC = () => {
           <Button variant="outlined" color="inherit" onClick={() => navigate('/sales-orders')} disabled={isSubmitting || cancelling}>
             Back
           </Button>
-          {isEdit && !ro && (
+          {isEdit && isAdmin && orderStatus !== 'Dispatched' && orderStatus !== 'Cancelled' && (
             <Button variant="outlined" color="error" onClick={() => setCancelOpen(true)} disabled={isSubmitting || cancelling}>
               Cancel Sales Order
             </Button>

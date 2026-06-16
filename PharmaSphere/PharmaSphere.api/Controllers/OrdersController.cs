@@ -42,6 +42,21 @@ namespace PharmaSphere.Api.Controllers
         public async Task<IActionResult> GetOrders(
             [FromQuery] OrderListQueryDto query, CancellationToken ct)
         {
+            // Non-admin roles are restricted to a single workflow status
+            var roleStatus = CurrentUserRole switch
+            {
+                "QA"         => "PIS Pending",
+                "Designer"   => "Artwork Pending",
+                "PPMC"       => "PM Supply Pending",
+                "Production" => "Production Pending",
+                "Packing"    => "Packing Pending",
+                "Dispatch"   => "Dispatch Pending",
+                _            => (string?)null
+            };
+
+            if (roleStatus is not null)
+                query = query with { Status = roleStatus };
+
             var result = await _orders.GetOrdersAsync(query, ct);
             return Ok(result);
         }

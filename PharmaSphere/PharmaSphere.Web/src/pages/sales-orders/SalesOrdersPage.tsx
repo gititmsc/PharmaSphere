@@ -75,6 +75,12 @@ const SalesOrdersPage: React.FC = () => {
   const isAdmin = user?.roleName === 'Admin';
   const { statuses } = useOrderStatuses();
 
+  // Amount column is restricted to Admin only
+  const availableCols = isAdmin ? ALL_COLS : ALL_COLS.filter(c => c.id !== 'amount');
+  const defaultVisible = isAdmin
+    ? new Set(DEFAULT_VISIBLE)
+    : new Set([...DEFAULT_VISIBLE].filter(id => id !== 'amount'));
+
   const [rows, setRows]             = useState<OrderListItem[]>([]);
   const [totalCount, setTotal]      = useState(0);
   const [loading, setLoading]       = useState(false);
@@ -91,7 +97,7 @@ const SalesOrdersPage: React.FC = () => {
   const [page, setPage]             = useState(1);
   const [pageSize, setPageSize]     = useState(10);
 
-  const [visibleCols, setVisible]   = useState<Set<string>>(new Set(DEFAULT_VISIBLE));
+  const [visibleCols, setVisible]   = useState<Set<string>>(defaultVisible);
   const [colAnchor, setColAnchor]   = useState<HTMLElement | null>(null);
 
   const debounce = useRef<ReturnType<typeof setTimeout>>();
@@ -162,7 +168,7 @@ const SalesOrdersPage: React.FC = () => {
     });
   };
 
-  const visibleDefs = ALL_COLS.filter(c => visibleCols.has(c.id));
+  const visibleDefs = availableCols.filter(c => visibleCols.has(c.id));
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const rangeStart = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -197,13 +203,15 @@ const SalesOrdersPage: React.FC = () => {
             InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" color="action" /></InputAdornment> }}
             sx={{ flexGrow: 1, minWidth: 160 }}
           />
-          <FormControl size="small" sx={{ minWidth: 160 }}>
-            <InputLabel>Status</InputLabel>
-            <Select value={statusFilter} label="Status" onChange={e => { setStatus(e.target.value); setPage(1); }}>
-              <MenuItem value="">All Statuses</MenuItem>
-              {statuses.map(s => <MenuItem key={s.statusName} value={s.statusName}>{s.statusName}</MenuItem>)}
-            </Select>
-          </FormControl>
+          {isAdmin && (
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <InputLabel>Status</InputLabel>
+              <Select value={statusFilter} label="Status" onChange={e => { setStatus(e.target.value); setPage(1); }}>
+                <MenuItem value="">All Statuses</MenuItem>
+                {statuses.map(s => <MenuItem key={s.statusName} value={s.statusName}>{s.statusName}</MenuItem>)}
+              </Select>
+            </FormControl>
+          )}
           <TextField
             size="small" label="From Date" type="date" value={dateFrom}
             onChange={e => { setDateFrom(e.target.value); setPage(1); }}
@@ -219,7 +227,7 @@ const SalesOrdersPage: React.FC = () => {
               <ViewColumnIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          {(search || statusFilter || dateFrom || dateTo) && (
+          {(search || (isAdmin && statusFilter) || dateFrom || dateTo) && (
             <Tooltip title="Clear filters">
               <IconButton size="small" color="error" onClick={() => { setSearch(''); setStatus(''); setDateFrom(''); setDateTo(''); setPage(1); }}
                 sx={{ border: 1, borderColor: 'divider' }}>
@@ -241,7 +249,7 @@ const SalesOrdersPage: React.FC = () => {
         <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ px: 0.5, display: 'block', mb: 0.5 }}>
           VISIBLE COLUMNS
         </Typography>
-        {ALL_COLS.map(c => (
+        {availableCols.map(c => (
           <FormControlLabel
             key={c.id}
             control={<Checkbox size="small" checked={visibleCols.has(c.id)} onChange={() => toggleCol(c.id)} />}
@@ -321,11 +329,13 @@ const SalesOrdersPage: React.FC = () => {
                           <EditIcon sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Delete">
-                        <IconButton size="small" color="error" onClick={() => setToDelete(row)}>
-                          <DeleteOutlineIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </Tooltip>
+                      {isAdmin && (
+                        <Tooltip title="Delete">
+                          <IconButton size="small" color="error" onClick={() => setToDelete(row)}>
+                            <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </Stack>
                   </TableCell>
                 </TableRow>
