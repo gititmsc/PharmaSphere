@@ -27,8 +27,9 @@ namespace PharmaSphere.Infrastructure.Persistence
         public DbSet<SealColor>           SealColors       => Set<SealColor>();
         public DbSet<Party>               Parties          => Set<Party>();
         public DbSet<BrandNameLookup>     BrandNames       => Set<BrandNameLookup>();
-        public DbSet<OrderStatusConfig>   OrderStatuses    => Set<OrderStatusConfig>();
+        public DbSet<OrderStatusConfig>     OrderStatuses          => Set<OrderStatusConfig>();
         public DbSet<OrderStatusTransition> OrderStatusTransitions => Set<OrderStatusTransition>();
+        public DbSet<ErrorLog>              ErrorLogs              => Set<ErrorLog>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -356,6 +357,16 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(t => t.ToStatus).HasMaxLength(100).IsRequired();
                 e.HasIndex(t => new { t.FromStatus, t.ToStatus }).IsUnique()
                  .HasDatabaseName("UQ_OrderStatusTransitions");
+            });
+
+            // ── ErrorLog table ────────────────────────────────────────────────────
+            modelBuilder.Entity<ErrorLog>(e =>
+            {
+                e.ToTable("ErrorLog");
+                e.HasKey(el => el.ErrorLogId);
+                e.Property(el => el.ErrorLogId).ValueGeneratedOnAdd();
+                e.Property(el => el.IPAddress).HasMaxLength(20);
+                e.Property(el => el.ClientBrowser).HasMaxLength(50);
             });
         }
     }

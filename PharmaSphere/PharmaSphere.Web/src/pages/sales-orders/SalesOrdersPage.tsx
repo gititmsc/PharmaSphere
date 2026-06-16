@@ -196,15 +196,34 @@ const SalesOrdersPage: React.FC = () => {
 
       {/* ── Filters ── */}
       <Card elevation={0} sx={{ border: 1, borderColor: 'divider', p: 1.5, mb: 1.5, borderRadius: 2 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} gap={1.5} alignItems="center">
+        {/* Row 1: search + icon actions */}
+        <Stack direction="row" gap={1} alignItems="center" mb={1.5}>
           <TextField
             size="small" placeholder="Search order no, party, brand…"
             value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
             InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" color="action" /></InputAdornment> }}
-            sx={{ flexGrow: 1, minWidth: 160 }}
+            sx={{ flexGrow: 1 }}
           />
+          <Tooltip title="Toggle columns">
+            <IconButton size="small" onClick={e => setColAnchor(e.currentTarget)} sx={{ border: 1, borderColor: 'divider', flexShrink: 0 }}>
+              <ViewColumnIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          {(search || (isAdmin && statusFilter) || dateFrom || dateTo) && (
+            <Tooltip title="Clear filters">
+              <IconButton size="small" color="error"
+                onClick={() => { setSearch(''); setStatus(''); setDateFrom(''); setDateTo(''); setPage(1); }}
+                sx={{ border: 1, borderColor: 'divider', flexShrink: 0 }}>
+                <FilterAltIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Stack>
+
+        {/* Row 2: filter fields — flex-wrap so they pair on mobile */}
+        <Stack direction="row" flexWrap="wrap" gap={1.5}>
           {isAdmin && (
-            <FormControl size="small" sx={{ minWidth: 160 }}>
+            <FormControl size="small" sx={{ flex: '1 1 150px' }}>
               <InputLabel>Status</InputLabel>
               <Select value={statusFilter} label="Status" onChange={e => { setStatus(e.target.value); setPage(1); }}>
                 <MenuItem value="">All Statuses</MenuItem>
@@ -215,26 +234,13 @@ const SalesOrdersPage: React.FC = () => {
           <TextField
             size="small" label="From Date" type="date" value={dateFrom}
             onChange={e => { setDateFrom(e.target.value); setPage(1); }}
-            InputLabelProps={{ shrink: true }} sx={{ width: 230 }}
+            InputLabelProps={{ shrink: true }} sx={{ flex: '1 1 150px' }}
           />
           <TextField
             size="small" label="To Date" type="date" value={dateTo}
             onChange={e => { setDateTo(e.target.value); setPage(1); }}
-            InputLabelProps={{ shrink: true }} sx={{ width: 230 }}
+            InputLabelProps={{ shrink: true }} sx={{ flex: '1 1 150px' }}
           />
-          <Tooltip title="Toggle columns">
-            <IconButton size="small" onClick={e => setColAnchor(e.currentTarget)} sx={{ border: 1, borderColor: 'divider' }}>
-              <ViewColumnIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          {(search || (isAdmin && statusFilter) || dateFrom || dateTo) && (
-            <Tooltip title="Clear filters">
-              <IconButton size="small" color="error" onClick={() => { setSearch(''); setStatus(''); setDateFrom(''); setDateTo(''); setPage(1); }}
-                sx={{ border: 1, borderColor: 'divider' }}>
-                <FilterAltIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
         </Stack>
       </Card>
 

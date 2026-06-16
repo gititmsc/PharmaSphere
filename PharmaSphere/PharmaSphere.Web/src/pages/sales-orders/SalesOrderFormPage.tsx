@@ -722,7 +722,12 @@ const SalesOrderFormPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Stack direction="row" justifyContent="flex-end" gap={1.5}>
+        <Stack
+          direction={{ xs: 'column-reverse', sm: 'row' }}
+          justifyContent={{ sm: 'flex-end' }}
+          gap={1.5}
+          sx={{ '& .MuiButton-root': { minWidth: { xs: '100%', sm: 120 }, whiteSpace: 'nowrap' } }}
+        >
           <Button variant="outlined" color="inherit" onClick={() => navigate('/sales-orders')} disabled={isSubmitting || cancelling}>
             Back
           </Button>
