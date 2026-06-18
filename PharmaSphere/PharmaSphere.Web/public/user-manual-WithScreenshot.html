@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PharmaSphere – User Manual &amp; UAT Guide</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 14px;
+    color: #1a1a2e;
+    background: #fff;
+    line-height: 1.7;
+  }
+
+  /* ── Cover page ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a3c5e 0%, #2e7d32 100%);
+    color: #fff;
+    text-align: center;
+    padding: 60px 40px;
+    page-break-after: always;
+  }
+  .cover h1 { font-size: 42px; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; }
+  .cover h2 { font-size: 22px; font-weight: 400; opacity: .85; margin-bottom: 40px; }
+  .cover .badge {
+    display: inline-block;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 50px;
+    padding: 8px 28px;
+    font-size: 13px;
+    letter-spacing: .5px;
+    margin: 6px;
+  }
+  .cover .meta { margin-top: 50px; opacity: .65; font-size: 13px; }
+
+  /* ── Layout ── */
+  .page { max-width: 960px; margin: 0 auto; padding: 48px 40px; }
+
+  /* ── TOC ── */
+  .toc { page-break-after: always; }
+  .toc h2 { font-size: 28px; font-weight: 700; margin-bottom: 28px; color: #1a3c5e;
+            border-bottom: 3px solid #2e7d32; padding-bottom: 10px; }
+  .toc ol { list-style: none; }
+  .toc > ol > li { margin-bottom: 8px; font-size: 15px; font-weight: 600; color: #1a3c5e; }
+  .toc > ol > li > ol { margin-top: 4px; margin-left: 20px; }
+  .toc > ol > li > ol > li { font-weight: 400; color: #374151; font-size: 13.5px; margin-bottom: 3px; }
+  .toc a { color: inherit; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* ── Section headings ── */
+  h2.section {
+    font-size: 26px; font-weight: 700; color: #1a3c5e;
+    border-bottom: 3px solid #2e7d32;
+    padding-bottom: 10px; margin-bottom: 24px; margin-top: 0;
+  }
+  h3 { font-size: 18px; font-weight: 700; color: #1a3c5e; margin: 28px 0 12px; }
+  h4 { font-size: 15px; font-weight: 700; color: #2e7d32; margin: 20px 0 8px; }
+
+  /* ── Section page ── */
+  .section-page { page-break-before: always; padding-top: 48px; }
+
+  /* ── Paragraph & list ── */
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 5px; }
+
+  /* ── Role chips ── */
+  .role {
+    display: inline-block; border-radius: 50px; padding: 2px 12px;
+    font-size: 12px; font-weight: 700; letter-spacing: .3px;
+  }
+  .role-admin    { background: #DBEAFE; color: #1D4ED8; }
+  .role-qa       { background: #FEF3C7; color: #92400E; }
+  .role-designer { background: #EDE9FE; color: #6D28D9; }
+  .role-ppmc     { background: #DCFCE7; color: #15803D; }
+  .role-prod     { background: #FEE2E2; color: #B91C1C; }
+  .role-pack     { background: #E0F2FE; color: #0369A1; }
+  .role-disp     { background: #FDF4FF; color: #7E22CE; }
+
+  /* ── Status chips ── */
+  .status {
+    display: inline-block; border-radius: 50px; padding: 2px 12px;
+    font-size: 12px; font-weight: 700;
+  }
+  .s-pis    { background: #FEF3C7; color: #92400E; }
+  .s-art    { background: #EDE9FE; color: #6D28D9; }
+  .s-pm     { background: #DCFCE7; color: #15803D; }
+  .s-prod   { background: #DBEAFE; color: #1D4ED8; }
+  .s-pack   { background: #FEE2E2; color: #B91C1C; }
+  .s-disp-p { background: #E0F2FE; color: #0369A1; }
+  .s-disped { background: #D1FAE5; color: #065F46; }
+  .s-cancel { background: #F3F4F6; color: #374151; }
+
+  /* ── Permission table ── */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 13px; }
+  th { background: #1a3c5e; color: #fff; padding: 10px 12px; text-align: left; font-weight: 600; }
+  td { padding: 9px 12px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  tr:nth-child(even) td { background: #f9fafb; }
+
+  /* ── Step boxes ── */
+  .steps { counter-reset: step; list-style: none; margin: 12px 0 20px 0; padding: 0; }
+  .steps li {
+    counter-increment: step;
+    display: flex; gap: 14px; align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .steps li::before {
+    content: counter(step);
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    background: #1a3c5e; color: #fff;
+    border-radius: 50%; font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps li p { margin: 0; padding-top: 3px; }
+
+  /* ── Info / warning callouts ── */
+  .callout {
+    border-left: 4px solid; border-radius: 0 8px 8px 0;
+    padding: 12px 16px; margin: 16px 0; font-size: 13.5px;
+  }
+  .callout-info    { border-color: #3B82F6; background: #EFF6FF; color: #1E40AF; }
+  .callout-warning { border-color: #F59E0B; background: #FFFBEB; color: #92400E; }
+  .callout-success { border-color: #10B981; background: #ECFDF5; color: #065F46; }
+  .callout-error   { border-color: #EF4444; background: #FEF2F2; color: #991B1B; }
+  .callout strong  { display: block; margin-bottom: 4px; }
+
+  /* ── Workflow diagram ── */
+  .workflow {
+    display: flex; flex-wrap: wrap; gap: 0;
+    align-items: center; margin: 20px 0;
+  }
+  .wf-box {
+    border-radius: 8px; padding: 10px 16px;
+    text-align: center; font-size: 12px; font-weight: 700;
+    min-width: 110px;
+  }
+  .wf-arrow { font-size: 20px; color: #9CA3AF; padding: 0 4px; line-height: 1; align-self: center; }
+  .wf-sub   { font-size: 10px; font-weight: 400; margin-top: 3px; opacity: .85; }
+
+  /* ── UAT table ── */
+  .uat-pass { color: #15803D; font-weight: 700; }
+  .uat-fail { color: #B91C1C; font-weight: 700; }
+  .tc-id    { font-family: monospace; font-size: 12px; white-space: nowrap; }
+
+  /* ── Screenshots ── */
+  .screenshot {
+    margin: 20px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.12);
+    border: 1px solid #e5e7eb;
+  }
+  .screenshot img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .screenshot figcaption {
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    padding: 7px 14px;
+    font-size: 12px;
+    color: #6B7280;
+    font-style: italic;
+  }
+  .screenshot-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 180px;
+    background: repeating-linear-gradient(
+      45deg, #f9fafb, #f9fafb 10px, #f3f4f6 10px, #f3f4f6 20px
+    );
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    color: #9CA3AF;
+  }
+  .screenshot-placeholder .ph-icon { font-size: 36px; line-height: 1; }
+  .screenshot-placeholder .ph-title { font-size: 14px; font-weight: 700; color: #374151; }
+  .screenshot-placeholder .ph-file  { font-size: 11px; font-family: monospace;
+    background: #e5e7eb; color: #1a3c5e; border-radius: 4px; padding: 2px 8px; }
+  .screenshot-placeholder .ph-note  { font-size: 11px; color: #9CA3AF; }
+
+  /* ── Print ── */
+  @media print {
+    .cover { min-height: auto; padding: 80px 60px; }
+    .section-page { page-break-before: always; }
+    .toc { page-break-after: always; }
+    a { color: inherit; }
+    .screenshot-placeholder { min-height: 120px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ COVER ═══════════════════════════════ -->
+<div class="cover">
+  <h1>PharmaSphere</h1>
+  <h2>User Manual &amp; UAT Guide</h2>
+  <div>
+    <span class="badge">Version 1.0</span>
+    <span class="badge">Confidential</span>
+    <span class="badge">June 2026</span>
+  </div>
+  <p style="margin-top:40px;font-size:15px;opacity:.9;max-width:520px;">
+    This document provides step-by-step instructions for every role in the
+    PharmaSphere Sales Order Management System, along with a complete set
+    of User Acceptance Testing (UAT) test cases.
+  </p>
+  <div class="meta">
+    Prepared by IT Musketeers &nbsp;|&nbsp; ai@itmusketeers.com
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TOC ════════════════════════════════ -->
+<div class="page toc" id="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#overview">1. System Overview</a></li>
+    <li><a href="#roles">2. User Roles &amp; Permissions</a>
+      <ol>
+        <li><a href="#roles-summary">2.1 Role Summary Table</a></li>
+        <li><a href="#roles-workflow">2.2 Workflow Ownership</a></li>
+      </ol>
+    </li>
+    <li><a href="#auth">3. Authentication</a>
+      <ol>
+        <li><a href="#login">3.1 Login</a></li>
+        <li><a href="#2fa">3.2 Two-Factor Authentication</a></li>
+        <li><a href="#forgot">3.3 Forgot Password</a></li>
+      </ol>
+    </li>
+    <li><a href="#dashboard">4. Dashboard</a>
+      <ol>
+        <li><a href="#dash-admin">4.1 Admin Dashboard</a></li>
+        <li><a href="#dash-role">4.2 Role-Specific Dashboard</a></li>
+      </ol>
+    </li>
+    <li><a href="#sales-orders">5. Sales Orders</a>
+      <ol>
+        <li><a href="#so-list">5.1 Sales Order List</a></li>
+        <li><a href="#so-add">5.2 Adding a New Sales Order (Admin)</a></li>
+        <li><a href="#so-edit">5.3 Editing a Sales Order</a></li>
+        <li><a href="#so-tabs">5.4 Form Tabs Overview</a></li>
+        <li><a href="#so-workflow">5.5 Status Workflow</a></li>
+        <li><a href="#so-cancel">5.6 Cancelling a Sales Order (Admin)</a></li>
+        <li><a href="#so-delete">5.7 Deleting a Sales Order (Admin)</a></li>
+      </ol>
+    </li>
+    <li><a href="#role-guides">6. Role-Specific Guides</a>
+      <ol>
+        <li><a href="#rg-qa">6.1 QA Role</a></li>
+        <li><a href="#rg-designer">6.2 Designer Role</a></li>
+        <li><a href="#rg-ppmc">6.3 PPMC Role</a></li>
+        <li><a href="#rg-production">6.4 Production Role</a></li>
+        <li><a href="#rg-packing">6.5 Packing Role</a></li>
+        <li><a href="#rg-dispatch">6.6 Dispatcher Role</a></li>
+      </ol>
+    </li>
+    <li><a href="#users">7. User Management (Admin)</a></li>
+    <li><a href="#uat">8. UAT Test Cases</a>
+      <ol>
+        <li><a href="#uat-auth">8.1 Authentication</a></li>
+        <li><a href="#uat-dashboard">8.2 Dashboard</a></li>
+        <li><a href="#uat-so">8.3 Sales Orders</a></li>
+        <li><a href="#uat-workflow">8.4 Status Workflow</a></li>
+        <li><a href="#uat-access">8.5 Role-Based Access Control</a></li>
+        <li><a href="#uat-users">8.6 User Management</a></li>
+      </ol>
+    </li>
+    <li><a href="#glossary">9. Glossary</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════════════════ 1. OVERVIEW ════════════════════════════ -->
+<div class="page section-page" id="overview">
+  <h2 class="section">1. System Overview</h2>
+  <p>
+    <strong>PharmaSphere</strong> is a web-based Sales Order Management System
+    designed for pharmaceutical manufacturing teams. It digitises and tracks the
+    complete lifecycle of a sales order — from initial creation by the Admin
+    through QA approval, artwork, packaging material supply, production,
+    packing, and final dispatch.
+  </p>
+  <p>
+    The system enforces a strict role-based workflow, ensuring that each
+    department can only act on orders at their specific stage. This eliminates
+    miscommunication, provides full audit traceability, and gives management
+    a real-time pipeline view.
+  </p>
+
+  <h3>Key Capabilities</h3>
+  <ul>
+    <li>Role-gated sales order creation, editing, and status progression</li>
+    <li>Automatic status advancement when required fields are saved</li>
+    <li>Real-time dashboard with pipeline counts per stage</li>
+    <li>Complete audit log and status history per order</li>
+    <li>Secure JWT authentication with optional Two-Factor Authentication (2FA)</li>
+    <li>Admin-only access to sensitive fields (Amount) and management features</li>
+  </ul>
+
+  <h3>Supported Browsers</h3>
+  <p>Google Chrome 110+, Microsoft Edge 110+, Mozilla Firefox 110+, Safari 16+.
+     The application is fully responsive and works on mobile devices.</p>
+
+  <h3>Application URL</h3>
+  <p>Access the application at your organisation's configured URL.
+     Contact your system administrator for the correct address.</p>
+</div>
+
+<!-- ═══════════════════════════ 2. ROLES ══════════════════════════════ -->
+<div class="page section-page" id="roles">
+  <h2 class="section">2. User Roles &amp; Permissions</h2>
+
+  <h3 id="roles-summary">2.1 Role Summary Table</h3>
+
+  <table>
+    <tr>
+      <th>Role</th>
+      <th>Dashboard</th>
+      <th>Sales Orders Visible</th>
+      <th>Can Edit</th>
+      <th>Editable Fields</th>
+    </tr>
+    <tr>
+      <td><span class="role role-admin">Admin</span></td>
+      <td>Full pipeline &amp; stats</td>
+      <td>All statuses</td>
+      <td>All orders</td>
+      <td>All fields including Amount</td>
+    </tr>
+    <tr>
+      <td><span class="role role-qa">QA</span></td>
+      <td>PIS Pending queue</td>
+      <td>PIS Pending only</td>
+      <td>PIS Pending only</td>
+      <td>PIS Approval Date</td>
+    </tr>
+    <tr>
+      <td><span class="role role-designer">Designer</span></td>
+      <td>Artwork Pending queue</td>
+      <td>Artwork Pending only</td>
+      <td>Artwork Pending only</td>
+      <td>Sanolet Party Artwork Approval Date</td>
+    </tr>
+    <tr>
+      <td><span class="role role-ppmc">PPMC</span></td>
+      <td>PM Supply Pending queue</td>
+      <td>PM Supply Pending only</td>
+      <td>PM Supply Pending only</td>
+      <td>All 10 Packing Material Order &amp; Receive dates</td>
+    </tr>
+    <tr>
+      <td><span class="role role-prod">Production</span></td>
+      <td>Production Pending queue</td>
+      <td>Production Pending only</td>
+      <td>Production Pending only</td>
+      <td>Filling Plan Date, Sterility 14 Days Date</td>
+    </tr>
+    <tr>
+      <td><span class="role role-pack">Packing</span></td>
+      <td>Packing Pending queue</td>
+      <td>Packing Pending only</td>
+      <td>Packing Pending only</td>
+      <td>Packing Plan Date</td>
+    </tr>
+    <tr>
+      <td><span class="role role-disp">Dispatcher</span></td>
+      <td>Dispatch Pending queue</td>
+      <td>Dispatch Pending only</td>
+      <td>Dispatch Pending only</td>
+      <td>Dispatch Date</td>
+    </tr>
+  </table>
+
+  <div class="callout callout-warning">
+    <strong>Important</strong>
+    Once an order advances past a role's stage, that role can no longer edit
+    the order. The record becomes read-only for them.
+  </div>
+
+  <h3 id="roles-workflow">2.2 Workflow Ownership</h3>
+
+  <div class="workflow">
+    <div class="wf-box s-pis">PIS Pending<div class="wf-sub">QA</div></div>
+    <span class="wf-arrow">→</span>
+    <div class="wf-box s-art">Artwork Pending<div class="wf-sub">Designer</div></div>
+    <span class="wf-arrow">→</span>
+    <div class="wf-box s-pm">PM Supply Pending<div class="wf-sub">PPMC</div></div>
+    <span class="wf-arrow">→</span>
+    <div class="wf-box s-prod">Production Pending<div class="wf-sub">Production</div></div>
+    <span class="wf-arrow">→</span>
+    <div class="wf-box s-pack">Packing Pending<div class="wf-sub">Packing</div></div>
+    <span class="wf-arrow">→</span>
+    <div class="wf-box s-disp-p">Dispatch Pending<div class="wf-sub">Dispatcher</div></div>
+    <span class="wf-arrow">→</span>
+    <div class="wf-box s-disped">Dispatched<div class="wf-sub">Read-only</div></div>
+  </div>
+
+  <p>Status advances <strong>automatically</strong> when the required field(s)
+     for each stage are saved. No manual status change is needed by role users.</p>
+</div>
+
+<!-- ═══════════════════════════ 3. AUTH ═══════════════════════════════ -->
+<div class="page section-page" id="auth">
+  <h2 class="section">3. Authentication</h2>
+
+  <h3 id="login">3.1 Login</h3>
+  <figure class="screenshot">
+    <img src="screenshots/01-login.png" alt="Login Screen" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Login Screen</span>
+      <span class="ph-file">screenshots/01-login.png</span>
+      <span class="ph-note">Navigate to the app URL and take a screenshot of the login form</span>
+    </div>
+    <figcaption>Fig 1 — PharmaSphere Login Screen</figcaption>
+  </figure>
+  <ol class="steps">
+    <li><p>Navigate to the application URL. The <strong>Login</strong> screen appears.</p></li>
+    <li><p>Enter your <strong>Email Address</strong> and <strong>Password</strong>.</p></li>
+    <li><p>Click <strong>Sign In</strong>.</p></li>
+    <li><p>On success you are redirected to the <strong>Dashboard</strong>.</p></li>
+  </ol>
+
+  <div class="callout callout-error">
+    <strong>Login failed?</strong>
+    Check your email and password. After multiple failed attempts the account
+    may be locked — contact your Admin.
+  </div>
+
+  <h3 id="2fa">3.2 Two-Factor Authentication (2FA)</h3>
+  <figure class="screenshot">
+    <img src="screenshots/02-2fa.png" alt="2FA Screen" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Two-Factor Authentication Screen</span>
+      <span class="ph-file">screenshots/02-2fa.png</span>
+      <span class="ph-note">Login with a 2FA-enabled account and screenshot the OTP entry screen</span>
+    </div>
+    <figcaption>Fig 2 — Two-Factor Authentication (OTP entry)</figcaption>
+  </figure>
+  <p>If 2FA is enabled on your account:</p>
+  <ol class="steps">
+    <li><p>After entering credentials you are redirected to the
+        <strong>Verify 2FA</strong> screen.</p></li>
+    <li><p>Check your registered email for a one-time code.</p></li>
+    <li><p>Enter the code and click <strong>Verify</strong>.</p></li>
+    <li><p>On success you are redirected to the Dashboard.</p></li>
+  </ol>
+
+  <div class="callout callout-info">
+    <strong>Note</strong>
+    The 2FA code expires after a short period. If it has expired, restart
+    the login process to receive a new code.
+  </div>
+
+  <h3 id="forgot">3.3 Forgot Password</h3>
+  <ol class="steps">
+    <li><p>On the Login screen click <strong>Forgot Password?</strong></p></li>
+    <li><p>Enter your registered email address and click <strong>Send Reset Link</strong>.</p></li>
+    <li><p>Open the email and click the reset link (valid for a limited time).</p></li>
+    <li><p>Enter and confirm your new password, then click <strong>Reset Password</strong>.</p></li>
+    <li><p>Log in with your new password.</p></li>
+  </ol>
+
+  <h3>3.4 Logout</h3>
+  <ol class="steps">
+    <li><p>Click your <strong>Avatar</strong> in the top-right corner of any screen.</p></li>
+    <li><p>Click <strong>Logout</strong> from the dropdown menu.</p></li>
+  </ol>
+</div>
+
+<!-- ════════════════════════ 4. DASHBOARD ════════════════════════════ -->
+<div class="page section-page" id="dashboard">
+  <h2 class="section">4. Dashboard</h2>
+  <p>The Dashboard is the home screen after login. Its content varies by role.</p>
+
+  <h3 id="dash-admin">4.1 Admin Dashboard</h3>
+  <figure class="screenshot">
+    <img src="screenshots/03-admin-dashboard.png" alt="Admin Dashboard" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Admin Dashboard</span>
+      <span class="ph-file">screenshots/03-admin-dashboard.png</span>
+      <span class="ph-note">Login as Admin and take a full-page screenshot of the Dashboard</span>
+    </div>
+    <figcaption>Fig 3 — Admin Dashboard showing summary cards, workflow pipeline, and recent orders</figcaption>
+  </figure>
+  <p>Admins see four sections:</p>
+  <h4>Summary Cards</h4>
+  <ul>
+    <li><strong>Total Orders</strong> — all-time order count</li>
+    <li><strong>Active Orders</strong> — orders currently in progress (not Dispatched or Cancelled)</li>
+    <li><strong>Dispatched</strong> — completed orders</li>
+    <li><strong>Cancelled</strong> — cancelled orders</li>
+  </ul>
+
+  <h4>Workflow Pipeline</h4>
+  <p>Six colour-coded cards show the live count of orders at each stage.
+     Click any card to jump to the Sales Order list filtered by that status.</p>
+
+  <h4>Recent Orders</h4>
+  <p>The last 10 orders across all statuses with a direct link to edit each one.</p>
+
+  <h3 id="dash-role">4.2 Role-Specific Dashboard</h3>
+  <figure class="screenshot">
+    <img src="screenshots/04-role-dashboard.png" alt="Role Dashboard" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Role-Specific Dashboard (e.g. QA)</span>
+      <span class="ph-file">screenshots/04-role-dashboard.png</span>
+      <span class="ph-note">Login as a QA or any non-admin user and screenshot their dashboard work queue</span>
+    </div>
+    <figcaption>Fig 4 — Role Dashboard showing pending work queue (QA example)</figcaption>
+  </figure>
+  <p>Non-admin users see a personalised work queue:</p>
+  <ul>
+    <li>A <strong>highlighted count card</strong> showing how many orders are
+        waiting for their action (orange = work pending, green = all clear).</li>
+    <li>A <strong>Go to My Orders</strong> button that navigates to the filtered
+        Sales Order list.</li>
+    <li>A <strong>work queue table</strong> listing every order at their stage
+        with a direct edit link per row.</li>
+  </ul>
+
+  <div class="callout callout-success">
+    <strong>Tip</strong>
+    The Dashboard refreshes its data every time you navigate back to it.
+    Use the sidebar <strong>Dashboard</strong> link or the logo to refresh.
+  </div>
+</div>
+
+<!-- ══════════════════════ 5. SALES ORDERS ════════════════════════════ -->
+<div class="page section-page" id="sales-orders">
+  <h2 class="section">5. Sales Orders</h2>
+
+  <h3 id="so-list">5.1 Sales Order List</h3>
+  <figure class="screenshot">
+    <img src="screenshots/05-so-list.png" alt="Sales Order List" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Sales Order List Screen</span>
+      <span class="ph-file">screenshots/05-so-list.png</span>
+      <span class="ph-note">Login as Admin → Sales Orders and take a screenshot of the full list with filters visible</span>
+    </div>
+    <figcaption>Fig 5 — Sales Order List with search, filters, and column toggle</figcaption>
+  </figure>
+  <p>Navigate to <strong>Sales Orders</strong> in the left sidebar.
+     The list shows orders filtered by your role automatically.</p>
+
+  <h4>Filtering (Admin only)</h4>
+  <ul>
+    <li><strong>Search</strong> — type any part of the Order No, Party, or Brand Name.</li>
+    <li><strong>Status</strong> — filter by a specific workflow status.</li>
+    <li><strong>From / To Date</strong> — filter by Order Date range.</li>
+    <li>Click the <strong>red filter icon</strong> to clear all active filters.</li>
+  </ul>
+
+  <h4>Column Visibility</h4>
+  <p>Click the <strong>columns icon</strong> (grid icon) to show or hide columns.
+     The <strong>Amount</strong> column is only available to Admin users.</p>
+
+  <h4>Row Actions</h4>
+  <ul>
+    <li><strong>Edit (pencil icon)</strong> — opens the order form for editing.</li>
+    <li><strong>Delete (trash icon)</strong> — soft-deletes the order.
+        <em>Admin only.</em></li>
+  </ul>
+
+  <h3 id="so-add">5.2 Adding a New Sales Order (Admin Only)</h3>
+  <figure class="screenshot">
+    <img src="screenshots/06-so-add.png" alt="Add Sales Order" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Add New Sales Order Form — General Info Tab</span>
+      <span class="ph-file">screenshots/06-so-add.png</span>
+      <span class="ph-note">Admin → + Add Order → screenshot the blank General Info tab</span>
+    </div>
+    <figcaption>Fig 6 — New Sales Order form (General Info tab)</figcaption>
+  </figure>
+  <ol class="steps">
+    <li><p>Click <strong>+ Add Order</strong> in the top-right of the Sales Orders list.</p></li>
+    <li><p>Fill in the <strong>General Info</strong> tab — Order No, Order Date,
+        Brand Name, Party, Composition, Qty, Amount, Make, and Remarks are all on this tab.</p></li>
+    <li><p>Optionally fill the <strong>Packaging Material</strong> tab with component details
+        (Vial, Label, Mono Box, Tray, etc.).</p></li>
+    <li><p>Click <strong>Create Order</strong>. The order is created with status
+        <span class="status s-pis">PIS Pending</span>.</p></li>
+  </ol>
+
+  <div class="callout callout-info">
+    <strong>Brand Name Auto-fill</strong>
+    When you select an existing brand name, the form pre-fills details from the
+    most recent order for that brand to save data entry time.
+  </div>
+
+  <h3 id="so-edit">5.3 Editing a Sales Order</h3>
+  <ol class="steps">
+    <li><p>Click the <strong>Edit</strong> icon on any row in the list,
+        or click a row in your Dashboard work queue.</p></li>
+    <li><p>The current order status is shown as a colour-coded chip in the
+        top-right of the page header.</p></li>
+    <li><p>Edit only the fields available to your role (other fields are read-only).</p></li>
+    <li><p>Click <strong>Save Changes</strong>. If your entry satisfies the stage
+        criteria the status advances automatically.</p></li>
+  </ol>
+
+  <h3 id="so-tabs">5.4 Form Tabs Overview</h3>
+  <figure class="screenshot">
+    <img src="screenshots/07-so-edit-header.png" alt="Edit Sales Order Header with Status Chip" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Edit Sales Order — Header with Status Chip</span>
+      <span class="ph-file">screenshots/07-so-edit-header.png</span>
+      <span class="ph-note">Open any existing order → screenshot the top header area showing the order title and coloured status chip</span>
+    </div>
+    <figcaption>Fig 7 — Sales Order edit screen showing current status chip in top-right header</figcaption>
+  </figure>
+
+  <figure class="screenshot">
+    <img src="screenshots/08-so-general-tab.png" alt="General Info Tab" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">General Info Tab</span>
+      <span class="ph-file">screenshots/08-so-general-tab.png</span>
+      <span class="ph-note">Open an order → General Info tab → screenshot all visible fields</span>
+    </div>
+    <figcaption>Fig 8 — General Info tab fields</figcaption>
+  </figure>
+
+  <figure class="screenshot">
+    <img src="screenshots/09-so-packaging-tab.png" alt="Packaging Material Tab" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Packaging Material Tab</span>
+      <span class="ph-file">screenshots/09-so-packaging-tab.png</span>
+      <span class="ph-note">Open an order → Packaging Material tab → screenshot the QA Approval and PM fields</span>
+    </div>
+    <figcaption>Fig 9 — Packaging Material tab including QA Approval section</figcaption>
+  </figure>
+
+  <figure class="screenshot">
+    <img src="screenshots/10-so-production-tab.png" alt="Production Info Tab" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Production Info Tab</span>
+      <span class="ph-file">screenshots/10-so-production-tab.png</span>
+      <span class="ph-note">Open an order → Production Info tab → screenshot Filling, Packing, Dispatch date fields</span>
+    </div>
+    <figcaption>Fig 10 — Production Info tab</figcaption>
+  </figure>
+
+  <figure class="screenshot">
+    <img src="screenshots/11-so-history-tab.png" alt="History Tab" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">History Tab — Status &amp; Audit Log</span>
+      <span class="ph-file">screenshots/11-so-history-tab.png</span>
+      <span class="ph-note">Open an order with history → History tab → screenshot the status timeline and audit log</span>
+    </div>
+    <figcaption>Fig 11 — History tab showing status change timeline and field-level audit log</figcaption>
+  </figure>
+
+  <table>
+    <tr><th>Tab</th><th>Contents</th><th>Who Can Edit</th></tr>
+    <tr>
+      <td><strong>General Info</strong></td>
+      <td>Order No, Date, Brand Name, Party, Composition, Qty, Amount, Make, Remarks.
+          Also contains QA Approval section (PIS &amp; Artwork dates).</td>
+      <td>Admin only (General fields). QA edits PIS date. Designer edits Artwork date.</td>
+    </tr>
+    <tr>
+      <td><strong>Packaging Material</strong></td>
+      <td>Component specifications (Vial, Label, Mono Box, Tray, Leaflet, etc.) and
+          Packing Material Order &amp; Receive dates.</td>
+      <td>Admin (specifications). PPMC (all 10 date fields).</td>
+    </tr>
+    <tr>
+      <td><strong>Production Info</strong></td>
+      <td>Filling Plan Date, Packing Plan Date, Sterility 14 Days Date, Dispatch Date.</td>
+      <td>Production (Filling &amp; Sterility). Packing (Packing Plan). Dispatcher (Dispatch Date).</td>
+    </tr>
+    <tr>
+      <td><strong>History</strong></td>
+      <td>Full status change timeline and field-level audit log.</td>
+      <td>Read-only for all roles.</td>
+    </tr>
+  </table>
+
+  <h3 id="so-workflow">5.5 Status Workflow</h3>
+
+  <p>Status advances <strong>automatically when you save</strong> the correct fields.
+     You do not need to manually change the status.</p>
+
+  <table>
+    <tr><th>Current Status</th><th>Role</th><th>Required Action</th><th>Advances To</th></tr>
+    <tr>
+      <td><span class="status s-pis">PIS Pending</span></td>
+      <td><span class="role role-qa">QA</span></td>
+      <td>Enter <strong>PIS Approval Date</strong> and save</td>
+      <td><span class="status s-art">Artwork Pending</span></td>
+    </tr>
+    <tr>
+      <td><span class="status s-art">Artwork Pending</span></td>
+      <td><span class="role role-designer">Designer</span></td>
+      <td>Enter <strong>Sanolet Party Artwork Approval Date</strong> and save</td>
+      <td><span class="status s-pm">PM Supply Pending</span></td>
+    </tr>
+    <tr>
+      <td><span class="status s-pm">PM Supply Pending</span></td>
+      <td><span class="role role-ppmc">PPMC</span></td>
+      <td>Fill all <strong>10 Packing Material</strong> order &amp; receive date fields and save</td>
+      <td><span class="status s-prod">Production Pending</span></td>
+    </tr>
+    <tr>
+      <td><span class="status s-prod">Production Pending</span></td>
+      <td><span class="role role-prod">Production</span></td>
+      <td>Enter <strong>Filling Plan Date</strong> and save</td>
+      <td><span class="status s-pack">Packing Pending</span></td>
+    </tr>
+    <tr>
+      <td><span class="status s-pack">Packing Pending</span></td>
+      <td><span class="role role-pack">Packing</span></td>
+      <td>Enter <strong>Packing Plan Date</strong> and save</td>
+      <td><span class="status s-disp-p">Dispatch Pending</span></td>
+    </tr>
+    <tr>
+      <td><span class="status s-disp-p">Dispatch Pending</span></td>
+      <td><span class="role role-disp">Dispatcher</span></td>
+      <td>Enter <strong>Dispatch Date</strong> and save</td>
+      <td><span class="status s-disped">Dispatched</span></td>
+    </tr>
+    <tr>
+      <td><span class="status s-disped">Dispatched</span></td>
+      <td>All</td>
+      <td>Read-only for all except Admin</td>
+      <td>—</td>
+    </tr>
+  </table>
+
+  <h3 id="so-cancel">5.6 Cancelling a Sales Order (Admin Only)</h3>
+  <figure class="screenshot">
+    <img src="screenshots/12-so-cancel-dialog.png" alt="Cancel Sales Order Dialog" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Cancel Sales Order — Confirmation Dialog</span>
+      <span class="ph-file">screenshots/12-so-cancel-dialog.png</span>
+      <span class="ph-note">Admin → open active order → click Cancel Sales Order → screenshot the confirmation dialog before confirming</span>
+    </div>
+    <figcaption>Fig 12 — Cancel Sales Order confirmation dialog</figcaption>
+  </figure>
+  <ol class="steps">
+    <li><p>Open the sales order in edit mode.</p></li>
+    <li><p>Click the red <strong>Cancel Sales Order</strong> button in the footer.</p></li>
+    <li><p>A confirmation dialog appears. Confirm to proceed.</p></li>
+    <li><p>The order status changes to <span class="status s-cancel">Cancelled</span>
+        and becomes fully read-only.</p></li>
+  </ol>
+
+  <div class="callout callout-warning">
+    <strong>This action cannot be undone through the UI.</strong>
+    The Cancel button is hidden once an order is Dispatched or already Cancelled.
+  </div>
+
+  <h3 id="so-delete">5.7 Deleting a Sales Order (Admin Only)</h3>
+  <ol class="steps">
+    <li><p>In the Sales Order list, click the <strong>delete (trash) icon</strong>
+        on the target row.</p></li>
+    <li><p>A confirmation dialog appears with the order number.</p></li>
+    <li><p>Confirm to soft-delete. The order is removed from the list.</p></li>
+  </ol>
+
+  <div class="callout callout-info">
+    <strong>Note</strong>
+    Deletion is a soft-delete — the record is retained in the database and can
+    be restored by a system administrator if needed.
+  </div>
+</div>
+
+<!-- ══════════════════════ 6. ROLE GUIDES ════════════════════════════ -->
+<div class="page section-page" id="role-guides">
+  <h2 class="section">6. Role-Specific Guides</h2>
+
+  <h3 id="rg-qa">6.1 QA Role — PIS Approval</h3>
+  <figure class="screenshot">
+    <img src="screenshots/13-qa-edit.png" alt="QA Edit Screen" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">QA Edit Screen — PIS Approval Date Field</span>
+      <span class="ph-file">screenshots/13-qa-edit.png</span>
+      <span class="ph-note">Login as QA → open a PIS Pending order → Packaging Material tab → screenshot showing the PIS Approval Date field and info banner</span>
+    </div>
+    <figcaption>Fig 13 — QA user view: PIS Approval Date field (Packaging Material tab)</figcaption>
+  </figure>
+  <p>You are responsible for approving the Product Information Sheet (PIS) before
+     artwork can begin.</p>
+  <ol class="steps">
+    <li><p>Log in. Your Dashboard shows all orders in
+        <span class="status s-pis">PIS Pending</span> status.</p></li>
+    <li><p>Click an order from the work queue or navigate to <strong>Sales Orders</strong>.</p></li>
+    <li><p>Go to the <strong>Packaging Material</strong> tab. You will see the
+        <em>"You can enter the PIS Approval Date."</em> info banner.</p></li>
+    <li><p>Enter the <strong>PIS Approval Date</strong> field.</p></li>
+    <li><p>Click <strong>Save Changes</strong>. The status automatically advances
+        to <span class="status s-art">Artwork Pending</span>.</p></li>
+    <li><p>The order disappears from your queue — your work for this order is complete.</p></li>
+  </ol>
+  <div class="callout callout-warning">
+    <strong>Access restriction</strong>
+    Once an order moves to Artwork Pending, it is read-only for your role.
+    You can no longer edit the PIS Approval Date.
+  </div>
+
+  <h3 id="rg-designer">6.2 Designer Role — Artwork Approval</h3>
+  <figure class="screenshot">
+    <img src="screenshots/18-designer-edit.png" alt="Designer Edit Screen" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Designer Edit Screen — Artwork Approval Date</span>
+      <span class="ph-file">screenshots/18-designer-edit.png</span>
+      <span class="ph-note">Login as Designer → open an Artwork Pending order → Packaging Material tab → screenshot the Sanolet Party Artwork Approval Date field</span>
+    </div>
+    <figcaption>Fig 18 — Designer view: Sanolet Party Artwork Approval Date field</figcaption>
+  </figure>
+  <p>You sign off on the Sanolet Party artwork before packaging materials are ordered.</p>
+  <ol class="steps">
+    <li><p>Log in. Your Dashboard shows all <span class="status s-art">Artwork Pending</span> orders.</p></li>
+    <li><p>Open an order and go to the <strong>Packaging Material</strong> tab.</p></li>
+    <li><p>Enter the <strong>Sanolet Party Artwork Approval Date</strong>.</p></li>
+    <li><p>Click <strong>Save Changes</strong>. Status advances to
+        <span class="status s-pm">PM Supply Pending</span>.</p></li>
+  </ol>
+
+  <h3 id="rg-ppmc">6.3 PPMC Role — Packing Material Supply</h3>
+  <figure class="screenshot">
+    <img src="screenshots/14-ppmc-edit.png" alt="PPMC Edit Screen" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">PPMC Edit Screen — All 10 PM Date Fields</span>
+      <span class="ph-file">screenshots/14-ppmc-edit.png</span>
+      <span class="ph-note">Login as PPMC → open a PM Supply Pending order → Packaging Material tab → screenshot all Packing Material Order &amp; Receive date fields</span>
+    </div>
+    <figcaption>Fig 14 — PPMC view: Packing Material Order and Receive date fields</figcaption>
+  </figure>
+  <p>You coordinate ordering and receipt of all 10 packaging material components.</p>
+  <ol class="steps">
+    <li><p>Log in. Your Dashboard shows all <span class="status s-pm">PM Supply Pending</span> orders.</p></li>
+    <li><p>Open an order and go to the <strong>Packaging Material</strong> tab.</p></li>
+    <li><p>Fill in all <strong>5 Supply Vendor Approval Dates</strong>
+        (Mono Box, Label, Insert, Tray, Shipper) under the
+        <em>Packing Material Order</em> section.</p></li>
+    <li><p>Fill in all <strong>5 Production Dates</strong>
+        (Mono Box, Label, Insert, Tray, Shipper) under the
+        <em>Packing Material Receive</em> section.</p></li>
+    <li><p>Click <strong>Save Changes</strong>. All 10 fields must be filled
+        for the status to advance to
+        <span class="status s-prod">Production Pending</span>.</p></li>
+  </ol>
+  <div class="callout callout-warning">
+    <strong>All 10 fields are required.</strong>
+    Saving with any field empty will save the record but will not advance
+    the status. Fill all fields and save again.
+  </div>
+
+  <h3 id="rg-production">6.4 Production Role — Filling Plan</h3>
+  <figure class="screenshot">
+    <img src="screenshots/19-production-edit.png" alt="Production Edit Screen" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Production Edit Screen — Filling Plan Date</span>
+      <span class="ph-file">screenshots/19-production-edit.png</span>
+      <span class="ph-note">Login as Production → open a Production Pending order → Production Info tab → screenshot the Filling Plan Date field</span>
+    </div>
+    <figcaption>Fig 19 — Production view: Filling Plan Date field (Production Info tab)</figcaption>
+  </figure>
+  <p>You enter the filling production schedule.</p>
+  <ol class="steps">
+    <li><p>Log in. Your Dashboard shows all <span class="status s-prod">Production Pending</span> orders.</p></li>
+    <li><p>Open an order and go to the <strong>Production Info</strong> tab.</p></li>
+    <li><p>Enter the <strong>Filling Plan Date</strong> (and optionally
+        <strong>Sterility 14 Days Date</strong>).</p></li>
+    <li><p>Click <strong>Save Changes</strong>. Status advances to
+        <span class="status s-pack">Packing Pending</span>.</p></li>
+  </ol>
+
+  <h3 id="rg-packing">6.5 Packing Role — Packing Plan</h3>
+  <figure class="screenshot">
+    <img src="screenshots/20-packing-edit.png" alt="Packing Edit Screen" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Packing Edit Screen — Packing Plan Date</span>
+      <span class="ph-file">screenshots/20-packing-edit.png</span>
+      <span class="ph-note">Login as Packing → open a Packing Pending order → Production Info tab → screenshot the Packing Plan Date field</span>
+    </div>
+    <figcaption>Fig 20 — Packing view: Packing Plan Date field (Production Info tab)</figcaption>
+  </figure>
+  <p>You schedule the packing operation after filling is complete.</p>
+  <ol class="steps">
+    <li><p>Log in. Your Dashboard shows all <span class="status s-pack">Packing Pending</span> orders.</p></li>
+    <li><p>Open an order and go to the <strong>Production Info</strong> tab.</p></li>
+    <li><p>Enter the <strong>Packing Plan Date</strong>.</p></li>
+    <li><p>Click <strong>Save Changes</strong>. Status advances to
+        <span class="status s-disp-p">Dispatch Pending</span>.</p></li>
+  </ol>
+
+  <h3 id="rg-dispatch">6.6 Dispatcher Role — Dispatch</h3>
+  <figure class="screenshot">
+    <img src="screenshots/15-dispatch-edit.png" alt="Dispatcher Edit Screen" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Dispatcher Edit Screen — Dispatch Date Field</span>
+      <span class="ph-file">screenshots/15-dispatch-edit.png</span>
+      <span class="ph-note">Login as Dispatcher → open a Dispatch Pending order → Production Info tab → screenshot the Dispatch Date field</span>
+    </div>
+    <figcaption>Fig 15 — Dispatcher view: Dispatch Date field (Production Info tab)</figcaption>
+  </figure>
+  <p>You record the actual dispatch and complete the order lifecycle.</p>
+  <ol class="steps">
+    <li><p>Log in. Your Dashboard shows all <span class="status s-disp-p">Dispatch Pending</span> orders.</p></li>
+    <li><p>Open an order and go to the <strong>Production Info</strong> tab.</p></li>
+    <li><p>Enter the <strong>Dispatch Date</strong>.</p></li>
+    <li><p>Click <strong>Save Changes</strong>. Status advances to
+        <span class="status s-disped">Dispatched</span>.
+        The order is now complete and read-only for all non-admin users.</p></li>
+  </ol>
+</div>
+
+<!-- ══════════════════════ 7. USER MANAGEMENT ═══════════════════════ -->
+<div class="page section-page" id="users">
+  <h2 class="section">7. User Management (Admin Only)</h2>
+  <figure class="screenshot">
+    <img src="screenshots/16-users-list.png" alt="User Management List" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">User Management — User List</span>
+      <span class="ph-file">screenshots/16-users-list.png</span>
+      <span class="ph-note">Login as Admin → Users → screenshot the full user list</span>
+    </div>
+    <figcaption>Fig 16 — User Management list (Admin only)</figcaption>
+  </figure>
+
+  <figure class="screenshot">
+    <img src="screenshots/17-users-form.png" alt="Add/Edit User Form" />
+    <div class="screenshot-placeholder">
+      <span class="ph-icon">📸</span>
+      <span class="ph-title">Add / Edit User Form</span>
+      <span class="ph-file">screenshots/17-users-form.png</span>
+      <span class="ph-note">Admin → Users → + Add User → screenshot the user form with fields visible</span>
+    </div>
+    <figcaption>Fig 17 — Add/Edit User form showing role dropdown</figcaption>
+  </figure>
+  <p>The <strong>Users</strong> menu item in the sidebar is visible only to
+     Admin users. Other roles cannot access this section.</p>
+
+  <h3>Viewing Users</h3>
+  <ol class="steps">
+    <li><p>Click <strong>Users</strong> in the left sidebar.</p></li>
+    <li><p>The user list shows all registered users with their name, email, role,
+        and active status.</p></li>
+  </ol>
+
+  <h3>Adding a New User</h3>
+  <ol class="steps">
+    <li><p>Click <strong>+ Add User</strong>.</p></li>
+    <li><p>Fill in First Name, Last Name, Email Address, Password, and Role.</p></li>
+    <li><p>Click <strong>Save</strong>. The user can now log in with the
+        provided credentials.</p></li>
+  </ol>
+
+  <h3>Editing a User</h3>
+  <ol class="steps">
+    <li><p>Click the <strong>Edit</strong> icon next to the user.</p></li>
+    <li><p>Update the required fields (password is optional on edit).</p></li>
+    <li><p>Click <strong>Save</strong>.</p></li>
+  </ol>
+
+  <h3>Available Roles</h3>
+  <ul>
+    <li><span class="role role-admin">Admin</span></li>
+    <li><span class="role role-qa">QA</span></li>
+    <li><span class="role role-designer">Designer</span></li>
+    <li><span class="role role-ppmc">PPMC</span></li>
+    <li><span class="role role-prod">Production</span></li>
+    <li><span class="role role-pack">Packing</span></li>
+    <li><span class="role role-disp">Dispatch</span></li>
+  </ul>
+</div>
+
+<!-- ══════════════════════ 8. UAT TEST CASES ═════════════════════════ -->
+<div class="page section-page" id="uat">
+  <h2 class="section">8. UAT Test Cases</h2>
+  <p>Use the table below to verify each feature during User Acceptance Testing.
+     Mark each test <span class="uat-pass">PASS</span> or
+     <span class="uat-fail">FAIL</span> and note any observations.</p>
+
+  <h3 id="uat-auth">8.1 Authentication</h3>
+  <table>
+    <tr><th>Test ID</th><th>Scenario</th><th>Steps</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
+    <tr>
+      <td class="tc-id">AUTH-01</td>
+      <td>Successful login</td>
+      <td>Enter valid email &amp; password → Sign In</td>
+      <td>Redirect to Dashboard</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">AUTH-02</td>
+      <td>Invalid password</td>
+      <td>Enter valid email, wrong password → Sign In</td>
+      <td>Error message displayed, stays on Login</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">AUTH-03</td>
+      <td>2FA flow</td>
+      <td>Login with 2FA-enabled account → enter OTP</td>
+      <td>Redirect to Dashboard after valid OTP</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">AUTH-04</td>
+      <td>Forgot password</td>
+      <td>Click Forgot Password → enter email → open reset link → set new password</td>
+      <td>Login succeeds with new password</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">AUTH-05</td>
+      <td>Logout</td>
+      <td>Click avatar → Logout</td>
+      <td>Redirected to Login page; back button does not access app</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">AUTH-06</td>
+      <td>Unauthenticated access</td>
+      <td>Try to navigate to /dashboard without logging in</td>
+      <td>Redirected to Login page</td>
+      <td></td><td></td>
+    </tr>
+  </table>
+
+  <h3 id="uat-dashboard">8.2 Dashboard</h3>
+  <table>
+    <tr><th>Test ID</th><th>Scenario</th><th>Steps</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
+    <tr>
+      <td class="tc-id">DASH-01</td>
+      <td>Admin sees pipeline</td>
+      <td>Login as Admin → Dashboard</td>
+      <td>4 summary cards + workflow pipeline + recent orders table visible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">DASH-02</td>
+      <td>Pipeline card click</td>
+      <td>Admin → click a pipeline stage card (e.g. PIS Pending)</td>
+      <td>Navigates to Sales Orders list filtered by that status</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">DASH-03</td>
+      <td>QA work queue</td>
+      <td>Login as QA user</td>
+      <td>Work queue card shows count of PIS Pending orders; table lists them</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">DASH-04</td>
+      <td>All-clear state</td>
+      <td>Login as role with no orders at their stage</td>
+      <td>Green "All caught up!" card displayed</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">DASH-05</td>
+      <td>Dashboard row click</td>
+      <td>Click any order row in dashboard table</td>
+      <td>Opens the order edit form</td>
+      <td></td><td></td>
+    </tr>
+  </table>
+
+  <h3 id="uat-so">8.3 Sales Orders</h3>
+  <table>
+    <tr><th>Test ID</th><th>Scenario</th><th>Steps</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
+    <tr>
+      <td class="tc-id">SO-01</td>
+      <td>Add order (Admin)</td>
+      <td>Admin → + Add Order → fill required fields → Create Order</td>
+      <td>Order created with status PIS Pending; appears in list</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-02</td>
+      <td>Non-admin cannot add order</td>
+      <td>Login as QA → navigate to /sales-orders/form</td>
+      <td>Redirect to Sales Orders list with error message</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-03</td>
+      <td>Amount field hidden for non-admin</td>
+      <td>Login as QA → open any order in edit mode → General Info tab</td>
+      <td>Amount field is not visible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-04</td>
+      <td>Status chip in edit header</td>
+      <td>Open any order in edit mode</td>
+      <td>Current status shown as colour chip in top-right of form header</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-05</td>
+      <td>Search filter</td>
+      <td>Admin → type part of an order number in search</td>
+      <td>List filters in real time to matching orders</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-06</td>
+      <td>Date range filter</td>
+      <td>Admin → set From Date and To Date</td>
+      <td>Only orders within the date range are shown</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-07</td>
+      <td>Column toggle</td>
+      <td>Click columns icon → uncheck a column</td>
+      <td>Column hides from table immediately</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-08</td>
+      <td>Amount column hidden for non-admin</td>
+      <td>Login as any non-admin role → Sales Orders list</td>
+      <td>Amount column is not in the list or column picker</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-09</td>
+      <td>Delete order (Admin)</td>
+      <td>Admin → click trash icon → confirm</td>
+      <td>Order removed from list</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-10</td>
+      <td>Delete button hidden for non-admin</td>
+      <td>Login as any non-admin → Sales Orders list</td>
+      <td>No trash icon visible on any row</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-11</td>
+      <td>Brand name auto-fill</td>
+      <td>Admin → Add Order → select existing brand name</td>
+      <td>Party, Composition, Qty and packaging fields pre-fill from last order</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-12</td>
+      <td>History tab</td>
+      <td>Open any existing order → click History tab</td>
+      <td>Status history and field-level audit log entries visible</td>
+      <td></td><td></td>
+    </tr>
+  </table>
+
+  <h3 id="uat-workflow">8.4 Status Workflow</h3>
+  <table>
+    <tr><th>Test ID</th><th>Scenario</th><th>Role</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
+    <tr>
+      <td class="tc-id">WF-01</td>
+      <td>QA advances PIS Pending → Artwork Pending</td>
+      <td><span class="role role-qa">QA</span></td>
+      <td>Enter PIS Approval Date → Save → status becomes Artwork Pending</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-02</td>
+      <td>QA cannot edit after advancement</td>
+      <td><span class="role role-qa">QA</span></td>
+      <td>After status = Artwork Pending, QA sees order as read-only; no info banner shown</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-03</td>
+      <td>Designer advances Artwork Pending → PM Supply Pending</td>
+      <td><span class="role role-designer">Designer</span></td>
+      <td>Enter Artwork Approval Date → Save → status becomes PM Supply Pending</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-04</td>
+      <td>PPMC — partial save does not advance</td>
+      <td><span class="role role-ppmc">PPMC</span></td>
+      <td>Fill only 9 of 10 PM dates → Save → status stays PM Supply Pending</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-05</td>
+      <td>PPMC advances PM Supply Pending → Production Pending</td>
+      <td><span class="role role-ppmc">PPMC</span></td>
+      <td>Fill all 10 PM dates → Save → status becomes Production Pending</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-06</td>
+      <td>Production advances → Packing Pending</td>
+      <td><span class="role role-prod">Production</span></td>
+      <td>Enter Filling Plan Date → Save → status becomes Packing Pending</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-07</td>
+      <td>Packing advances → Dispatch Pending</td>
+      <td><span class="role role-pack">Packing</span></td>
+      <td>Enter Packing Plan Date → Save → status becomes Dispatch Pending</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-08</td>
+      <td>Dispatcher advances → Dispatched</td>
+      <td><span class="role role-disp">Dispatcher</span></td>
+      <td>Enter Dispatch Date → Save → status becomes Dispatched; order is read-only</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-09</td>
+      <td>Admin edits Dispatched order</td>
+      <td><span class="role role-admin">Admin</span></td>
+      <td>Dispatched order is editable by Admin; all fields accessible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-10</td>
+      <td>Cancel order (Admin)</td>
+      <td><span class="role role-admin">Admin</span></td>
+      <td>Click Cancel Sales Order → confirm → status becomes Cancelled; fully read-only</td>
+      <td></td><td></td>
+    </tr>
+  </table>
+
+  <h3 id="uat-access">8.5 Role-Based Access Control</h3>
+  <table>
+    <tr><th>Test ID</th><th>Scenario</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
+    <tr>
+      <td class="tc-id">RBAC-01</td>
+      <td>Non-admin cannot see Users menu</td>
+      <td>Login as QA → sidebar has no "Users" link</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-02</td>
+      <td>Non-admin cannot navigate to /users</td>
+      <td>Login as QA → manually type /users in URL → redirected to Dashboard</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-03</td>
+      <td>QA sees only PIS Pending orders</td>
+      <td>Login as QA → Sales Orders list → only PIS Pending rows visible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-04</td>
+      <td>Status filter hidden for non-admin</td>
+      <td>Login as any non-admin → Sales Orders list → no Status dropdown in filters</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-05</td>
+      <td>QA cannot edit Artwork Approval Date</td>
+      <td>Login as QA → open PIS Pending order → Artwork date field is read-only</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-06</td>
+      <td>General Info read-only for non-admin</td>
+      <td>Login as any non-admin role → open any order → General Info fields are read-only</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-07</td>
+      <td>Cancel button hidden for non-admin</td>
+      <td>Login as QA → open any order → no "Cancel Sales Order" button</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-08</td>
+      <td>Backend enforces role filter (API)</td>
+      <td>QA user calls GET /api/orders without status param → only PIS Pending returned</td>
+      <td></td><td></td>
+    </tr>
+  </table>
+
+  <h3 id="uat-users">8.6 User Management</h3>
+  <table>
+    <tr><th>Test ID</th><th>Scenario</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
+    <tr>
+      <td class="tc-id">USR-01</td>
+      <td>Admin creates new user</td>
+      <td>Fill form → Save → user appears in list and can log in</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">USR-02</td>
+      <td>Admin edits user role</td>
+      <td>Change role → Save → user's dashboard and access change on next login</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">USR-03</td>
+      <td>Duplicate email rejected</td>
+      <td>Create user with existing email → validation error shown</td>
+      <td></td><td></td>
+    </tr>
+  </table>
+</div>
+
+<!-- ══════════════════════ 9. GLOSSARY ═══════════════════════════════ -->
+<div class="page section-page" id="glossary">
+  <h2 class="section">9. Glossary</h2>
+  <table>
+    <tr><th>Term</th><th>Definition</th></tr>
+    <tr><td>PIS</td><td>Product Information Sheet — the initial product specification document that QA must approve.</td></tr>
+    <tr><td>PPMC</td><td>Production Planning &amp; Material Control — the team responsible for ordering and tracking packaging materials.</td></tr>
+    <tr><td>PM Supply</td><td>Packaging Material Supply — the stage where all 10 packaging component orders and receipts are recorded.</td></tr>
+    <tr><td>Soft Delete</td><td>A deletion that hides the record from the UI but retains it in the database for potential recovery.</td></tr>
+    <tr><td>UAT</td><td>User Acceptance Testing — the process of validating that the system meets business requirements before go-live.</td></tr>
+    <tr><td>2FA</td><td>Two-Factor Authentication — a second verification step (OTP sent to email) after password entry.</td></tr>
+    <tr><td>JWT</td><td>JSON Web Token — the secure token used to maintain authenticated sessions.</td></tr>
+    <tr><td>Audit Log</td><td>A record of every field change made to a sales order, including who made it and when.</td></tr>
+    <tr><td>Status History</td><td>A timeline of every status change an order has passed through.</td></tr>
+    <tr><td>Pipeline</td><td>The Admin Dashboard view showing live order counts at each workflow stage.</td></tr>
+  </table>
+
+  <div style="margin-top:60px;padding:24px;background:#f9fafb;border-radius:8px;text-align:center;color:#6B7280;font-size:13px;">
+    <strong style="color:#1a3c5e;display:block;margin-bottom:6px;">PharmaSphere – User Manual v1.0</strong>
+    Prepared by IT Musketeers &nbsp;|&nbsp; sales@itmusketeers.com &nbsp;|&nbsp; June 2026<br/>
+    This document is confidential and intended for authorised personnel only.
+  </div>
+</div>
+
+<script>
+  // Auto-swap missing screenshots for their placeholder sibling
+  document.querySelectorAll('.screenshot img').forEach(img => {
+    img.addEventListener('error', function() {
+      this.style.display = 'none';
+      var ph = this.parentElement.querySelector('.screenshot-placeholder');
+      if (ph) ph.style.display = 'flex';
+    });
+    // Trigger if already broken
+    if (!img.complete || img.naturalWidth === 0) {
+      img.dispatchEvent(new Event('error'));
+    }
+  });
+</script>
+</body>
+</html>

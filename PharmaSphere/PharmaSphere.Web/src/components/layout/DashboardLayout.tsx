@@ -27,6 +27,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import PeopleIcon from '@mui/icons-material/People';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import logoImg from '@/assets/logo.jpg';
@@ -171,9 +172,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         ))}
       </List>
 
-      {/* Logoff */}
+      {/* User Manual + Logoff */}
       <Divider />
       <List sx={{ px: 1, py: 1 }}>
+        <ListItemButton
+          component="a"
+          href="/user-manual.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{ borderRadius: 1.5, mb: 0.5 }}
+        >
+          <ListItemIcon sx={{ minWidth: 40 }}>
+            <MenuBookIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText primary="User Manual" primaryTypographyProps={{ fontSize: 14 }} />
+        </ListItemButton>
+        <Divider sx={{ mb: 0.5 }} />
         <ListItemButton
           onClick={async () => {
             if (isMobile) setMobileOpen(false);

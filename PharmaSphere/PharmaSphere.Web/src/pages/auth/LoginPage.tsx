@@ -279,6 +279,17 @@ const LoginPage: React.FC = () => {
             Privacy Policy
           </Link>
         </Typography>
+        <Typography variant="caption" color="text.secondary" textAlign="center" display="block" mt={1}>
+          <Link
+            href="/user-manual.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            sx={{ color: 'primary.main', fontWeight: 600 }}
+          >
+            📖 View User Manual
+          </Link>
+        </Typography>
       </Box>
     </Box>
   );
