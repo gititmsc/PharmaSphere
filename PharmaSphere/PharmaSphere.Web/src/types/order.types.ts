@@ -53,6 +53,7 @@ export interface OrderDetail {
   composition: string | null;
   qty: number | null;
   shelfLifeMonths: string | null;
+  rate: number | null;
   amount: number | null;
   make: string | null;
   adminRemarks: string | null;
@@ -147,6 +148,7 @@ export interface OrderFormValues {
   composition: string;
   qty: string;
   shelfLifeMonths: string;
+  rate: string;
   amount: string;
   make: string;
   adminRemarks: string;

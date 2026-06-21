@@ -115,6 +115,7 @@ namespace PharmaSphere.Services.Orders
             Track("Composition",       order.Composition,                      req.Composition);
             Track("Qty",               order.Qty,                              req.Qty);
             Track("Shelf Life (Mths)", order.ShelfLifeMonths,                  req.ShelfLifeMonths);
+            Track("Rate",              order.Rate,                             req.Rate);
             Track("Amount",            order.Amount,                           req.Amount);
             Track("Make",              order.Make,                             req.Make);
             Track("Admin Remarks",     order.AdminRemarks,                     req.AdminRemarks);
@@ -357,6 +358,7 @@ namespace PharmaSphere.Services.Orders
                 Composition           = Blank(r.Composition),
                 Qty                   = r.Qty,
                 ShelfLifeMonths       = Blank(r.ShelfLifeMonths),
+                Rate                  = r.Rate,
                 Amount                = r.Amount,
                 Make                  = Blank(r.Make),
                 AdminRemarks          = Blank(r.AdminRemarks),
@@ -404,6 +406,7 @@ namespace PharmaSphere.Services.Orders
             o.Composition           = Blank(r.Composition);
             o.Qty                   = r.Qty;
             o.ShelfLifeMonths       = Blank(r.ShelfLifeMonths);
+            o.Rate                  = r.Rate;
             o.Amount                = r.Amount;
             o.Make                  = Blank(r.Make);
             o.AdminRemarks          = Blank(r.AdminRemarks);
@@ -445,6 +448,7 @@ namespace PharmaSphere.Services.Orders
             o.Composition,
             o.Qty,
             o.ShelfLifeMonths,
+            o.Rate,
             o.Amount,
             o.Make,
             o.AdminRemarks,

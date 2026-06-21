@@ -31,6 +31,7 @@ function toRequest(v: OrderFormValues) {
     composition:                     n(v.composition),
     qty:                             v.qty === '' ? null : Number(v.qty),
     shelfLifeMonths:                 n(v.shelfLifeMonths),
+    rate:                            v.rate === '' ? null : Number(v.rate),
     amount:                          v.amount === '' ? null : Number(v.amount),
     make:                            n(v.make),
     adminRemarks:                    n(v.adminRemarks),

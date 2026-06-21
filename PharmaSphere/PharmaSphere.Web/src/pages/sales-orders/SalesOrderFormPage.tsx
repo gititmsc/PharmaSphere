@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Alert,
@@ -103,7 +103,7 @@ const Fld: React.FC<FldProps> = ({
 const EMPTY: OrderFormValues = {
   orderNo: '', orderDate: new Date().toISOString().slice(0, 10),
   party: '', brandName: '', composition: '', qty: '', shelfLifeMonths: '',
-  amount: '', make: '', adminRemarks: '',
+  rate: '', amount: '', make: '', adminRemarks: '',
   vial: '', sealColour: '', wfi: '', label: '', monoBox: '', tray: '',
   leaflet: '', syringeAndNeedle: '', shrink: '', shipper: '',
   otherRemarks: '',
@@ -153,7 +153,7 @@ const SalesOrderFormPage: React.FC = () => {
   const [cancelling, setCancelling]   = useState(false);
   const justSelectedRef  = useRef(false);
 
-  const { control, handleSubmit, reset, formState: { isSubmitting } } =
+  const { control, handleSubmit, reset, setValue, formState: { isSubmitting } } =
     useForm<OrderFormValues>({ defaultValues: EMPTY, mode: 'onTouched' });
 
   useEffect(() => {
@@ -182,6 +182,7 @@ const SalesOrderFormPage: React.FC = () => {
       composition:  prev.composition ?? '',
       qty:          prev.qty?.toString() ?? '',
       shelfLifeMonths: prev.shelfLifeMonths ?? '',
+      rate:         prev.rate?.toString() ?? '',
       amount:       prev.amount?.toString() ?? '',
       make:         prev.make ?? '',
       adminRemarks: prev.adminRemarks ?? '',
@@ -234,6 +235,7 @@ const SalesOrderFormPage: React.FC = () => {
           party: o.party ?? '', brandName: o.brandName ?? '',
           composition: o.composition ?? '',
           qty: o.qty?.toString() ?? '', shelfLifeMonths: o.shelfLifeMonths ?? '',
+          rate: o.rate?.toString() ?? '',
           amount: o.amount?.toString() ?? '',
           make: o.make ?? '',
           adminRemarks: o.adminRemarks ?? '',
@@ -263,6 +265,16 @@ const SalesOrderFormPage: React.FC = () => {
       .catch(() => { enqueueSnackbar('Failed to load order.', { variant: 'error' }); navigate('/sales-orders'); })
       .finally(() => setLoading(false));
   }, [isEdit, orderId, reset, navigate, enqueueSnackbar]);
+
+  const watchedRate = useWatch({ control, name: 'rate' });
+  const watchedQty  = useWatch({ control, name: 'qty' });
+  useEffect(() => {
+    const rate = parseFloat(watchedRate);
+    const qty  = parseInt(watchedQty, 10);
+    if (!isNaN(rate) && !isNaN(qty) && rate > 0 && qty > 0) {
+      setValue('amount', (rate * qty).toFixed(2), { shouldDirty: true });
+    }
+  }, [watchedRate, watchedQty, setValue]);
 
   const handleCancelOrder = async () => {
     if (!orderId) return;
@@ -445,7 +457,12 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="shelfLifeMonths" label="Shelf Life" control={control} readOnly={roGeneralInfo} placeholder="e.g. 24 months" />
                 </Grid>
 
-                {/* Row 3: Amount (Admin only) | Party | Make */}
+                {/* Row 3: Rate (Admin only) | Amount (Admin only) | Party | Make */}
+                {isAdmin && (
+                  <Grid item xs={12} sm={4}>
+                    <Fld name="rate" label="Rate (₹)" control={control} type="number" adornment="₹" readOnly={roGeneralInfo} placeholder="0.00" />
+                  </Grid>
+                )}
                 {isAdmin && (
                   <Grid item xs={12} sm={4}>
                     <Fld name="amount" label="Amount (₹)" control={control} type="number" adornment="₹" readOnly={roGeneralInfo} placeholder="0.00" />

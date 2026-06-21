@@ -14,6 +14,7 @@ namespace PharmaSphere.Core.Models
         public string? Party { get; set; }
         public string? Make { get; set; }
         public string? AdminRemarks { get; set; }
+        public decimal? Rate { get; set; }
         public decimal? Amount { get; set; }
         public string? Vial { get; set; }
         public string? SealColour { get; set; }
