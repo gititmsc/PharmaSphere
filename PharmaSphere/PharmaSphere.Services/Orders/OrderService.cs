@@ -315,6 +315,9 @@ namespace PharmaSphere.Services.Orders
             }, ct);
         }
 
+        public Task<bool> OrderNoExistsAsync(string orderNo, int? excludeOrderId = null, CancellationToken ct = default)
+            => _orders.OrderNoExistsAsync(orderNo, excludeOrderId, ct);
+
         public Task<IReadOnlyList<string>> GetSealColorsAsync(CancellationToken ct = default)
             => _orders.GetSealColorsAsync(ct);
 

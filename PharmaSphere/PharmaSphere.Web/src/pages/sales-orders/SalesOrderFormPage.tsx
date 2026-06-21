@@ -55,6 +55,7 @@ interface FldProps {
   label: string;
   control: ReturnType<typeof useForm<OrderFormValues>>['control'];
   required?: string;
+  validate?: (v: string) => Promise<string | true> | string | true;
   type?: string;
   multiline?: boolean;
   rows?: number;
@@ -66,14 +67,14 @@ interface FldProps {
   shrinkLabel?: boolean;
 }
 const Fld: React.FC<FldProps> = ({
-  name, label, control, required, type = 'text',
+  name, label, control, required, validate, type = 'text',
   multiline = false, rows = 1, readOnly = false,
   adornment, min, step, placeholder, shrinkLabel,
 }) => (
   <Controller
     name={name}
     control={control}
-    rules={{ required }}
+    rules={{ required, validate }}
     render={({ field, fieldState: { error } }) => (
       <TextField
         {...field}
@@ -151,7 +152,8 @@ const SalesOrderFormPage: React.FC = () => {
   const [auditLogs, setAuditLogs]     = useState<OrderAuditLogItem[]>([]);
   const [cancelOpen, setCancelOpen]   = useState(false);
   const [cancelling, setCancelling]   = useState(false);
-  const justSelectedRef  = useRef(false);
+  const justSelectedRef    = useRef(false);
+  const lastCheckedOrderNo = useRef('');
 
   const { control, handleSubmit, reset, setValue, formState: { isSubmitting } } =
     useForm<OrderFormValues>({ defaultValues: EMPTY, mode: 'onTouched' });
@@ -234,6 +236,7 @@ const SalesOrderFormPage: React.FC = () => {
         setOrderStatus(o.currentStatus);
         setOrderNo(o.orderNo);
         setAuditLogs(o.auditLogs ?? []);
+        lastCheckedOrderNo.current = o.orderNo.toLowerCase();
         reset({
           orderNo: o.orderNo, orderDate: o.orderDate,
           party: o.party ?? '', brandName: o.brandName ?? '',
@@ -282,6 +285,21 @@ const SalesOrderFormPage: React.FC = () => {
       setValue('amount', (rate * qty).toFixed(2), { shouldDirty: true });
     }
   }, [watchedRate, watchedQty, setValue]);
+
+  const validateOrderNo = async (value: string): Promise<string | true> => {
+    const v = value.trim();
+    if (!v) return 'Order No is required';
+    // Skip API call if we already validated this exact value
+    if (v.toLowerCase() === lastCheckedOrderNo.current.toLowerCase()) return true;
+    lastCheckedOrderNo.current = v.toLowerCase();
+    try {
+      const exists = await OrderService.checkOrderNo(v, orderId ?? undefined);
+      if (exists) return `Order No "${v}" already exists. Please use a unique order number.`;
+    } catch {
+      // Don't block save if the check call fails
+    }
+    return true;
+  };
 
   const handleCancelOrder = async () => {
     if (!orderId) return;
@@ -408,7 +426,7 @@ const SalesOrderFormPage: React.FC = () => {
 
                 {/* Row 1: Order No | Order Date | Brand Name */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="orderNo" label="Order No *" control={control} required="Order No is required" readOnly={roGeneralInfo} placeholder="e.g. ORD-2025-001" />
+                  <Fld name="orderNo" label="Order No *" control={control} validate={validateOrderNo} readOnly={roGeneralInfo} placeholder="e.g. ORD-2025-001" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="orderDate" label="Order Date *" control={control} required="Order date is required" type="date" readOnly={roGeneralInfo} shrinkLabel />
@@ -502,7 +520,7 @@ const SalesOrderFormPage: React.FC = () => {
                 <Grid item xs={12} sm={4}>
                   <Fld name="make" label="Make" control={control} readOnly={roGeneralInfo} placeholder="Manufacturer" />
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={12} sm={4}>
                   <Fld name="neutralCode" label="Neutral Code / Mfg. Lic. No / LL NO" control={control} readOnly={roGeneralInfo} placeholder="Enter neutral code or licence number" />
                 </Grid>
 

@@ -27,6 +27,19 @@ namespace PharmaSphere.Api.Controllers
         private string CurrentUserRole =>
             User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
 
+        // GET /api/orders/check-order-no?orderNo=XXX&excludeId=1
+        [HttpGet("check-order-no")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> CheckOrderNo(
+            [FromQuery] string orderNo, [FromQuery] int? excludeId, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(orderNo))
+                return Ok(new { exists = false });
+
+            var exists = await _orders.OrderNoExistsAsync(orderNo.Trim(), excludeId, ct);
+            return Ok(new { exists });
+        }
+
         // GET /api/orders/seal-colors
         [HttpGet("seal-colors")]
         [ProducesResponseType(typeof(IReadOnlyList<string>), StatusCodes.Status200OK)]
