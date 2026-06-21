@@ -200,21 +200,25 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(o => o.BrandName).HasMaxLength(200);
                 e.Property(o => o.Composition).HasMaxLength(500);
                 e.Property(o => o.ShelfLifeMonths).HasMaxLength(200);
+                e.Property(o => o.MRP).HasPrecision(18, 2);
                 e.Property(o => o.Rate).HasPrecision(18, 2);
                 e.Property(o => o.Amount).HasPrecision(18, 2);
                 e.Property(o => o.Party).HasMaxLength(200);
                 e.Property(o => o.Make).HasMaxLength(200);
+                e.Property(o => o.NeutralCode).HasMaxLength(500);
                 e.Property(o => o.AdminRemarks).HasMaxLength(1000);
                 e.Property(o => o.Vial).HasMaxLength(100);
                 e.Property(o => o.SealColour).HasMaxLength(100);
                 e.Property(o => o.WFI).HasMaxLength(100);
                 e.Property(o => o.Label).HasMaxLength(100);
                 e.Property(o => o.MonoBox).HasMaxLength(100);
+                e.Property(o => o.MonthBox).HasMaxLength(200);
                 e.Property(o => o.Tray).HasMaxLength(100);
                 e.Property(o => o.Leaflet).HasMaxLength(100);
                 e.Property(o => o.SyringeAndNeedle).HasMaxLength(100);
                 e.Property(o => o.Shrink).HasMaxLength(100);
                 e.Property(o => o.Shipper).HasMaxLength(100);
+                e.Property(o => o.Hologram).HasMaxLength(200);
                 e.Property(o => o.OtherRemarks).HasMaxLength(1000);
                 e.Property(o => o.CurrentStatus).HasMaxLength(50).IsRequired()
                  .HasDefaultValue("PIS Pending");

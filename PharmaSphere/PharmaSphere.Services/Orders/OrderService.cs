@@ -115,9 +115,11 @@ namespace PharmaSphere.Services.Orders
             Track("Composition",       order.Composition,                      req.Composition);
             Track("Qty",               order.Qty,                              req.Qty);
             Track("Shelf Life (Mths)", order.ShelfLifeMonths,                  req.ShelfLifeMonths);
+            Track("MRP",               order.MRP,                              req.MRP);
             Track("Rate",              order.Rate,                             req.Rate);
             Track("Amount",            order.Amount,                           req.Amount);
             Track("Make",              order.Make,                             req.Make);
+            Track("Neutral Code",      order.NeutralCode,                      req.NeutralCode);
             Track("Admin Remarks",     order.AdminRemarks,                     req.AdminRemarks);
             Track("Other Remarks",     order.OtherRemarks,                     req.OtherRemarks);
 
@@ -127,15 +129,17 @@ namespace PharmaSphere.Services.Orders
             Track("WFI",               order.WFI,              req.WFI);
             Track("Label",             order.Label,            req.Label);
             Track("Mono Box",          order.MonoBox,          req.MonoBox);
+            Track("Month Box",         order.MonthBox,         req.MonthBox);
             Track("Tray",              order.Tray,             req.Tray);
             Track("Leaflet",           order.Leaflet,          req.Leaflet);
             Track("Syringe & Needle",  order.SyringeAndNeedle, req.SyringeAndNeedle);
             Track("Shrink",            order.Shrink,           req.Shrink);
             Track("Shipper",           order.Shipper,          req.Shipper);
+            Track("Hologram",          order.Hologram,         req.Hologram);
 
             // ── QA Information ────────────────────────────────────────────────────
             Track("PIS Approval Date",              order.PISApprovalDate?.ToString("yyyy-MM-dd"),                 req.PISApprovalDate);
-            Track("Artwork Approval Date",          order.SanoletPartyArtworkApprovalDate?.ToString("yyyy-MM-dd"), req.SanoletPartyArtworkApprovalDate);
+            Track("Artwork Approval Date",           order.SanoletPartyArtworkApprovalDate?.ToString("yyyy-MM-dd"), req.SanoletPartyArtworkApprovalDate);
             Track("MonoBox Vendor Approval",        order.MonoBoxSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"), req.MonoBoxSupplyVendorApprovalDate);
             Track("Label Vendor Approval",          order.LabelSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),   req.LabelSupplyVendorApprovalDate);
             Track("Insert Vendor Approval",         order.InsertSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),  req.InsertSupplyVendorApprovalDate);
@@ -358,20 +362,24 @@ namespace PharmaSphere.Services.Orders
                 Composition           = Blank(r.Composition),
                 Qty                   = r.Qty,
                 ShelfLifeMonths       = Blank(r.ShelfLifeMonths),
+                MRP                   = r.MRP,
                 Rate                  = r.Rate,
                 Amount                = r.Amount,
                 Make                  = Blank(r.Make),
+                NeutralCode           = Blank(r.NeutralCode),
                 AdminRemarks          = Blank(r.AdminRemarks),
                 Vial                  = Blank(r.Vial),
                 SealColour            = Blank(r.SealColour),
                 WFI                   = Blank(r.WFI),
                 Label                 = Blank(r.Label),
                 MonoBox               = Blank(r.MonoBox),
+                MonthBox              = Blank(r.MonthBox),
                 Tray                  = Blank(r.Tray),
                 Leaflet               = Blank(r.Leaflet),
                 SyringeAndNeedle      = Blank(r.SyringeAndNeedle),
                 Shrink                = Blank(r.Shrink),
                 Shipper               = Blank(r.Shipper),
+                Hologram              = Blank(r.Hologram),
                 OtherRemarks          = Blank(r.OtherRemarks),
                 PISApprovalDate                 = ParseDateOpt(r.PISApprovalDate),
                 SanoletPartyArtworkApprovalDate = ParseDateOpt(r.SanoletPartyArtworkApprovalDate),
@@ -406,20 +414,24 @@ namespace PharmaSphere.Services.Orders
             o.Composition           = Blank(r.Composition);
             o.Qty                   = r.Qty;
             o.ShelfLifeMonths       = Blank(r.ShelfLifeMonths);
+            o.MRP                   = r.MRP;
             o.Rate                  = r.Rate;
             o.Amount                = r.Amount;
             o.Make                  = Blank(r.Make);
+            o.NeutralCode           = Blank(r.NeutralCode);
             o.AdminRemarks          = Blank(r.AdminRemarks);
             o.Vial                  = Blank(r.Vial);
             o.SealColour            = Blank(r.SealColour);
             o.WFI                   = Blank(r.WFI);
             o.Label                 = Blank(r.Label);
             o.MonoBox               = Blank(r.MonoBox);
+            o.MonthBox              = Blank(r.MonthBox);
             o.Tray                  = Blank(r.Tray);
             o.Leaflet               = Blank(r.Leaflet);
             o.SyringeAndNeedle      = Blank(r.SyringeAndNeedle);
             o.Shrink                = Blank(r.Shrink);
             o.Shipper               = Blank(r.Shipper);
+            o.Hologram              = Blank(r.Hologram);
             o.OtherRemarks          = Blank(r.OtherRemarks);
             o.PISApprovalDate                 = ParseDateOpt(r.PISApprovalDate);
             o.SanoletPartyArtworkApprovalDate = ParseDateOpt(r.SanoletPartyArtworkApprovalDate);
@@ -448,20 +460,24 @@ namespace PharmaSphere.Services.Orders
             o.Composition,
             o.Qty,
             o.ShelfLifeMonths,
+            o.MRP,
             o.Rate,
             o.Amount,
             o.Make,
+            o.NeutralCode,
             o.AdminRemarks,
             o.Vial,
             o.SealColour,
             o.WFI,
             o.Label,
             o.MonoBox,
+            o.MonthBox,
             o.Tray,
             o.Leaflet,
             o.SyringeAndNeedle,
             o.Shrink,
             o.Shipper,
+            o.Hologram,
             o.OtherRemarks,
             o.PISApprovalDate?.ToString("yyyy-MM-dd"),
             o.SanoletPartyArtworkApprovalDate?.ToString("yyyy-MM-dd"),

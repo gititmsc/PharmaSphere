@@ -103,9 +103,9 @@ const Fld: React.FC<FldProps> = ({
 const EMPTY: OrderFormValues = {
   orderNo: '', orderDate: new Date().toISOString().slice(0, 10),
   party: '', brandName: '', composition: '', qty: '', shelfLifeMonths: '',
-  rate: '', amount: '', make: '', adminRemarks: '',
-  vial: '', sealColour: '', wfi: '', label: '', monoBox: '', tray: '',
-  leaflet: '', syringeAndNeedle: '', shrink: '', shipper: '',
+  mrp: '', rate: '', amount: '', make: '', neutralCode: '', adminRemarks: '',
+  vial: '', sealColour: '', wfi: '', label: '', monoBox: '', monthBox: '', tray: '',
+  leaflet: '', syringeAndNeedle: '', shrink: '', shipper: '', hologram: '',
   otherRemarks: '',
   pisApprovalDate: '', sanoletPartyArtworkApprovalDate: '',
   monoBoxSupplyVendorApprovalDate: '', labelSupplyVendorApprovalDate: '',
@@ -182,9 +182,11 @@ const SalesOrderFormPage: React.FC = () => {
       composition:  prev.composition ?? '',
       qty:          prev.qty?.toString() ?? '',
       shelfLifeMonths: prev.shelfLifeMonths ?? '',
+      mrp:          prev.mrp?.toString() ?? '',
       rate:         prev.rate?.toString() ?? '',
       amount:       prev.amount?.toString() ?? '',
       make:         prev.make ?? '',
+      neutralCode:  prev.neutralCode ?? '',
       adminRemarks: prev.adminRemarks ?? '',
       otherRemarks: prev.otherRemarks ?? '',
       // Packaging
@@ -193,11 +195,13 @@ const SalesOrderFormPage: React.FC = () => {
       wfi:              prev.wfi ?? '',
       label:            prev.label ?? '',
       monoBox:          prev.monoBox ?? '',
+      monthBox:         prev.monthBox ?? '',
       tray:             prev.tray ?? '',
       leaflet:          prev.leaflet ?? '',
       syringeAndNeedle: prev.syringeAndNeedle ?? '',
       shrink:           prev.shrink ?? '',
       shipper:          prev.shipper ?? '',
+      hologram:         prev.hologram ?? '',
       // QA dates cleared
       pisApprovalDate:                 '',
       sanoletPartyArtworkApprovalDate: '',
@@ -235,14 +239,17 @@ const SalesOrderFormPage: React.FC = () => {
           party: o.party ?? '', brandName: o.brandName ?? '',
           composition: o.composition ?? '',
           qty: o.qty?.toString() ?? '', shelfLifeMonths: o.shelfLifeMonths ?? '',
+          mrp: o.mrp?.toString() ?? '',
           rate: o.rate?.toString() ?? '',
           amount: o.amount?.toString() ?? '',
           make: o.make ?? '',
+          neutralCode: o.neutralCode ?? '',
           adminRemarks: o.adminRemarks ?? '',
           vial: o.vial ?? '', sealColour: o.sealColour ?? '', wfi: o.wfi ?? '',
-          label: o.label ?? '', monoBox: o.monoBox ?? '', tray: o.tray ?? '',
+          label: o.label ?? '', monoBox: o.monoBox ?? '', monthBox: o.monthBox ?? '',
+          tray: o.tray ?? '',
           leaflet: o.leaflet ?? '', syringeAndNeedle: o.syringeAndNeedle ?? '',
-          shrink: o.shrink ?? '', shipper: o.shipper ?? '',
+          shrink: o.shrink ?? '', shipper: o.shipper ?? '', hologram: o.hologram ?? '',
           otherRemarks: o.otherRemarks ?? '',
           pisApprovalDate: o.pisApprovalDate ?? '',
           sanoletPartyArtworkApprovalDate: o.sanoletPartyArtworkApprovalDate ?? '',
@@ -446,15 +453,18 @@ const SalesOrderFormPage: React.FC = () => {
                   />
                 </Grid>
 
-                {/* Row 2: Composition | Qty | Shelf Life */}
+                {/* Row 2: Generic Name | Qty | Shelf Life | MRP */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="composition" label="Composition" control={control} readOnly={roGeneralInfo} placeholder="Active ingredients" />
+                  <Fld name="composition" label="Generic Name" control={control} readOnly={roGeneralInfo} placeholder="Active ingredients" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="qty" label="Quantity" control={control} type="number" readOnly={roGeneralInfo} placeholder="0" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="shelfLifeMonths" label="Shelf Life" control={control} readOnly={roGeneralInfo} placeholder="e.g. 24 months" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="mrp" label="MRP (₹)" control={control} type="number" adornment="₹" readOnly={roGeneralInfo} placeholder="0.00" />
                 </Grid>
 
                 {/* Row 3: Rate (Admin only) | Amount (Admin only) | Party | Make */}
@@ -491,6 +501,9 @@ const SalesOrderFormPage: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="make" label="Make" control={control} readOnly={roGeneralInfo} placeholder="Manufacturer" />
+                </Grid>
+                <Grid item xs={12} sm={8}>
+                  <Fld name="neutralCode" label="Neutral Code / Mfg. Lic. No / LL NO" control={control} readOnly={roGeneralInfo} placeholder="Enter neutral code or licence number" />
                 </Grid>
 
                 {/* Row 4: Admin Remarks — full width */}
@@ -539,12 +552,15 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="wfi" label="WFI" control={control} readOnly={roGeneralInfo} placeholder="Enter WFI" />
                 </Grid>
 
-                {/* Row 6: Label | Mono Box | Tray */}
+                {/* Row 6: Label | Mono Box | Month Box | Tray */}
                 <Grid item xs={12} sm={4}>
                   <Fld name="label" label="Label" control={control} readOnly={roGeneralInfo} placeholder="Enter label" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="monoBox" label="Mono Box" control={control} readOnly={roGeneralInfo} placeholder="Enter mono box" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="monthBox" label="Month Box" control={control} readOnly={roGeneralInfo} placeholder="Enter month box" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="tray" label="Tray" control={control} readOnly={roGeneralInfo} placeholder="Enter tray" />
@@ -561,9 +577,12 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="shrink" label="Shrink" control={control} readOnly={roGeneralInfo} placeholder="Enter shrink" />
                 </Grid>
 
-                {/* Row 8: Shipper */}
+                {/* Row 8: Shipper | Hologram */}
                 <Grid item xs={12} sm={4}>
                   <Fld name="shipper" label="Shipper" control={control} readOnly={roGeneralInfo} placeholder="Enter shipper" />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="hologram" label="Hologram" control={control} readOnly={roGeneralInfo} placeholder="Enter hologram" />
                 </Grid>
 
                 <Grid item xs={12}>
@@ -579,7 +598,7 @@ const SalesOrderFormPage: React.FC = () => {
                 <Alert severity="info" sx={{ mb: 1.5 }}>
                   {isQA
                     ? 'You can enter the PIS Approval Date.'
-                    : 'You can enter the Sanolet Party Artwork Approval Date.'}
+                    : 'You can enter the Artwork Approval Date.'}
                 </Alert>
               )}
               {isEdit && !isAdmin && isPPMC && orderStatus === 'PM Supply Pending' && (
@@ -599,7 +618,7 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="pisApprovalDate" label="PIS Approval Date" control={control} type="date" readOnly={roPISDate} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="sanoletPartyArtworkApprovalDate" label="Sanolet Party Artwork Approval Date" control={control} type="date" readOnly={roArtworkDate} shrinkLabel />
+                  <Fld name="sanoletPartyArtworkApprovalDate" label="Artwork Approval Date" control={control} type="date" readOnly={roArtworkDate} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4} />
 

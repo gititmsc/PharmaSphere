@@ -11,8 +11,10 @@ namespace PharmaSphere.Core.Models
         public string? Composition { get; set; }
         public int? Qty { get; set; }
         public string? ShelfLifeMonths { get; set; }
+        public decimal? MRP { get; set; }
         public string? Party { get; set; }
         public string? Make { get; set; }
+        public string? NeutralCode { get; set; }
         public string? AdminRemarks { get; set; }
         public decimal? Rate { get; set; }
         public decimal? Amount { get; set; }
@@ -21,11 +23,13 @@ namespace PharmaSphere.Core.Models
         public string? WFI { get; set; }
         public string? Label { get; set; }
         public string? MonoBox { get; set; }
+        public string? MonthBox { get; set; }
         public string? Tray { get; set; }
         public string? Leaflet { get; set; }
         public string? SyringeAndNeedle { get; set; }
         public string? Shrink { get; set; }
         public string? Shipper { get; set; }
+        public string? Hologram { get; set; }
         public string? OtherRemarks { get; set; }
 
         // ── QA Fields ─────────────────────────────────────────────────────────────
