@@ -39,9 +39,6 @@ namespace PharmaSphere.Services.Orders
         public async Task<OrderListItemDto> CreateOrderAsync(
             CreateOrderRequestDto req, int userId, string userName, CancellationToken ct = default)
         {
-            if (await _orders.OrderNoExistsAsync(req.OrderNo, null, ct))
-                throw new InvalidOperationException($"Order number '{req.OrderNo}' already exists.");
-
             var initialStatus = await _statuses.GetInitialStatusNameAsync(ct) ?? "PIS Pending";
             var order = MapCreate(req, userId, userName, initialStatus);
             await _orders.AddAsync(order, ct);
@@ -84,10 +81,6 @@ namespace PharmaSphere.Services.Orders
 
             if (!order.IsActive)
                 throw new InvalidOperationException("Cannot edit an inactive (deleted) order.");
-
-            if (!string.Equals(order.OrderNo, req.OrderNo, StringComparison.OrdinalIgnoreCase))
-                if (await _orders.OrderNoExistsAsync(req.OrderNo, orderId, ct))
-                    throw new InvalidOperationException($"Order number '{req.OrderNo}' already exists.");
 
             var now = DateTime.UtcNow;
 
@@ -314,9 +307,6 @@ namespace PharmaSphere.Services.Orders
                 ChangedDate     = order.UpdatedDate.Value,
             }, ct);
         }
-
-        public Task<bool> OrderNoExistsAsync(string orderNo, int? excludeOrderId = null, CancellationToken ct = default)
-            => _orders.OrderNoExistsAsync(orderNo, excludeOrderId, ct);
 
         public Task<IReadOnlyList<string>> GetSealColorsAsync(CancellationToken ct = default)
             => _orders.GetSealColorsAsync(ct);

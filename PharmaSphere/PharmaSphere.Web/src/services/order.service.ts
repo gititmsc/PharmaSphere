@@ -70,13 +70,6 @@ function toRequest(v: OrderFormValues) {
 }
 
 export const OrderService = {
-  async checkOrderNo(orderNo: string, excludeId?: number): Promise<boolean> {
-    const params = new URLSearchParams({ orderNo });
-    if (excludeId !== undefined) params.set('excludeId', String(excludeId));
-    const { data } = await httpClient.get<{ exists: boolean }>(`/orders/check-order-no?${params}`);
-    return data.exists;
-  },
-
   async getSealColors(): Promise<string[]> {
     const { data } = await httpClient.get<string[]>('/orders/seal-colors');
     return data;
