@@ -606,7 +606,17 @@ namespace PharmaSphere.Services.Orders
 
         private static string ComputeTargetStatus(Order o)
         {
-            var pisApproved     = o.PISApprovalDate.HasValue;
+            // All QA/Design fields must be filled before advancing past PIS Pending
+            var qaComplete = o.PISApprovalDate.HasValue
+                          && o.PPApplyDate.HasValue    && o.PPDraftDate.HasValue
+                          && o.PPApprovalDate.HasValue && o.PPReceivedDate.HasValue
+                          && o.CPPApplyDate.HasValue   && o.CPPDraftDate.HasValue
+                          && o.CPPApprovalDate.HasValue && o.CPPReceivedDate.HasValue
+                          && o.COPPApplyDate.HasValue  && o.COPPDraftDate.HasValue
+                          && o.COPPApprovalDate.HasValue && o.COPPReceivedDate.HasValue
+                          && o.FSCApplyDate.HasValue   && o.FSCDraftDate.HasValue
+                          && o.FSCApprovalDate.HasValue && o.FSCReceivedDate.HasValue;
+
             var artworkApproved = o.SanoletPartyArtworkApprovalDate.HasValue;
             var allPMFilled     = o.MonoBoxSupplyVendorApprovalDate.HasValue
                                && o.LabelSupplyVendorApprovalDate.HasValue
@@ -622,17 +632,17 @@ namespace PharmaSphere.Services.Orders
             var packingDone  = o.PackingPlan.HasValue;
             var dispatchDone = o.DispatchDate.HasValue;
 
-            if (dispatchDone && packingDone && fillingDone && allPMFilled && artworkApproved && pisApproved)
+            if (dispatchDone && packingDone && fillingDone && allPMFilled && artworkApproved && qaComplete)
                 return OrderStatus.Dispatched;
-            if (packingDone  && fillingDone && allPMFilled && artworkApproved && pisApproved)
+            if (packingDone  && fillingDone && allPMFilled && artworkApproved && qaComplete)
                 return "Dispatch Pending";
-            if (fillingDone  && allPMFilled && artworkApproved && pisApproved)
+            if (fillingDone  && allPMFilled && artworkApproved && qaComplete)
                 return "Packing Pending";
-            if (allPMFilled  && artworkApproved && pisApproved)
+            if (allPMFilled  && artworkApproved && qaComplete)
                 return "Production Pending";
-            if (artworkApproved && pisApproved)
+            if (artworkApproved && qaComplete)
                 return "PM Supply Pending";
-            if (pisApproved)
+            if (qaComplete)
                 return "Artwork Pending";
             return "PIS Pending";
         }

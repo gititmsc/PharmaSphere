@@ -610,6 +610,11 @@ const SalesOrderFormPage: React.FC = () => {
 
             {/* ── Tab 1: QA / Design ── */}
             <TabPanel value={tab} index={1}>
+              {isEdit && !isAdmin && isQA && orderStatus === 'PIS Pending' && (
+                <Alert severity="info" sx={{ mb: 1.5 }}>
+                  Fill all fields on this tab (PIS Approval Date, Product Permission, Combipack Product Permission, COPP and FSC dates) to advance the order to <strong>Artwork Pending</strong>.
+                </Alert>
+              )}
               {isEdit && !isAdmin && (isDesigner && orderStatus === 'Artwork Pending') && (
                 <Alert severity="info" sx={{ mb: 1.5 }}>You can enter the Artwork Approval Date.</Alert>
               )}
