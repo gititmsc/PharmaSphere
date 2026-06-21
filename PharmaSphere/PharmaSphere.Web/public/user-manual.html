@@ -137,6 +137,7 @@
   /* ── Workflow diagram ── */
   .workflow {
     display: flex; flex-wrap: wrap; gap: 0;
+    row-gap: 16px;
     align-items: center; margin: 20px 0;
   }
   .wf-box {
@@ -266,7 +267,8 @@
     <li>Real-time dashboard with pipeline counts per stage</li>
     <li>Complete audit log and status history per order</li>
     <li>Secure JWT authentication with optional Two-Factor Authentication (2FA)</li>
-    <li>Admin-only access to sensitive fields (Amount) and management features</li>
+    <li>Admin-only access to sensitive fields (Rate, Amount) and management features</li>
+    <li>Dedicated QA / Design tab for regulatory permission dates (Product Permission, COPP, FSC)</li>
   </ul>
 
   <h3>Supported Browsers</h3>
@@ -297,21 +299,21 @@
       <td>Full pipeline &amp; stats</td>
       <td>All statuses</td>
       <td>All orders</td>
-      <td>All fields including Amount</td>
+      <td>All fields including Rate &amp; Amount</td>
     </tr>
     <tr>
       <td><span class="role role-qa">QA</span></td>
       <td>PIS Pending queue</td>
       <td>PIS Pending only</td>
       <td>PIS Pending only</td>
-      <td>PIS Approval Date</td>
+      <td>PIS Approval Date; Product Permission, Combipack Product Permission, COPP &amp; FSC dates (QA / Design tab)</td>
     </tr>
     <tr>
       <td><span class="role role-designer">Designer</span></td>
       <td>Artwork Pending queue</td>
       <td>Artwork Pending only</td>
       <td>Artwork Pending only</td>
-      <td>Sanolet Party Artwork Approval Date</td>
+      <td>Artwork Approval Date</td>
     </tr>
     <tr>
       <td><span class="role role-ppmc">PPMC</span></td>
@@ -491,10 +493,12 @@
   <h3 id="so-add">5.2 Adding a New Sales Order (Admin Only)</h3>
   <ol class="steps">
     <li><p>Click <strong>+ Add Order</strong> in the top-right of the Sales Orders list.</p></li>
-    <li><p>Fill in the <strong>General Info</strong> tab — Order No, Order Date,
-        Brand Name, Party, Composition, Qty, Amount, Make, and Remarks are all on this tab.</p></li>
+    <li><p>Fill in the <strong>General Info</strong> tab — Order No, Order Date, Brand Name,
+        Party, Generic Name, Qty, Shelf Life, MRP, Make, Neutral Code / Mfg. Lic. No / LL NO,
+        and Admin Remarks are on this tab. <strong>Rate</strong> (Admin-only) auto-calculates
+        Amount = Rate × Qty.</p></li>
     <li><p>Optionally fill the <strong>Packaging Material</strong> tab with component details
-        (Vial, Label, Mono Box, Tray, etc.).</p></li>
+        (Vial, Label, Mono Box, Month Box, Tray, Shipper, Hologram, etc.).</p></li>
     <li><p>Click <strong>Create Order</strong>. The order is created with status
         <span class="status s-pis">PIS Pending</span>.</p></li>
   </ol>
@@ -522,13 +526,22 @@
     <tr><th>Tab</th><th>Contents</th><th>Who Can Edit</th></tr>
     <tr>
       <td><strong>General Info</strong></td>
-      <td>Order No, Date, Brand Name, Party, Composition, Qty, Amount, Make, Remarks.
-          Also contains QA Approval section (PIS &amp; Artwork dates).</td>
-      <td>Admin only (General fields). QA edits PIS date. Designer edits Artwork date.</td>
+      <td>Order No, Date, Brand Name, Party, Generic Name, Qty, Shelf Life, MRP, Make,
+          Neutral Code / Mfg. Lic. No / LL NO, Admin Remarks.
+          Rate field (Admin only) auto-calculates Amount = Rate × Qty.</td>
+      <td>Admin only.</td>
+    </tr>
+    <tr>
+      <td><strong>QA / Design</strong></td>
+      <td>PIS Approval Date; Artwork Approval Date; Product Permission dates (Apply, Draft, Approval, Received);
+          Combipack Product Permission dates; COPP dates; FSC dates.</td>
+      <td>QA edits PIS Approval Date &amp; all 16 permission dates. Designer edits Artwork Approval Date.
+          Product Permission / COPP / FSC sections visible to Admin and QA only.</td>
     </tr>
     <tr>
       <td><strong>Packaging Material</strong></td>
-      <td>Component specifications (Vial, Label, Mono Box, Tray, Leaflet, etc.) and
+      <td>Component specifications (Vial, Seal Colour, WFI, Label, Mono Box, Month Box, Tray,
+          Leaflet, Syringe &amp; Needle, Shrink, Shipper, Hologram, Other Remarks) and
           Packing Material Order &amp; Receive dates.</td>
       <td>Admin (specifications). PPMC (all 10 date fields).</td>
     </tr>
@@ -554,13 +567,16 @@
     <tr>
       <td><span class="status s-pis">PIS Pending</span></td>
       <td><span class="role role-qa">QA</span></td>
-      <td>Enter <strong>PIS Approval Date</strong> and save</td>
+      <td>On the <strong>QA / Design</strong> tab, fill <strong>all 17 fields</strong>:
+          PIS Approval Date plus Apply, Draft, Approval &amp; Received dates for
+          Product Permission, Combipack Product Permission, COPP, and FSC — then save.
+          Saving with any field missing keeps the status at PIS Pending.</td>
       <td><span class="status s-art">Artwork Pending</span></td>
     </tr>
     <tr>
       <td><span class="status s-art">Artwork Pending</span></td>
       <td><span class="role role-designer">Designer</span></td>
-      <td>Enter <strong>Sanolet Party Artwork Approval Date</strong> and save</td>
+      <td>Enter <strong>Artwork Approval Date</strong> on the <strong>QA / Design</strong> tab and save</td>
       <td><span class="status s-pm">PM Supply Pending</span></td>
     </tr>
     <tr>
@@ -628,32 +644,46 @@
 <div class="page section-page" id="role-guides">
   <h2 class="section">6. Role-Specific Guides</h2>
 
-  <h3 id="rg-qa">6.1 QA Role — PIS Approval</h3>
-  <p>You are responsible for approving the Product Information Sheet (PIS) before
-     artwork can begin.</p>
+  <h3 id="rg-qa">6.1 QA Role — QA / Design Approval</h3>
+  <p>You are responsible for completing all regulatory design approvals before artwork
+     can begin. This requires filling <strong>17 date fields</strong> on the
+     <strong>QA / Design</strong> tab.</p>
   <ol class="steps">
     <li><p>Log in. Your Dashboard shows all orders in
         <span class="status s-pis">PIS Pending</span> status.</p></li>
     <li><p>Click an order from the work queue or navigate to <strong>Sales Orders</strong>.</p></li>
-    <li><p>Go to the <strong>Packaging Material</strong> tab. You will see the
-        <em>"You can enter the PIS Approval Date."</em> info banner.</p></li>
-    <li><p>Enter the <strong>PIS Approval Date</strong> field.</p></li>
-    <li><p>Click <strong>Save Changes</strong>. The status automatically advances
-        to <span class="status s-art">Artwork Pending</span>.</p></li>
-    <li><p>The order disappears from your queue — your work for this order is complete.</p></li>
+    <li><p>Go to the <strong>QA / Design</strong> tab. An info banner reminds you that
+        all fields must be completed to advance the status.</p></li>
+    <li><p>In the <strong>QA Approval</strong> section, enter the <strong>PIS Approval Date</strong>.</p></li>
+    <li><p>In the <strong>Product Permission</strong> section, enter the Apply Date, Draft Date,
+        Approval Date, and Received Date.</p></li>
+    <li><p>In the <strong>Combipack Product Permission</strong> section, enter the same four dates.</p></li>
+    <li><p>In the <strong>COPP</strong> section, enter the same four dates.</p></li>
+    <li><p>In the <strong>FSC</strong> section, enter the same four dates.</p></li>
+    <li><p>Click <strong>Save Changes</strong>. All 17 fields must be filled for the status
+        to automatically advance to <span class="status s-art">Artwork Pending</span>.
+        Saving with any field empty saves the record but keeps the status at
+        <span class="status s-pis">PIS Pending</span>.</p></li>
+    <li><p>Once the status advances, the order disappears from your queue.</p></li>
   </ol>
   <div class="callout callout-warning">
+    <strong>All 17 fields are required.</strong>
+    PIS Approval Date alone is not sufficient. Every Apply, Draft, Approval, and Received
+    date across all four sections (Product Permission, Combipack Product Permission,
+    COPP, FSC) must be saved before the status advances.
+  </div>
+  <div class="callout callout-info">
     <strong>Access restriction</strong>
     Once an order moves to Artwork Pending, it is read-only for your role.
-    You can no longer edit the PIS Approval Date.
   </div>
 
   <h3 id="rg-designer">6.2 Designer Role — Artwork Approval</h3>
-  <p>You sign off on the Sanolet Party artwork before packaging materials are ordered.</p>
+  <p>You sign off on the artwork before packaging materials are ordered.</p>
   <ol class="steps">
     <li><p>Log in. Your Dashboard shows all <span class="status s-art">Artwork Pending</span> orders.</p></li>
-    <li><p>Open an order and go to the <strong>Packaging Material</strong> tab.</p></li>
-    <li><p>Enter the <strong>Sanolet Party Artwork Approval Date</strong>.</p></li>
+    <li><p>Open an order and go to the <strong>QA / Design</strong> tab.</p></li>
+    <li><p>An info banner will confirm you can enter the Artwork Approval Date.</p></li>
+    <li><p>Enter the <strong>Artwork Approval Date</strong>.</p></li>
     <li><p>Click <strong>Save Changes</strong>. Status advances to
         <span class="status s-pm">PM Supply Pending</span>.</p></li>
   </ol>
@@ -940,69 +970,76 @@
     <tr><th>Test ID</th><th>Scenario</th><th>Role</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
     <tr>
       <td class="tc-id">WF-01</td>
-      <td>QA advances PIS Pending → Artwork Pending</td>
+      <td>QA — partial save does not advance status</td>
       <td><span class="role role-qa">QA</span></td>
-      <td>Enter PIS Approval Date → Save → status becomes Artwork Pending</td>
+      <td>QA / Design tab → fill only PIS Approval Date (leave any other field empty) → Save → status stays PIS Pending</td>
       <td></td><td></td>
     </tr>
     <tr>
       <td class="tc-id">WF-02</td>
+      <td>QA advances PIS Pending → Artwork Pending</td>
+      <td><span class="role role-qa">QA</span></td>
+      <td>Fill all 17 QA / Design fields (PIS Approval Date + 4 sections × 4 dates) → Save → status becomes Artwork Pending</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-03</td>
       <td>QA cannot edit after advancement</td>
       <td><span class="role role-qa">QA</span></td>
       <td>After status = Artwork Pending, QA sees order as read-only; no info banner shown</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">WF-03</td>
+      <td class="tc-id">WF-04</td>
       <td>Designer advances Artwork Pending → PM Supply Pending</td>
       <td><span class="role role-designer">Designer</span></td>
-      <td>Enter Artwork Approval Date → Save → status becomes PM Supply Pending</td>
+      <td>QA / Design tab → enter Artwork Approval Date → Save → status becomes PM Supply Pending</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">WF-04</td>
+      <td class="tc-id">WF-05</td>
       <td>PPMC — partial save does not advance</td>
       <td><span class="role role-ppmc">PPMC</span></td>
       <td>Fill only 9 of 10 PM dates → Save → status stays PM Supply Pending</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">WF-05</td>
+      <td class="tc-id">WF-06</td>
       <td>PPMC advances PM Supply Pending → Production Pending</td>
       <td><span class="role role-ppmc">PPMC</span></td>
       <td>Fill all 10 PM dates → Save → status becomes Production Pending</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">WF-06</td>
+      <td class="tc-id">WF-07</td>
       <td>Production advances → Packing Pending</td>
       <td><span class="role role-prod">Production</span></td>
       <td>Enter Filling Plan Date → Save → status becomes Packing Pending</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">WF-07</td>
+      <td class="tc-id">WF-08</td>
       <td>Packing advances → Dispatch Pending</td>
       <td><span class="role role-pack">Packing</span></td>
       <td>Enter Packing Plan Date → Save → status becomes Dispatch Pending</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">WF-08</td>
+      <td class="tc-id">WF-09</td>
       <td>Dispatcher advances → Dispatched</td>
       <td><span class="role role-disp">Dispatcher</span></td>
       <td>Enter Dispatch Date → Save → status becomes Dispatched; order is read-only</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">WF-09</td>
+      <td class="tc-id">WF-10</td>
       <td>Admin edits Dispatched order</td>
       <td><span class="role role-admin">Admin</span></td>
       <td>Dispatched order is editable by Admin; all fields accessible</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">WF-10</td>
+      <td class="tc-id">WF-11</td>
       <td>Cancel order (Admin)</td>
       <td><span class="role role-admin">Admin</span></td>
       <td>Click Cancel Sales Order → confirm → status becomes Cancelled; fully read-only</td>
@@ -1040,23 +1077,35 @@
     <tr>
       <td class="tc-id">RBAC-05</td>
       <td>QA cannot edit Artwork Approval Date</td>
-      <td>Login as QA → open PIS Pending order → Artwork date field is read-only</td>
+      <td>Login as QA → open PIS Pending order → QA / Design tab → Artwork Approval Date field is read-only</td>
       <td></td><td></td>
     </tr>
     <tr>
       <td class="tc-id">RBAC-06</td>
+      <td>Product Permission / COPP / FSC sections hidden from non-QA / non-Admin</td>
+      <td>Login as Designer → open any order → QA / Design tab → Product Permission, Combipack, COPP, FSC sections not visible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-07</td>
       <td>General Info read-only for non-admin</td>
       <td>Login as any non-admin role → open any order → General Info fields are read-only</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">RBAC-07</td>
+      <td class="tc-id">RBAC-08</td>
+      <td>Rate field hidden for non-admin</td>
+      <td>Login as QA → open any order → General Info tab → Rate field is not visible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-09</td>
       <td>Cancel button hidden for non-admin</td>
       <td>Login as QA → open any order → no "Cancel Sales Order" button</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">RBAC-08</td>
+      <td class="tc-id">RBAC-10</td>
       <td>Backend enforces role filter (API)</td>
       <td>QA user calls GET /api/orders without status param → only PIS Pending returned</td>
       <td></td><td></td>
@@ -1093,6 +1142,15 @@
   <table>
     <tr><th>Term</th><th>Definition</th></tr>
     <tr><td>PIS</td><td>Product Information Sheet — the initial product specification document that QA must approve.</td></tr>
+    <tr><td>Generic Name</td><td>The non-proprietary (chemical) name of the drug product; previously labelled "Composition" in the form.</td></tr>
+    <tr><td>MRP</td><td>Maximum Retail Price — the highest price at which the product can be sold to the end consumer.</td></tr>
+    <tr><td>Rate</td><td>The per-unit price set by Admin. The system automatically calculates Amount = Rate × Qty. Visible and editable by Admin only.</td></tr>
+    <tr><td>Neutral Code / Mfg. Lic. No / LL NO</td><td>Regulatory reference codes associated with the product's manufacturing licence and lot/licence number.</td></tr>
+    <tr><td>Product Permission (PP)</td><td>Regulatory permission for a single product. Tracked by Apply, Draft, Approval, and Received dates.</td></tr>
+    <tr><td>Combipack Product Permission (CPP)</td><td>Regulatory permission for a combination-pack product. Tracked by Apply, Draft, Approval, and Received dates.</td></tr>
+    <tr><td>COPP</td><td>Certificate of Pharmaceutical Product — an international regulatory certificate. Tracked by Apply, Draft, Approval, and Received dates.</td></tr>
+    <tr><td>FSC</td><td>Free Sale Certificate — certifies that the product is approved for sale. Tracked by Apply, Draft, Approval, and Received dates.</td></tr>
+    <tr><td>QA / Design Tab</td><td>The dedicated tab on the Sales Order form containing all QA regulatory dates (PIS Approval, Artwork Approval, PP, CPP, COPP, FSC). Visible to Admin and QA; Artwork date also visible to Designer.</td></tr>
     <tr><td>PPMC</td><td>Production Planning &amp; Material Control — the team responsible for ordering and tracking packaging materials.</td></tr>
     <tr><td>PM Supply</td><td>Packaging Material Supply — the stage where all 10 packaging component orders and receipts are recorded.</td></tr>
     <tr><td>Soft Delete</td><td>A deletion that hides the record from the UI but retains it in the database for potential recovery.</td></tr>
