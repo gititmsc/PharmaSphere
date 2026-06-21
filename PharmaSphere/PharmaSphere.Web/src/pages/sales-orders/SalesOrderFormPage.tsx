@@ -109,6 +109,10 @@ const EMPTY: OrderFormValues = {
   leaflet: '', syringeAndNeedle: '', shrink: '', shipper: '', hologram: '',
   otherRemarks: '',
   pisApprovalDate: '', sanoletPartyArtworkApprovalDate: '',
+  ppApplyDate: '', ppDraftDate: '', ppApprovalDate: '', ppReceivedDate: '',
+  cppApplyDate: '', cppDraftDate: '', cppApprovalDate: '', cppReceivedDate: '',
+  coppApplyDate: '', coppDraftDate: '', coppApprovalDate: '', coppReceivedDate: '',
+  fscApplyDate: '', fscDraftDate: '', fscApprovalDate: '', fscReceivedDate: '',
   monoBoxSupplyVendorApprovalDate: '', labelSupplyVendorApprovalDate: '',
   insertSupplyVendorApprovalDate: '', traySupplyVendorApprovalDate: '',
   shipperSupplyVendorApprovalDate: '',
@@ -254,6 +258,14 @@ const SalesOrderFormPage: React.FC = () => {
           otherRemarks: o.otherRemarks ?? '',
           pisApprovalDate: o.pisApprovalDate ?? '',
           sanoletPartyArtworkApprovalDate: o.sanoletPartyArtworkApprovalDate ?? '',
+          ppApplyDate: o.ppApplyDate ?? '', ppDraftDate: o.ppDraftDate ?? '',
+          ppApprovalDate: o.ppApprovalDate ?? '', ppReceivedDate: o.ppReceivedDate ?? '',
+          cppApplyDate: o.cppApplyDate ?? '', cppDraftDate: o.cppDraftDate ?? '',
+          cppApprovalDate: o.cppApprovalDate ?? '', cppReceivedDate: o.cppReceivedDate ?? '',
+          coppApplyDate: o.coppApplyDate ?? '', coppDraftDate: o.coppDraftDate ?? '',
+          coppApprovalDate: o.coppApprovalDate ?? '', coppReceivedDate: o.coppReceivedDate ?? '',
+          fscApplyDate: o.fscApplyDate ?? '', fscDraftDate: o.fscDraftDate ?? '',
+          fscApprovalDate: o.fscApprovalDate ?? '', fscReceivedDate: o.fscReceivedDate ?? '',
           monoBoxSupplyVendorApprovalDate: o.monoBoxSupplyVendorApprovalDate ?? '',
           labelSupplyVendorApprovalDate: o.labelSupplyVendorApprovalDate ?? '',
           insertSupplyVendorApprovalDate: o.insertSupplyVendorApprovalDate ?? '',
@@ -348,6 +360,8 @@ const SalesOrderFormPage: React.FC = () => {
   const roPackingPlan = ro || (!isAdmin && !(isPacking && orderStatus === 'Packing Pending'));
   // Dispatch may only fill dispatch date while the order is still in 'Dispatch Pending'
   const roDispatch    = ro || (!isAdmin && !(isDispatch && orderStatus === 'Dispatch Pending'));
+  // QA extra fields (Product Permission, COPP, FSC) — editable by QA or Admin any time order is active
+  const roQAExtra     = ro || (!isAdmin && !isQA);
 
   return (
     <Box>
@@ -391,6 +405,7 @@ const SalesOrderFormPage: React.FC = () => {
             sx={{ px: 2, borderBottom: 1, borderColor: 'divider', minHeight: 40,
               '& .MuiTab-root': { minHeight: 40, py: 0 } }}>
             <Tab label="General Info" />
+            <Tab label="QA / Design" />
             <Tab label="Packaging Material" />
             <Tab label="Production Info" />
             {isEdit && <Tab label="History" />}
@@ -593,19 +608,10 @@ const SalesOrderFormPage: React.FC = () => {
               </Grid>
             </TabPanel>
 
-            {/* ── Tab 1: Packaging Material ── */}
+            {/* ── Tab 1: QA / Design ── */}
             <TabPanel value={tab} index={1}>
-              {isEdit && !isAdmin && ((isQA && orderStatus === 'PIS Pending') || (isDesigner && orderStatus === 'Artwork Pending')) && (
-                <Alert severity="info" sx={{ mb: 1.5 }}>
-                  {isQA
-                    ? 'You can enter the PIS Approval Date.'
-                    : 'You can enter the Artwork Approval Date.'}
-                </Alert>
-              )}
-              {isEdit && !isAdmin && isPPMC && orderStatus === 'PM Supply Pending' && (
-                <Alert severity="info" sx={{ mb: 1.5 }}>
-                  Complete all Packing Material Order and Receive dates to advance the status.
-                </Alert>
+              {isEdit && !isAdmin && (isDesigner && orderStatus === 'Artwork Pending') && (
+                <Alert severity="info" sx={{ mb: 1.5 }}>You can enter the Artwork Approval Date.</Alert>
               )}
               <Grid container spacing={1.5}>
 
@@ -622,6 +628,96 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="sanoletPartyArtworkApprovalDate" label="Artwork Approval Date" control={control} type="date" readOnly={roArtworkDate} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4} />
+
+                {/* ── Product Permission ── */}
+                {(isAdmin || isQA) && (<>
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 0.5 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Product Permission</Typography>
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="ppApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="ppDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="ppApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="ppReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+
+                  {/* ── Combipack Product Permission ── */}
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 0.5 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Combipack Product Permission</Typography>
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="cppApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="cppDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="cppApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="cppReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+
+                  {/* ── COPP ── */}
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 0.5 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>COPP</Typography>
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="coppApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="coppDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="coppApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="coppReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+
+                  {/* ── FSC ── */}
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 0.5 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>FSC</Typography>
+                    </Divider>
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="fscApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="fscDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="fscApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="fscReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  </Grid>
+                </>)}
+
+              </Grid>
+            </TabPanel>
+
+            {/* ── Tab 2: Packaging Material ── */}
+            <TabPanel value={tab} index={2}>
+              {isEdit && !isAdmin && isPPMC && orderStatus === 'PM Supply Pending' && (
+                <Alert severity="info" sx={{ mb: 1.5 }}>
+                  Complete all Packing Material Order and Receive dates to advance the status.
+                </Alert>
+              )}
+              <Grid container spacing={1.5}>
 
                 {/* ── Packing Material Order ── */}
                 <Grid item xs={12}>
@@ -671,8 +767,8 @@ const SalesOrderFormPage: React.FC = () => {
               </Grid>
             </TabPanel>
 
-            {/* ── Tab 2: Production Info ── */}
-            <TabPanel value={tab} index={2}>
+            {/* ── Tab 3: Production Info ── */}
+            <TabPanel value={tab} index={3}>
               {isEdit && !isAdmin && ((isProduction && orderStatus === 'Production Pending') || (isPacking && orderStatus === 'Packing Pending') || (isDispatch && orderStatus === 'Dispatch Pending')) && (
                 <Alert severity="info" sx={{ mb: 1.5 }}>
                   {isProduction && 'Enter the Filling Plan Date and Sterility Date to advance the status.'}
@@ -696,9 +792,9 @@ const SalesOrderFormPage: React.FC = () => {
               </Grid>
             </TabPanel>
 
-            {/* ── Tab 3: History (edit mode only) ── */}
+            {/* ── Tab 4: History (edit mode only) ── */}
             {isEdit && (
-              <TabPanel value={tab} index={3}>
+              <TabPanel value={tab} index={4}>
                 {auditLogs.length === 0 ? (
                   <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
                     No history recorded for this order.

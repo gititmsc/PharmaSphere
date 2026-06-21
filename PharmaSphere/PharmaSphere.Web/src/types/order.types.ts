@@ -75,6 +75,22 @@ export interface OrderDetail {
   // QA
   pisApprovalDate: string | null;
   sanoletPartyArtworkApprovalDate: string | null;
+  ppApplyDate: string | null;
+  ppDraftDate: string | null;
+  ppApprovalDate: string | null;
+  ppReceivedDate: string | null;
+  cppApplyDate: string | null;
+  cppDraftDate: string | null;
+  cppApprovalDate: string | null;
+  cppReceivedDate: string | null;
+  coppApplyDate: string | null;
+  coppDraftDate: string | null;
+  coppApprovalDate: string | null;
+  coppReceivedDate: string | null;
+  fscApplyDate: string | null;
+  fscDraftDate: string | null;
+  fscApprovalDate: string | null;
+  fscReceivedDate: string | null;
   monoBoxSupplyVendorApprovalDate: string | null;
   labelSupplyVendorApprovalDate: string | null;
   insertSupplyVendorApprovalDate: string | null;
@@ -174,6 +190,22 @@ export interface OrderFormValues {
   // QA
   pisApprovalDate: string;
   sanoletPartyArtworkApprovalDate: string;
+  ppApplyDate: string;
+  ppDraftDate: string;
+  ppApprovalDate: string;
+  ppReceivedDate: string;
+  cppApplyDate: string;
+  cppDraftDate: string;
+  cppApprovalDate: string;
+  cppReceivedDate: string;
+  coppApplyDate: string;
+  coppDraftDate: string;
+  coppApprovalDate: string;
+  coppReceivedDate: string;
+  fscApplyDate: string;
+  fscDraftDate: string;
+  fscApprovalDate: string;
+  fscReceivedDate: string;
   monoBoxSupplyVendorApprovalDate: string;
   labelSupplyVendorApprovalDate: string;
   insertSupplyVendorApprovalDate: string;

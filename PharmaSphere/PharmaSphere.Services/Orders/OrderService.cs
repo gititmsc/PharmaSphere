@@ -131,9 +131,25 @@ namespace PharmaSphere.Services.Orders
             Track("Hologram",          order.Hologram,         req.Hologram);
 
             // ── QA Information ────────────────────────────────────────────────────
-            Track("PIS Approval Date",              order.PISApprovalDate?.ToString("yyyy-MM-dd"),                 req.PISApprovalDate);
-            Track("Artwork Approval Date",           order.SanoletPartyArtworkApprovalDate?.ToString("yyyy-MM-dd"), req.SanoletPartyArtworkApprovalDate);
-            Track("MonoBox Vendor Approval",        order.MonoBoxSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"), req.MonoBoxSupplyVendorApprovalDate);
+            Track("PIS Approval Date",    order.PISApprovalDate?.ToString("yyyy-MM-dd"),                 req.PISApprovalDate);
+            Track("Artwork Approval Date", order.SanoletPartyArtworkApprovalDate?.ToString("yyyy-MM-dd"), req.SanoletPartyArtworkApprovalDate);
+            Track("PP Apply Date",        order.PPApplyDate?.ToString("yyyy-MM-dd"),    req.PPApplyDate);
+            Track("PP Draft Date",        order.PPDraftDate?.ToString("yyyy-MM-dd"),    req.PPDraftDate);
+            Track("PP Approval Date",     order.PPApprovalDate?.ToString("yyyy-MM-dd"), req.PPApprovalDate);
+            Track("PP Received Date",     order.PPReceivedDate?.ToString("yyyy-MM-dd"), req.PPReceivedDate);
+            Track("CPP Apply Date",       order.CPPApplyDate?.ToString("yyyy-MM-dd"),    req.CPPApplyDate);
+            Track("CPP Draft Date",       order.CPPDraftDate?.ToString("yyyy-MM-dd"),    req.CPPDraftDate);
+            Track("CPP Approval Date",    order.CPPApprovalDate?.ToString("yyyy-MM-dd"), req.CPPApprovalDate);
+            Track("CPP Received Date",    order.CPPReceivedDate?.ToString("yyyy-MM-dd"), req.CPPReceivedDate);
+            Track("COPP Apply Date",      order.COPPApplyDate?.ToString("yyyy-MM-dd"),    req.COPPApplyDate);
+            Track("COPP Draft Date",      order.COPPDraftDate?.ToString("yyyy-MM-dd"),    req.COPPDraftDate);
+            Track("COPP Approval Date",   order.COPPApprovalDate?.ToString("yyyy-MM-dd"), req.COPPApprovalDate);
+            Track("COPP Received Date",   order.COPPReceivedDate?.ToString("yyyy-MM-dd"), req.COPPReceivedDate);
+            Track("FSC Apply Date",       order.FSCApplyDate?.ToString("yyyy-MM-dd"),    req.FSCApplyDate);
+            Track("FSC Draft Date",       order.FSCDraftDate?.ToString("yyyy-MM-dd"),    req.FSCDraftDate);
+            Track("FSC Approval Date",    order.FSCApprovalDate?.ToString("yyyy-MM-dd"), req.FSCApprovalDate);
+            Track("FSC Received Date",    order.FSCReceivedDate?.ToString("yyyy-MM-dd"), req.FSCReceivedDate);
+            Track("MonoBox Vendor Approval", order.MonoBoxSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"), req.MonoBoxSupplyVendorApprovalDate);
             Track("Label Vendor Approval",          order.LabelSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),   req.LabelSupplyVendorApprovalDate);
             Track("Insert Vendor Approval",         order.InsertSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),  req.InsertSupplyVendorApprovalDate);
             Track("Tray Vendor Approval",           order.TraySupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),    req.TraySupplyVendorApprovalDate);
@@ -376,6 +392,22 @@ namespace PharmaSphere.Services.Orders
                 OtherRemarks          = Blank(r.OtherRemarks),
                 PISApprovalDate                 = ParseDateOpt(r.PISApprovalDate),
                 SanoletPartyArtworkApprovalDate = ParseDateOpt(r.SanoletPartyArtworkApprovalDate),
+                PPApplyDate    = ParseDateOpt(r.PPApplyDate),
+                PPDraftDate    = ParseDateOpt(r.PPDraftDate),
+                PPApprovalDate = ParseDateOpt(r.PPApprovalDate),
+                PPReceivedDate = ParseDateOpt(r.PPReceivedDate),
+                CPPApplyDate    = ParseDateOpt(r.CPPApplyDate),
+                CPPDraftDate    = ParseDateOpt(r.CPPDraftDate),
+                CPPApprovalDate = ParseDateOpt(r.CPPApprovalDate),
+                CPPReceivedDate = ParseDateOpt(r.CPPReceivedDate),
+                COPPApplyDate    = ParseDateOpt(r.COPPApplyDate),
+                COPPDraftDate    = ParseDateOpt(r.COPPDraftDate),
+                COPPApprovalDate = ParseDateOpt(r.COPPApprovalDate),
+                COPPReceivedDate = ParseDateOpt(r.COPPReceivedDate),
+                FSCApplyDate    = ParseDateOpt(r.FSCApplyDate),
+                FSCDraftDate    = ParseDateOpt(r.FSCDraftDate),
+                FSCApprovalDate = ParseDateOpt(r.FSCApprovalDate),
+                FSCReceivedDate = ParseDateOpt(r.FSCReceivedDate),
                 MonoBoxSupplyVendorApprovalDate = ParseDateOpt(r.MonoBoxSupplyVendorApprovalDate),
                 LabelSupplyVendorApprovalDate   = ParseDateOpt(r.LabelSupplyVendorApprovalDate),
                 InsertSupplyVendorApprovalDate  = ParseDateOpt(r.InsertSupplyVendorApprovalDate),
@@ -428,6 +460,22 @@ namespace PharmaSphere.Services.Orders
             o.OtherRemarks          = Blank(r.OtherRemarks);
             o.PISApprovalDate                 = ParseDateOpt(r.PISApprovalDate);
             o.SanoletPartyArtworkApprovalDate = ParseDateOpt(r.SanoletPartyArtworkApprovalDate);
+            o.PPApplyDate    = ParseDateOpt(r.PPApplyDate);
+            o.PPDraftDate    = ParseDateOpt(r.PPDraftDate);
+            o.PPApprovalDate = ParseDateOpt(r.PPApprovalDate);
+            o.PPReceivedDate = ParseDateOpt(r.PPReceivedDate);
+            o.CPPApplyDate    = ParseDateOpt(r.CPPApplyDate);
+            o.CPPDraftDate    = ParseDateOpt(r.CPPDraftDate);
+            o.CPPApprovalDate = ParseDateOpt(r.CPPApprovalDate);
+            o.CPPReceivedDate = ParseDateOpt(r.CPPReceivedDate);
+            o.COPPApplyDate    = ParseDateOpt(r.COPPApplyDate);
+            o.COPPDraftDate    = ParseDateOpt(r.COPPDraftDate);
+            o.COPPApprovalDate = ParseDateOpt(r.COPPApprovalDate);
+            o.COPPReceivedDate = ParseDateOpt(r.COPPReceivedDate);
+            o.FSCApplyDate    = ParseDateOpt(r.FSCApplyDate);
+            o.FSCDraftDate    = ParseDateOpt(r.FSCDraftDate);
+            o.FSCApprovalDate = ParseDateOpt(r.FSCApprovalDate);
+            o.FSCReceivedDate = ParseDateOpt(r.FSCReceivedDate);
             o.MonoBoxSupplyVendorApprovalDate = ParseDateOpt(r.MonoBoxSupplyVendorApprovalDate);
             o.LabelSupplyVendorApprovalDate   = ParseDateOpt(r.LabelSupplyVendorApprovalDate);
             o.InsertSupplyVendorApprovalDate  = ParseDateOpt(r.InsertSupplyVendorApprovalDate);
@@ -474,6 +522,22 @@ namespace PharmaSphere.Services.Orders
             o.OtherRemarks,
             o.PISApprovalDate?.ToString("yyyy-MM-dd"),
             o.SanoletPartyArtworkApprovalDate?.ToString("yyyy-MM-dd"),
+            o.PPApplyDate?.ToString("yyyy-MM-dd"),
+            o.PPDraftDate?.ToString("yyyy-MM-dd"),
+            o.PPApprovalDate?.ToString("yyyy-MM-dd"),
+            o.PPReceivedDate?.ToString("yyyy-MM-dd"),
+            o.CPPApplyDate?.ToString("yyyy-MM-dd"),
+            o.CPPDraftDate?.ToString("yyyy-MM-dd"),
+            o.CPPApprovalDate?.ToString("yyyy-MM-dd"),
+            o.CPPReceivedDate?.ToString("yyyy-MM-dd"),
+            o.COPPApplyDate?.ToString("yyyy-MM-dd"),
+            o.COPPDraftDate?.ToString("yyyy-MM-dd"),
+            o.COPPApprovalDate?.ToString("yyyy-MM-dd"),
+            o.COPPReceivedDate?.ToString("yyyy-MM-dd"),
+            o.FSCApplyDate?.ToString("yyyy-MM-dd"),
+            o.FSCDraftDate?.ToString("yyyy-MM-dd"),
+            o.FSCApprovalDate?.ToString("yyyy-MM-dd"),
+            o.FSCReceivedDate?.ToString("yyyy-MM-dd"),
             o.MonoBoxSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.LabelSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.InsertSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),

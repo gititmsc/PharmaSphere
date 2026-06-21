@@ -35,6 +35,26 @@ namespace PharmaSphere.Core.Models
         // ── QA Fields ─────────────────────────────────────────────────────────────
         public DateTime? PISApprovalDate { get; set; }
         public DateTime? SanoletPartyArtworkApprovalDate { get; set; }
+        // Product Permission
+        public DateTime? PPApplyDate { get; set; }
+        public DateTime? PPDraftDate { get; set; }
+        public DateTime? PPApprovalDate { get; set; }
+        public DateTime? PPReceivedDate { get; set; }
+        // Combipack Product Permission
+        public DateTime? CPPApplyDate { get; set; }
+        public DateTime? CPPDraftDate { get; set; }
+        public DateTime? CPPApprovalDate { get; set; }
+        public DateTime? CPPReceivedDate { get; set; }
+        // COPP
+        public DateTime? COPPApplyDate { get; set; }
+        public DateTime? COPPDraftDate { get; set; }
+        public DateTime? COPPApprovalDate { get; set; }
+        public DateTime? COPPReceivedDate { get; set; }
+        // FSC
+        public DateTime? FSCApplyDate { get; set; }
+        public DateTime? FSCDraftDate { get; set; }
+        public DateTime? FSCApprovalDate { get; set; }
+        public DateTime? FSCReceivedDate { get; set; }
         public DateTime? MonoBoxSupplyVendorApprovalDate { get; set; }
         public DateTime? LabelSupplyVendorApprovalDate { get; set; }
         public DateTime? InsertSupplyVendorApprovalDate { get; set; }
