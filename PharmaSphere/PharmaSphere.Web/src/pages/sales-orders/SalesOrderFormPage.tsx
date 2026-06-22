@@ -408,7 +408,7 @@ const SalesOrderFormPage: React.FC = () => {
             <Tab label="QA / Design" />
             <Tab label="Packaging Material" />
             <Tab label="Production Info" />
-            {isEdit && <Tab label="History" />}
+            {isEdit && isAdmin && <Tab label="History" />}
           </Tabs>
 
           <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -797,8 +797,8 @@ const SalesOrderFormPage: React.FC = () => {
               </Grid>
             </TabPanel>
 
-            {/* ── Tab 4: History (edit mode only) ── */}
-            {isEdit && (
+            {/* ── Tab 4: History (Admin only) ── */}
+            {isEdit && isAdmin && (
               <TabPanel value={tab} index={4}>
                 {auditLogs.length === 0 ? (
                   <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
