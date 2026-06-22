@@ -363,6 +363,13 @@ const SalesOrderFormPage: React.FC = () => {
   // QA extra fields (Product Permission, COPP, FSC) — editable by QA or Admin any time order is active
   const roQAExtra     = ro || (!isAdmin && !isQA);
 
+  // Dynamic tab indices — only tabs relevant to the role are rendered, so indices must be computed
+  let _ti = 1; // 0 is always General Info
+  const qaTabIdx         = (isAdmin || isQA || isDesigner)                     ? _ti++ : -1;
+  const packagingTabIdx  = (isAdmin || isPPMC)                                  ? _ti++ : -1;
+  const productionTabIdx = (isAdmin || isProduction || isPacking || isDispatch) ? _ti++ : -1;
+  const historyTabIdx    = (isAdmin && isEdit)                                  ? _ti++ : -1;
+
   return (
     <Box>
       <Stack direction="row" alignItems="center" gap={1.5} mb={1.5}>
@@ -405,10 +412,10 @@ const SalesOrderFormPage: React.FC = () => {
             sx={{ px: 2, borderBottom: 1, borderColor: 'divider', minHeight: 40,
               '& .MuiTab-root': { minHeight: 40, py: 0 } }}>
             <Tab label="General Info" />
-            <Tab label="QA / Design" />
-            <Tab label="Packaging Material" />
-            <Tab label="Production Info" />
-            {isEdit && isAdmin && <Tab label="History" />}
+            {(isAdmin || isQA || isDesigner)                     && <Tab label="QA / Design" />}
+            {(isAdmin || isPPMC)                                  && <Tab label="Packaging Material" />}
+            {(isAdmin || isProduction || isPacking || isDispatch) && <Tab label="Production Info" />}
+            {isEdit && isAdmin                                    && <Tab label="History" />}
           </Tabs>
 
           <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -608,8 +615,9 @@ const SalesOrderFormPage: React.FC = () => {
               </Grid>
             </TabPanel>
 
-            {/* ── Tab 1: QA / Design ── */}
-            <TabPanel value={tab} index={1}>
+            {/* ── Tab: QA / Design ── */}
+            {qaTabIdx >= 0 && (
+            <TabPanel value={tab} index={qaTabIdx}>
               {isEdit && !isAdmin && isQA && orderStatus === 'PIS Pending' && (
                 <Alert severity="info" sx={{ mb: 1.5 }}>
                   Fill all fields on this tab (PIS Approval Date, Product Permission, Combipack Product Permission, COPP and FSC dates) to advance the order to <strong>Artwork Pending</strong>.
@@ -626,13 +634,16 @@ const SalesOrderFormPage: React.FC = () => {
                     <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>QA Approval</Typography>
                   </Divider>
                 </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="pisApprovalDate" label="PIS Approval Date" control={control} type="date" readOnly={roPISDate} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="sanoletPartyArtworkApprovalDate" label="Artwork Approval Date" control={control} type="date" readOnly={roArtworkDate} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4} />
+                {(isAdmin || isQA) && (
+                  <Grid item xs={12} sm={4}>
+                    <Fld name="pisApprovalDate" label="PIS Approval Date" control={control} type="date" readOnly={roPISDate} shrinkLabel />
+                  </Grid>
+                )}
+                {(isAdmin || isDesigner) && (
+                  <Grid item xs={12} sm={4}>
+                    <Fld name="sanoletPartyArtworkApprovalDate" label="Artwork Approval Date" control={control} type="date" readOnly={roArtworkDate} shrinkLabel />
+                  </Grid>
+                )}
 
                 {/* ── Product Permission ── */}
                 {(isAdmin || isQA) && (<>
@@ -714,9 +725,11 @@ const SalesOrderFormPage: React.FC = () => {
 
               </Grid>
             </TabPanel>
+            )}
 
-            {/* ── Tab 2: Packaging Material ── */}
-            <TabPanel value={tab} index={2}>
+            {/* ── Tab: Packaging Material ── */}
+            {packagingTabIdx >= 0 && (
+            <TabPanel value={tab} index={packagingTabIdx}>
               {isEdit && !isAdmin && isPPMC && orderStatus === 'PM Supply Pending' && (
                 <Alert severity="info" sx={{ mb: 1.5 }}>
                   Complete all Packing Material Order and Receive dates to advance the status.
@@ -771,9 +784,11 @@ const SalesOrderFormPage: React.FC = () => {
 
               </Grid>
             </TabPanel>
+            )}
 
-            {/* ── Tab 3: Production Info ── */}
-            <TabPanel value={tab} index={3}>
+            {/* ── Tab: Production Info ── */}
+            {productionTabIdx >= 0 && (
+            <TabPanel value={tab} index={productionTabIdx}>
               {isEdit && !isAdmin && ((isProduction && orderStatus === 'Production Pending') || (isPacking && orderStatus === 'Packing Pending') || (isDispatch && orderStatus === 'Dispatch Pending')) && (
                 <Alert severity="info" sx={{ mb: 1.5 }}>
                   {isProduction && 'Enter the Filling Plan Date and Sterility Date to advance the status.'}
@@ -782,24 +797,33 @@ const SalesOrderFormPage: React.FC = () => {
                 </Alert>
               )}
               <Grid container spacing={1.5}>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="fillingPlan" label="Filling Plan Date" control={control} type="date" readOnly={roFilling} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="packingPlan" label="Packing Plan Date" control={control} type="date" readOnly={roPackingPlan} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="sterility14DaysDate" label="Sterility 14 Days Date" control={control} type="date" readOnly={roFilling} shrinkLabel />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Fld name="dispatchDate" label="Dispatch Date" control={control} type="date" readOnly={roDispatch} shrinkLabel />
-                </Grid>
+                {(isAdmin || isProduction) && (
+                  <Grid item xs={12} sm={4}>
+                    <Fld name="fillingPlan" label="Filling Plan Date" control={control} type="date" readOnly={roFilling} shrinkLabel />
+                  </Grid>
+                )}
+                {(isAdmin || isPacking) && (
+                  <Grid item xs={12} sm={4}>
+                    <Fld name="packingPlan" label="Packing Plan Date" control={control} type="date" readOnly={roPackingPlan} shrinkLabel />
+                  </Grid>
+                )}
+                {(isAdmin || isProduction) && (
+                  <Grid item xs={12} sm={4}>
+                    <Fld name="sterility14DaysDate" label="Sterility 14 Days Date" control={control} type="date" readOnly={roFilling} shrinkLabel />
+                  </Grid>
+                )}
+                {(isAdmin || isDispatch) && (
+                  <Grid item xs={12} sm={4}>
+                    <Fld name="dispatchDate" label="Dispatch Date" control={control} type="date" readOnly={roDispatch} shrinkLabel />
+                  </Grid>
+                )}
               </Grid>
             </TabPanel>
+            )}
 
-            {/* ── Tab 4: History (Admin only) ── */}
-            {isEdit && isAdmin && (
-              <TabPanel value={tab} index={4}>
+            {/* ── Tab: History (Admin only) ── */}
+            {isEdit && isAdmin && historyTabIdx >= 0 && (
+              <TabPanel value={tab} index={historyTabIdx}>
                 {auditLogs.length === 0 ? (
                   <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
                     No history recorded for this order.

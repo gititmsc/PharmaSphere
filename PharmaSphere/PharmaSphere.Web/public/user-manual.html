@@ -290,58 +290,58 @@
     <tr>
       <th>Role</th>
       <th>Dashboard</th>
-      <th>Sales Orders Visible</th>
-      <th>Can Edit</th>
+      <th>Orders Visible</th>
+      <th>Visible Tabs</th>
       <th>Editable Fields</th>
     </tr>
     <tr>
       <td><span class="role role-admin">Admin</span></td>
       <td>Full pipeline &amp; stats</td>
       <td>All statuses</td>
-      <td>All orders</td>
+      <td>General Info, QA / Design, Packaging Material, Production Info, History</td>
       <td>All fields including Rate &amp; Amount</td>
     </tr>
     <tr>
       <td><span class="role role-qa">QA</span></td>
       <td>PIS Pending queue</td>
       <td>PIS Pending only</td>
-      <td>PIS Pending only</td>
-      <td>PIS Approval Date; Product Permission, Combipack Product Permission, COPP &amp; FSC dates (QA / Design tab)</td>
+      <td>General Info, QA / Design</td>
+      <td>PIS Approval Date; Product Permission, Combipack Product Permission, COPP &amp; FSC dates</td>
     </tr>
     <tr>
       <td><span class="role role-designer">Designer</span></td>
       <td>Artwork Pending queue</td>
       <td>Artwork Pending only</td>
-      <td>Artwork Pending only</td>
-      <td>Artwork Approval Date</td>
+      <td>General Info, QA / Design</td>
+      <td>Artwork Approval Date only (PIS &amp; permission sections not visible)</td>
     </tr>
     <tr>
       <td><span class="role role-ppmc">PPMC</span></td>
       <td>PM Supply Pending queue</td>
       <td>PM Supply Pending only</td>
-      <td>PM Supply Pending only</td>
-      <td>All 10 Packing Material Order &amp; Receive dates</td>
+      <td>General Info, Packaging Material</td>
+      <td>All 10 Packing Material Order &amp; Receive dates (component specs not visible)</td>
     </tr>
     <tr>
       <td><span class="role role-prod">Production</span></td>
       <td>Production Pending queue</td>
       <td>Production Pending only</td>
-      <td>Production Pending only</td>
+      <td>General Info, Production Info</td>
       <td>Filling Plan Date, Sterility 14 Days Date</td>
     </tr>
     <tr>
       <td><span class="role role-pack">Packing</span></td>
       <td>Packing Pending queue</td>
       <td>Packing Pending only</td>
-      <td>Packing Pending only</td>
-      <td>Packing Plan Date</td>
+      <td>General Info, Production Info</td>
+      <td>Packing Plan Date only</td>
     </tr>
     <tr>
       <td><span class="role role-disp">Dispatcher</span></td>
       <td>Dispatch Pending queue</td>
       <td>Dispatch Pending only</td>
-      <td>Dispatch Pending only</td>
-      <td>Dispatch Date</td>
+      <td>General Info, Production Info</td>
+      <td>Dispatch Date only</td>
     </tr>
   </table>
 
@@ -523,37 +523,45 @@
   <h3 id="so-tabs">5.4 Form Tabs Overview</h3>
 
   <table>
-    <tr><th>Tab</th><th>Contents</th><th>Who Can Edit</th></tr>
+    <tr><th>Tab</th><th>Visible To</th><th>Fields Shown Per Role</th></tr>
     <tr>
       <td><strong>General Info</strong></td>
-      <td>Order No, Date, Brand Name, Party, Generic Name, Qty, Shelf Life, MRP, Make,
-          Neutral Code / Mfg. Lic. No / LL NO, Admin Remarks.
-          Rate field (Admin only) auto-calculates Amount = Rate × Qty.</td>
-      <td>Admin only.</td>
+      <td>All roles</td>
+      <td>All roles see all fields (read-only for non-Admin). Rate &amp; Amount visible to Admin only.
+          Component specifications (Vial, Seal Colour, WFI, Label, Mono Box, Month Box, Tray,
+          Leaflet, Syringe &amp; Needle, Shrink, Shipper, Hologram, Other Remarks) visible to Admin only.</td>
     </tr>
     <tr>
       <td><strong>QA / Design</strong></td>
-      <td>PIS Approval Date; Artwork Approval Date; Product Permission dates (Apply, Draft, Approval, Received);
-          Combipack Product Permission dates; COPP dates; FSC dates.</td>
-      <td>QA edits PIS Approval Date &amp; all 16 permission dates. Designer edits Artwork Approval Date.
-          Product Permission / COPP / FSC sections visible to Admin and QA only.</td>
+      <td>Admin, QA, Designer</td>
+      <td>
+        <strong>QA:</strong> PIS Approval Date + Product Permission, Combipack Product Permission, COPP, FSC date sections.<br/>
+        <strong>Designer:</strong> Artwork Approval Date only — PIS date and all permission sections are hidden.<br/>
+        <strong>Admin:</strong> All fields.
+      </td>
     </tr>
     <tr>
       <td><strong>Packaging Material</strong></td>
-      <td>Component specifications (Vial, Seal Colour, WFI, Label, Mono Box, Month Box, Tray,
-          Leaflet, Syringe &amp; Needle, Shrink, Shipper, Hologram, Other Remarks) and
-          Packing Material Order &amp; Receive dates.</td>
-      <td>Admin (specifications). PPMC (all 10 date fields).</td>
+      <td>Admin, PPMC</td>
+      <td>
+        <strong>PPMC:</strong> Packing Material Order dates &amp; Packing Material Receive dates (10 fields total) — component specifications are hidden.<br/>
+        <strong>Admin:</strong> All fields including component specifications.
+      </td>
     </tr>
     <tr>
       <td><strong>Production Info</strong></td>
-      <td>Filling Plan Date, Packing Plan Date, Sterility 14 Days Date, Dispatch Date.</td>
-      <td>Production (Filling &amp; Sterility). Packing (Packing Plan). Dispatcher (Dispatch Date).</td>
+      <td>Admin, Production, Packing, Dispatcher</td>
+      <td>
+        <strong>Production:</strong> Filling Plan Date &amp; Sterility 14 Days Date only.<br/>
+        <strong>Packing:</strong> Packing Plan Date only.<br/>
+        <strong>Dispatcher:</strong> Dispatch Date only.<br/>
+        <strong>Admin:</strong> All four fields.
+      </td>
     </tr>
     <tr>
       <td><strong>History</strong></td>
-      <td>Full status change timeline and field-level audit log.</td>
-      <td>Visible to <strong>Admin only</strong>. Not shown to any other role.</td>
+      <td>Admin only</td>
+      <td>Full status change timeline and field-level audit log. Not shown to any other role.</td>
     </tr>
   </table>
 
@@ -648,6 +656,10 @@
   <p>You are responsible for completing all regulatory design approvals before artwork
      can begin. This requires filling <strong>17 date fields</strong> on the
      <strong>QA / Design</strong> tab.</p>
+  <div class="callout callout-info">
+    <strong>Tabs visible to your role:</strong> General Info and QA / Design only.
+    Packaging Material, Production Info, and History tabs are not shown.
+  </div>
   <ol class="steps">
     <li><p>Log in. Your Dashboard shows all orders in
         <span class="status s-pis">PIS Pending</span> status.</p></li>
@@ -679,6 +691,11 @@
 
   <h3 id="rg-designer">6.2 Designer Role — Artwork Approval</h3>
   <p>You sign off on the artwork before packaging materials are ordered.</p>
+  <div class="callout callout-info">
+    <strong>Tabs visible to your role:</strong> General Info and QA / Design only.
+    On the QA / Design tab you will see <strong>only the Artwork Approval Date</strong> —
+    the PIS date and all permission sections are not shown.
+  </div>
   <ol class="steps">
     <li><p>Log in. Your Dashboard shows all <span class="status s-art">Artwork Pending</span> orders.</p></li>
     <li><p>Open an order and go to the <strong>QA / Design</strong> tab.</p></li>
@@ -690,6 +707,11 @@
 
   <h3 id="rg-ppmc">6.3 PPMC Role — Packing Material Supply</h3>
   <p>You coordinate ordering and receipt of all 10 packaging material components.</p>
+  <div class="callout callout-info">
+    <strong>Tabs visible to your role:</strong> General Info and Packaging Material only.
+    On the Packaging Material tab you will see <strong>only the 10 date fields</strong>
+    (Packing Material Order &amp; Receive) — component specifications are not shown.
+  </div>
   <ol class="steps">
     <li><p>Log in. Your Dashboard shows all <span class="status s-pm">PM Supply Pending</span> orders.</p></li>
     <li><p>Open an order and go to the <strong>Packaging Material</strong> tab.</p></li>
@@ -711,6 +733,11 @@
 
   <h3 id="rg-production">6.4 Production Role — Filling Plan</h3>
   <p>You enter the filling production schedule.</p>
+  <div class="callout callout-info">
+    <strong>Tabs visible to your role:</strong> General Info and Production Info only.
+    On the Production Info tab you will see <strong>Filling Plan Date and Sterility 14 Days Date only</strong> —
+    Packing Plan and Dispatch Date are not shown.
+  </div>
   <ol class="steps">
     <li><p>Log in. Your Dashboard shows all <span class="status s-prod">Production Pending</span> orders.</p></li>
     <li><p>Open an order and go to the <strong>Production Info</strong> tab.</p></li>
@@ -722,6 +749,11 @@
 
   <h3 id="rg-packing">6.5 Packing Role — Packing Plan</h3>
   <p>You schedule the packing operation after filling is complete.</p>
+  <div class="callout callout-info">
+    <strong>Tabs visible to your role:</strong> General Info and Production Info only.
+    On the Production Info tab you will see <strong>Packing Plan Date only</strong> —
+    Filling Plan, Sterility, and Dispatch Date are not shown.
+  </div>
   <ol class="steps">
     <li><p>Log in. Your Dashboard shows all <span class="status s-pack">Packing Pending</span> orders.</p></li>
     <li><p>Open an order and go to the <strong>Production Info</strong> tab.</p></li>
@@ -732,6 +764,11 @@
 
   <h3 id="rg-dispatch">6.6 Dispatcher Role — Dispatch</h3>
   <p>You record the actual dispatch and complete the order lifecycle.</p>
+  <div class="callout callout-info">
+    <strong>Tabs visible to your role:</strong> General Info and Production Info only.
+    On the Production Info tab you will see <strong>Dispatch Date only</strong> —
+    Filling Plan, Sterility, and Packing Plan are not shown.
+  </div>
   <ol class="steps">
     <li><p>Log in. Your Dashboard shows all <span class="status s-disp-p">Dispatch Pending</span> orders.</p></li>
     <li><p>Open an order and go to the <strong>Production Info</strong> tab.</p></li>
@@ -1076,36 +1113,66 @@
     </tr>
     <tr>
       <td class="tc-id">RBAC-05</td>
-      <td>QA cannot edit Artwork Approval Date</td>
-      <td>Login as QA → open PIS Pending order → QA / Design tab → Artwork Approval Date field is read-only</td>
+      <td>QA does not see Artwork Approval Date</td>
+      <td>Login as QA → open PIS Pending order → QA / Design tab → Artwork Approval Date field is not visible</td>
       <td></td><td></td>
     </tr>
     <tr>
       <td class="tc-id">RBAC-06</td>
-      <td>Product Permission / COPP / FSC sections hidden from non-QA / non-Admin</td>
-      <td>Login as Designer → open any order → QA / Design tab → Product Permission, Combipack, COPP, FSC sections not visible</td>
+      <td>Designer sees only Artwork date on QA / Design tab</td>
+      <td>Login as Designer → open Artwork Pending order → QA / Design tab → only Artwork Approval Date visible; PIS date and all permission sections not shown</td>
       <td></td><td></td>
     </tr>
     <tr>
       <td class="tc-id">RBAC-07</td>
+      <td>QA does not see Packaging Material or Production Info tabs</td>
+      <td>Login as QA → open any order → only General Info and QA / Design tabs visible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-08</td>
+      <td>PPMC sees only PM date fields (not component specs)</td>
+      <td>Login as PPMC → open any order → Packaging Material tab → only 10 date fields visible; Vial, Label spec, Mono Box spec etc. not shown</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-09</td>
+      <td>Production sees only Filling &amp; Sterility fields</td>
+      <td>Login as Production → open any order → Production Info tab → only Filling Plan Date and Sterility 14 Days Date visible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-10</td>
+      <td>Packing sees only Packing Plan field</td>
+      <td>Login as Packing → open any order → Production Info tab → only Packing Plan Date visible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-11</td>
+      <td>Dispatcher sees only Dispatch Date field</td>
+      <td>Login as Dispatch → open any order → Production Info tab → only Dispatch Date visible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">RBAC-12</td>
       <td>General Info read-only for non-admin</td>
       <td>Login as any non-admin role → open any order → General Info fields are read-only</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">RBAC-08</td>
+      <td class="tc-id">RBAC-13</td>
       <td>Rate field hidden for non-admin</td>
       <td>Login as QA → open any order → General Info tab → Rate field is not visible</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">RBAC-09</td>
+      <td class="tc-id">RBAC-14</td>
       <td>Cancel button hidden for non-admin</td>
       <td>Login as QA → open any order → no "Cancel Sales Order" button</td>
       <td></td><td></td>
     </tr>
     <tr>
-      <td class="tc-id">RBAC-10</td>
+      <td class="tc-id">RBAC-15</td>
       <td>Backend enforces role filter (API)</td>
       <td>QA user calls GET /api/orders without status param → only PIS Pending returned</td>
       <td></td><td></td>
