@@ -81,6 +81,13 @@ namespace PharmaSphere.Repositories.ProductMasters
         public async Task<ProductMaster?> GetByIdAsync(int id, CancellationToken ct = default) =>
             await _db.ProductMasters.FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted, ct);
 
+        public async Task<ProductMaster?> GetByBrandNameAsync(string brandName, CancellationToken ct = default) =>
+            await _db.ProductMasters
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted && p.BrandName == brandName)
+                .OrderBy(p => p.Id)
+                .FirstOrDefaultAsync(ct);
+
         public async Task AddAsync(ProductMaster product, CancellationToken ct = default)
         {
             _db.ProductMasters.Add(product);

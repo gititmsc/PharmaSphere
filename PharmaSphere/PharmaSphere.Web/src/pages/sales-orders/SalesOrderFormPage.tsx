@@ -150,7 +150,6 @@ const SalesOrderFormPage: React.FC = () => {
   const [loading, setLoading]       = useState(isEdit);
   const [orderStatus, setOrderStatus] = useState('');
   const [orderNo, setOrderNo]       = useState('');
-  const [sealColors, setSealColors]   = useState<string[]>([]);
   const [parties, setParties]         = useState<string[]>([]);
   const [brandNames, setBrandNames]   = useState<string[]>([]);
   const [auditLogs, setAuditLogs]     = useState<OrderAuditLogItem[]>([]);
@@ -169,67 +168,37 @@ const SalesOrderFormPage: React.FC = () => {
   }, [isEdit, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    OrderService.getSealColors().then(setSealColors).catch(() => {});
     LookupService.getParties().then(setParties).catch(() => {});
-    LookupService.getBrandNames().then(setBrandNames).catch(() => {});
+    LookupService.getProductMasterBrands().then(setBrandNames).catch(() => {});
   }, []);
 
-  const handleBrandNameSelect = async (brandName: string) => {
-    if (isEdit || !brandName.trim()) return;
-    const prev = await OrderService.getLatestByBrand(brandName);
-    if (!prev) return;
+  const pmFields: (keyof OrderFormValues)[] = [
+    'composition', 'vial', 'sealColour', 'wfi', 'label',
+    'monoBox', 'monthBox', 'tray', 'leaflet', 'syringeAndNeedle',
+    'shrink', 'shipper', 'hologram',
+  ];
 
-    reset({
-      orderNo:      '',
-      orderDate:    new Date().toISOString().slice(0, 10),
-      party:        prev.party ?? '',
-      brandName:    brandName,
-      composition:  prev.composition ?? '',
-      qty:          prev.qty?.toString() ?? '',
-      shelfLifeMonths: prev.shelfLifeMonths ?? '',
-      mrp:          prev.mrp?.toString() ?? '',
-      rate:         prev.rate?.toString() ?? '',
-      amount:       prev.amount?.toString() ?? '',
-      make:         prev.make ?? '',
-      neutralCode:  prev.neutralCode ?? '',
-      adminRemarks: prev.adminRemarks ?? '',
-      otherRemarks: prev.otherRemarks ?? '',
-      // Packaging
-      vial:             prev.vial ?? '',
-      sealColour:       prev.sealColour ?? '',
-      wfi:              prev.wfi ?? '',
-      label:            prev.label ?? '',
-      monoBox:          prev.monoBox ?? '',
-      monthBox:         prev.monthBox ?? '',
-      tray:             prev.tray ?? '',
-      leaflet:          prev.leaflet ?? '',
-      syringeAndNeedle: prev.syringeAndNeedle ?? '',
-      shrink:           prev.shrink ?? '',
-      shipper:          prev.shipper ?? '',
-      hologram:         prev.hologram ?? '',
-      // QA dates cleared
-      pisApprovalDate:                 '',
-      sanoletPartyArtworkApprovalDate: '',
-      monoBoxSupplyVendorApprovalDate: '',
-      labelSupplyVendorApprovalDate:   '',
-      insertSupplyVendorApprovalDate:  '',
-      traySupplyVendorApprovalDate:    '',
-      shipperSupplyVendorApprovalDate: '',
-      // Production dates cleared
-      productionMonoBox:   '',
-      productionLabel:     '',
-      productionInsert:    '',
-      productionTray:      '',
-      productionShipper:   '',
-      fillingPlan:         '',
-      packingPlan:         '',
-      sterility14DaysDate: '',
-      dispatchDate:        '',
-    });
-    enqueueSnackbar(`Pre-filled from order ${prev.orderNo}`, {
-      variant: 'info',
-      anchorOrigin: { vertical: 'top', horizontal: 'right' },
-    });
+  const handleBrandNameSelect = async (brandName: string) => {
+    if (roBrandName) return;
+    if (!brandName.trim()) {
+      pmFields.forEach(k => setValue(k, ''));
+      return;
+    }
+    const pm = await LookupService.getProductMasterByBrand(brandName);
+    if (!pm) return;
+    setValue('composition',      pm.genericName);
+    setValue('vial',             pm.vial);
+    setValue('sealColour',       pm.sealColor);
+    setValue('wfi',              pm.wfi);
+    setValue('label',            pm.label);
+    setValue('monoBox',          pm.monoBox);
+    setValue('monthBox',         pm.monthBox);
+    setValue('tray',             pm.tray);
+    setValue('leaflet',          pm.leaflet);
+    setValue('syringeAndNeedle', pm.syringeNeedle);
+    setValue('shrink',           pm.shrink);
+    setValue('shipper',          pm.shipper);
+    setValue('hologram',         pm.hologram);
   };
 
   useEffect(() => {
@@ -346,6 +315,8 @@ const SalesOrderFormPage: React.FC = () => {
   // Fully locked: Cancelled (all), or Dispatched for non-Admin
   const ro = orderStatus === 'Cancelled' || (orderStatus === 'Dispatched' && !isAdmin);
   const roGeneralInfo = ro || !isAdmin;
+  // Brand Name: editable only when creating OR editing while still in PIS Pending
+  const roBrandName = isEdit && orderStatus !== 'PIS Pending';
 
   // Per-field role gates (base ro applies first, then role check)
   // QA may only fill pisApprovalDate while the order is still in 'PIS Pending'
@@ -455,7 +426,7 @@ const SalesOrderFormPage: React.FC = () => {
                           }
                         }}
                         onInputChange={(_, v) => field.onChange(v)}
-                        disabled={roGeneralInfo}
+                        disabled={roBrandName}
                         size="small"
                         renderInput={(params) => (
                           <TextField
@@ -465,7 +436,7 @@ const SalesOrderFormPage: React.FC = () => {
                             onBlur={(e) => {
                               field.onBlur();
                               const val = (e.target as HTMLInputElement).value?.trim();
-                              if (!isEdit && !justSelectedRef.current && val) {
+                              if (!justSelectedRef.current && val) {
                                 handleBrandNameSelect(val);
                               }
                             }}
@@ -478,7 +449,7 @@ const SalesOrderFormPage: React.FC = () => {
 
                 {/* Row 2: Generic Name | Qty | Shelf Life | MRP */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="composition" label="Generic Name" control={control} readOnly={roGeneralInfo} placeholder="Active ingredients" />
+                  <Fld name="composition" label="Generic Name" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="qty" label="Quantity" control={control} type="number" readOnly={roGeneralInfo} placeholder="0" />
@@ -543,69 +514,46 @@ const SalesOrderFormPage: React.FC = () => {
 
                 {/* Row 5: Vial | Seal Colour | WFI */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="vial" label="Vial" control={control} readOnly={roGeneralInfo} placeholder="Enter vial" />
+                  <Fld name="vial" label="Vial" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Controller
-                    name="sealColour"
-                    control={control}
-                    render={({ field }) => (
-                      <Autocomplete
-                        freeSolo
-                        options={sealColors}
-                        value={field.value || null}
-                        inputValue={field.value || ''}
-                        onChange={(_, newValue) => field.onChange(newValue ?? '')}
-                        onInputChange={(_, newInputValue) => field.onChange(newInputValue)}
-                        disabled={roGeneralInfo}
-                        size="small"
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Seal Colour"
-                            placeholder="Select or type colour"
-                            onBlur={field.onBlur}
-                          />
-                        )}
-                      />
-                    )}
-                  />
+                  <Fld name="sealColour" label="Seal Colour" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="wfi" label="WFI" control={control} readOnly={roGeneralInfo} placeholder="Enter WFI" />
+                  <Fld name="wfi" label="WFI" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
 
                 {/* Row 6: Label | Mono Box | Month Box | Tray */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="label" label="Label" control={control} readOnly={roGeneralInfo} placeholder="Enter label" />
+                  <Fld name="label" label="Label" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="monoBox" label="Mono Box" control={control} readOnly={roGeneralInfo} placeholder="Enter mono box" />
+                  <Fld name="monoBox" label="Mono Box" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="monthBox" label="Month Box" control={control} readOnly={roGeneralInfo} placeholder="Enter month box" />
+                  <Fld name="monthBox" label="Month Box" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="tray" label="Tray" control={control} readOnly={roGeneralInfo} placeholder="Enter tray" />
+                  <Fld name="tray" label="Tray" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
 
                 {/* Row 7: Leaflet | Syringe & Needle | Shrink */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="leaflet" label="Leaflet" control={control} readOnly={roGeneralInfo} placeholder="Enter leaflet" />
+                  <Fld name="leaflet" label="Leaflet" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="syringeAndNeedle" label="Syringe & Needle" control={control} readOnly={roGeneralInfo} placeholder="Enter syringe & needle" />
+                  <Fld name="syringeAndNeedle" label="Syringe & Needle" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="shrink" label="Shrink" control={control} readOnly={roGeneralInfo} placeholder="Enter shrink" />
+                  <Fld name="shrink" label="Shrink" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
 
                 {/* Row 8: Shipper | Hologram */}
                 <Grid item xs={12} sm={4}>
-                  <Fld name="shipper" label="Shipper" control={control} readOnly={roGeneralInfo} placeholder="Enter shipper" />
+                  <Fld name="shipper" label="Shipper" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="hologram" label="Hologram" control={control} readOnly={roGeneralInfo} placeholder="Enter hologram" />
+                  <Fld name="hologram" label="Hologram" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
 
                 <Grid item xs={12}>

@@ -8,6 +8,7 @@ namespace PharmaSphere.Repositories.Interfaces
         Task<PagedResultDto<ProductMasterListItemDto>> GetPagedAsync(ProductMasterListQueryDto query, CancellationToken ct = default);
         Task<IReadOnlyList<string>> GetAllBrandNamesAsync(CancellationToken ct = default);
         Task<ProductMaster?> GetByIdAsync(int id, CancellationToken ct = default);
+        Task<ProductMaster?> GetByBrandNameAsync(string brandName, CancellationToken ct = default);
         Task AddAsync(ProductMaster product, CancellationToken ct = default);
         Task<bool> DeleteAsync(int id, CancellationToken ct = default);
         Task SaveChangesAsync(CancellationToken ct = default);
