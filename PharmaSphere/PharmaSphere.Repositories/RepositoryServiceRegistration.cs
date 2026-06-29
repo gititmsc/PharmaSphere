@@ -4,6 +4,7 @@ using PharmaSphere.Repositories.Interfaces;
 using PharmaSphere.Repositories.Lookups;
 using PharmaSphere.Repositories.Orders;
 using PharmaSphere.Repositories.OrderStatuses;
+using PharmaSphere.Repositories.ProductMasters;
 
 
 
@@ -22,6 +23,7 @@ namespace PharmaSphere.Repositories
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<ILookupRepository, LookupRepository>();
             services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
+            services.AddScoped<IProductMasterRepository, ProductMasterRepository>();
 
             return services;
         }

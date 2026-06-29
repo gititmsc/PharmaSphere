@@ -8,6 +8,7 @@ using PharmaSphere.Services.Users;
 using PharmaSphere.Services.Lookups;
 using PharmaSphere.Services.Orders;
 using PharmaSphere.Services.OrderStatuses;
+using PharmaSphere.Services.ProductMasters;
 
 namespace PharmaSphere.Services
 {
@@ -29,6 +30,7 @@ namespace PharmaSphere.Services
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<ILookupService, LookupService>();
             services.AddScoped<IOrderStatusService, OrderStatusService>();
+            services.AddScoped<IProductMasterService, ProductMasterService>();
 
             return services;
         }

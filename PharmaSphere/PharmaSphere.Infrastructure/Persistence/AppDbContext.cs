@@ -30,6 +30,7 @@ namespace PharmaSphere.Infrastructure.Persistence
         public DbSet<OrderStatusConfig>     OrderStatuses          => Set<OrderStatusConfig>();
         public DbSet<OrderStatusTransition> OrderStatusTransitions => Set<OrderStatusTransition>();
         public DbSet<ErrorLog>              ErrorLogs              => Set<ErrorLog>();
+        public DbSet<ProductMaster>         ProductMasters         => Set<ProductMaster>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -372,6 +373,30 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(el => el.ErrorLogId).ValueGeneratedOnAdd();
                 e.Property(el => el.IPAddress).HasMaxLength(20);
                 e.Property(el => el.ClientBrowser).HasMaxLength(50);
+            });
+
+            // ── ProductMaster table ───────────────────────────────────────────────
+            modelBuilder.Entity<ProductMaster>(e =>
+            {
+                e.ToTable("ProductMaster");
+                e.HasKey(p => p.Id);
+                e.Property(p => p.Id).ValueGeneratedOnAdd();
+                e.Property(p => p.BrandName).HasMaxLength(200).IsRequired();
+                e.Property(p => p.GenericName).HasMaxLength(500).IsRequired();
+                e.Property(p => p.Vial).HasMaxLength(200).IsRequired();
+                e.Property(p => p.SealColor).HasMaxLength(100).IsRequired();
+                e.Property(p => p.WFI).HasMaxLength(100).IsRequired();
+                e.Property(p => p.Label).HasMaxLength(200).IsRequired();
+                e.Property(p => p.MonoBox).HasMaxLength(200).IsRequired();
+                e.Property(p => p.MonthBox).HasMaxLength(200).IsRequired();
+                e.Property(p => p.Tray).HasMaxLength(200).IsRequired();
+                e.Property(p => p.Leaflet).HasMaxLength(200).IsRequired();
+                e.Property(p => p.SyringeNeedle).HasMaxLength(200).IsRequired();
+                e.Property(p => p.Shrink).HasMaxLength(200).IsRequired();
+                e.Property(p => p.Shipper).HasMaxLength(200).IsRequired();
+                e.Property(p => p.Hologram).HasMaxLength(200).IsRequired();
+                e.Property(p => p.CreatedBy).HasMaxLength(100);
+                e.Property(p => p.UpdatedBy).HasMaxLength(100);
             });
         }
     }

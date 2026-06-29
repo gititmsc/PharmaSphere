@@ -28,6 +28,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import MedicationIcon from '@mui/icons-material/Medication';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import logoImg from '@/assets/logo.jpg';
@@ -45,7 +46,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navItems = [
     { label: 'Dashboard',    icon: <DashboardIcon />, path: '/dashboard' },
     { label: 'Sales Orders', icon: <ListAltIcon />,   path: '/sales-orders' },
-    ...(isAdmin ? [{ label: 'Users', icon: <PeopleIcon />, path: '/users' }] : []),
+    ...(isAdmin ? [
+      { label: 'Users',          icon: <PeopleIcon />,    path: '/users' },
+      { label: 'Product Master', icon: <MedicationIcon />, path: '/product-masters' },
+    ] : []),
   ];
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
