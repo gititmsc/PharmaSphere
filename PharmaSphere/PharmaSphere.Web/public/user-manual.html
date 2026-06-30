@@ -229,17 +229,26 @@
       </ol>
     </li>
     <li><a href="#users">7. User Management (Admin)</a></li>
-    <li><a href="#uat">8. UAT Test Cases</a>
+    <li><a href="#product-master">8. Product Master (Admin)</a>
       <ol>
-        <li><a href="#uat-auth">8.1 Authentication</a></li>
-        <li><a href="#uat-dashboard">8.2 Dashboard</a></li>
-        <li><a href="#uat-so">8.3 Sales Orders</a></li>
-        <li><a href="#uat-workflow">8.4 Status Workflow</a></li>
-        <li><a href="#uat-access">8.5 Role-Based Access Control</a></li>
-        <li><a href="#uat-users">8.6 User Management</a></li>
+        <li><a href="#pm-list">8.1 Product Master List</a></li>
+        <li><a href="#pm-add">8.2 Adding a Product</a></li>
+        <li><a href="#pm-edit">8.3 Editing a Product</a></li>
+        <li><a href="#pm-delete">8.4 Deleting a Product</a></li>
       </ol>
     </li>
-    <li><a href="#glossary">9. Glossary</a></li>
+    <li><a href="#uat">9. UAT Test Cases</a>
+      <ol>
+        <li><a href="#uat-auth">9.1 Authentication</a></li>
+        <li><a href="#uat-dashboard">9.2 Dashboard</a></li>
+        <li><a href="#uat-so">9.3 Sales Orders</a></li>
+        <li><a href="#uat-workflow">9.4 Status Workflow</a></li>
+        <li><a href="#uat-access">9.5 Role-Based Access Control</a></li>
+        <li><a href="#uat-users">9.6 User Management</a></li>
+        <li><a href="#uat-pm">9.7 Product Master</a></li>
+      </ol>
+    </li>
+    <li><a href="#glossary">10. Glossary</a></li>
   </ol>
 </div>
 
@@ -269,6 +278,7 @@
     <li>Secure JWT authentication with optional Two-Factor Authentication (2FA)</li>
     <li>Admin-only access to sensitive fields (Rate, Amount) and management features</li>
     <li>Dedicated QA / Design tab for regulatory permission dates (Product Permission, COPP, FSC)</li>
+    <li>Centralised Product Master catalogue — brand selection auto-fills all packaging component specifications into new sales orders</li>
   </ul>
 
   <h3>Supported Browsers</h3>
@@ -299,7 +309,7 @@
       <td>Full pipeline &amp; stats</td>
       <td>All statuses</td>
       <td>General Info, QA / Design, Packaging Material, Production Info, History</td>
-      <td>All fields including Rate &amp; Amount</td>
+      <td>All fields including Rate &amp; Amount. Full access to Product Master (create, edit, delete)</td>
     </tr>
     <tr>
       <td><span class="role role-qa">QA</span></td>
@@ -504,9 +514,13 @@
   </ol>
 
   <div class="callout callout-info">
-    <strong>Brand Name Auto-fill</strong>
-    When you select an existing brand name, the form pre-fills details from the
-    most recent order for that brand to save data entry time.
+    <strong>Brand Name Auto-fill from Product Master</strong>
+    Brand Name is selected from the <strong>Product Master</strong> catalogue.
+    Once you choose a brand, the system automatically populates all packaging component
+    fields (Generic Name, Vial, Seal Colour, WFI, Label, Mono Box, Month Box, Tray,
+    Leaflet, Syringe &amp; Needle, Shrink, Shipper, Hologram) from the Product Master
+    record. These fields are <strong>read-only for all roles</strong> and cannot be
+    manually overridden.
   </div>
 
   <h3 id="so-edit">5.3 Editing a Sales Order</h3>
@@ -520,6 +534,15 @@
         criteria the status advances automatically.</p></li>
   </ol>
 
+  <div class="callout callout-warning">
+    <strong>Brand Name is locked once an order moves past PIS Pending</strong>
+    Brand Name can only be changed while the order status is
+    <span class="status s-pis">PIS Pending</span>.
+    For any other status — including by Admin — the Brand Name field is read-only.
+    If you change the Brand Name while in PIS Pending, all packaging component fields
+    are automatically refreshed from the updated Product Master record.
+  </div>
+
   <h3 id="so-tabs">5.4 Form Tabs Overview</h3>
 
   <table>
@@ -529,7 +552,8 @@
       <td>All roles</td>
       <td>All roles see all fields (read-only for non-Admin). Rate &amp; Amount visible to Admin only.
           Component specifications (Vial, Seal Colour, WFI, Label, Mono Box, Month Box, Tray,
-          Leaflet, Syringe &amp; Needle, Shrink, Shipper, Hologram, Other Remarks) visible to Admin only.</td>
+          Leaflet, Syringe &amp; Needle, Shrink, Shipper, Hologram, Other Remarks) visible to Admin only.
+          Component spec fields are always read-only (auto-filled from the Product Master catalogue).</td>
     </tr>
     <tr>
       <td><strong>QA / Design</strong></td>
@@ -819,14 +843,101 @@
   </ul>
 </div>
 
-<!-- ══════════════════════ 8. UAT TEST CASES ═════════════════════════ -->
+<!-- ══════════════════════ 8. PRODUCT MASTER ════════════════════════ -->
+<div class="page section-page" id="product-master">
+  <h2 class="section">8. Product Master (Admin Only)</h2>
+  <p>The <strong>Product Master</strong> is the centralised catalogue of all products manufactured
+     by the organisation. It stores the standard packaging component specifications for each brand.
+     When a new sales order is created, the Brand Name is selected from this catalogue and all
+     component fields are automatically populated.</p>
+  <p>The <strong>Product Master</strong> menu item in the sidebar is visible only to Admin users.</p>
+
+  <h3 id="pm-list">8.1 Product Master List</h3>
+  <ol class="steps">
+    <li><p>Click <strong>Product Master</strong> in the left sidebar.</p></li>
+    <li><p>The list displays all active products with their Brand Name, Generic Name,
+        Vial, Seal Colour, and Mono Box.</p></li>
+  </ol>
+
+  <h4>Filtering &amp; Search</h4>
+  <ul>
+    <li><strong>Search</strong> — type any keyword to filter across all text fields.</li>
+    <li><strong>Brand Name</strong> — select a specific brand from the dropdown filter.</li>
+    <li>Click the <strong>red filter icon</strong> to clear all active filters.</li>
+  </ul>
+
+  <h4>Pagination</h4>
+  <p>Use the <strong>Rows per page</strong> selector and the pagination arrows at the bottom of the
+     list to navigate large catalogues. The current range (e.g. 1–10 of 35) is shown alongside
+     the controls.</p>
+
+  <h3 id="pm-add">8.2 Adding a New Product</h3>
+  <ol class="steps">
+    <li><p>Click <strong>+ Add Product</strong> in the top-right of the Product Master list.</p></li>
+    <li><p>Fill in all 14 required fields:</p>
+      <ul>
+        <li><strong>Brand Name</strong> — the proprietary product name.</li>
+        <li><strong>Generic Name</strong> — the non-proprietary (chemical) name.</li>
+        <li><strong>Vial</strong> — vial specification.</li>
+        <li><strong>Seal Colour</strong> — seal colour (type freely or select a suggestion).</li>
+        <li><strong>WFI</strong> — Water for Injection specification.</li>
+        <li><strong>Label</strong> — label specification.</li>
+        <li><strong>Mono Box</strong> — mono box specification.</li>
+        <li><strong>Month Box</strong> — month box specification.</li>
+        <li><strong>Tray</strong> — tray specification.</li>
+        <li><strong>Leaflet</strong> — leaflet specification.</li>
+        <li><strong>Syringe &amp; Needle</strong> — syringe and needle specification.</li>
+        <li><strong>Shrink</strong> — shrink wrap specification.</li>
+        <li><strong>Shipper</strong> — shipper box specification.</li>
+        <li><strong>Hologram</strong> — hologram specification.</li>
+      </ul>
+    </li>
+    <li><p>Click <strong>Save</strong>. The product is added to the catalogue and immediately
+        available as a Brand Name option in new sales orders.</p></li>
+  </ol>
+
+  <div class="callout callout-warning">
+    <strong>All 14 fields are mandatory.</strong>
+    The form cannot be submitted with any field left blank.
+  </div>
+
+  <h3 id="pm-edit">8.3 Editing a Product</h3>
+  <ol class="steps">
+    <li><p>Click the <strong>Edit (pencil) icon</strong> on the product row.</p></li>
+    <li><p>Update any field as required.</p></li>
+    <li><p>Click <strong>Save</strong>.</p></li>
+  </ol>
+
+  <div class="callout callout-info">
+    <strong>Note on existing sales orders</strong>
+    Editing a Product Master record does <strong>not</strong> retroactively update
+    the packaging fields on sales orders that were already created using that brand.
+    Each sales order stores its own snapshot of the product specifications at the
+    time the Brand Name was selected.
+  </div>
+
+  <h3 id="pm-delete">8.4 Deleting a Product</h3>
+  <ol class="steps">
+    <li><p>Click the <strong>Delete (trash) icon</strong> on the product row.</p></li>
+    <li><p>A confirmation dialog displays the brand name. Confirm to proceed.</p></li>
+    <li><p>The product is soft-deleted and removed from the list and from the Brand Name
+        dropdown in new sales orders.</p></li>
+  </ol>
+
+  <div class="callout callout-warning">
+    <strong>This action cannot be undone through the UI.</strong>
+    Deleting a product does not affect existing sales orders that already reference it.
+  </div>
+</div>
+
+<!-- ══════════════════════ 9. UAT TEST CASES ═════════════════════════ -->
 <div class="page section-page" id="uat">
-  <h2 class="section">8. UAT Test Cases</h2>
+  <h2 class="section">9. UAT Test Cases</h2>
   <p>Use the table below to verify each feature during User Acceptance Testing.
      Mark each test <span class="uat-pass">PASS</span> or
      <span class="uat-fail">FAIL</span> and note any observations.</p>
 
-  <h3 id="uat-auth">8.1 Authentication</h3>
+  <h3 id="uat-auth">9.1 Authentication</h3>
   <table>
     <tr><th>Test ID</th><th>Scenario</th><th>Steps</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
     <tr>
@@ -873,7 +984,7 @@
     </tr>
   </table>
 
-  <h3 id="uat-dashboard">8.2 Dashboard</h3>
+  <h3 id="uat-dashboard">9.2 Dashboard</h3>
   <table>
     <tr><th>Test ID</th><th>Scenario</th><th>Steps</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
     <tr>
@@ -913,7 +1024,7 @@
     </tr>
   </table>
 
-  <h3 id="uat-so">8.3 Sales Orders</h3>
+  <h3 id="uat-so">9.3 Sales Orders</h3>
   <table>
     <tr><th>Test ID</th><th>Scenario</th><th>Steps</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
     <tr>
@@ -988,13 +1099,34 @@
     </tr>
     <tr>
       <td class="tc-id">SO-11</td>
-      <td>Brand name auto-fill</td>
-      <td>Admin → Add Order → select existing brand name</td>
-      <td>Party, Composition, Qty and packaging fields pre-fill from last order</td>
+      <td>Brand name auto-fill from Product Master</td>
+      <td>Admin → Add Order → select a brand name from the dropdown</td>
+      <td>Generic Name, Vial, Seal Colour, WFI, Label, Mono Box, Month Box, Tray, Leaflet, Syringe &amp; Needle, Shrink, Shipper, Hologram auto-filled from Product Master; all those fields are read-only</td>
       <td></td><td></td>
     </tr>
     <tr>
       <td class="tc-id">SO-12</td>
+      <td>PM fields read-only for all roles on new order</td>
+      <td>Admin → Add Order → select brand name → attempt to edit Vial or any other PM-derived field</td>
+      <td>All 13 PM-derived fields are read-only; values cannot be changed</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-13</td>
+      <td>Brand Name locked past PIS Pending</td>
+      <td>Open an order whose status is Artwork Pending (or later) → General Info tab</td>
+      <td>Brand Name field is disabled/read-only; no role (including Admin) can change it</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-14</td>
+      <td>Brand Name editable in PIS Pending edit mode</td>
+      <td>Open an order with status PIS Pending → change the Brand Name → save</td>
+      <td>Brand Name dropdown is active; selecting a new brand refreshes all PM-derived fields; save succeeds</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">SO-15</td>
       <td>History tab — Admin only</td>
       <td>Login as Admin → open any existing order → click History tab</td>
       <td>Status history and field-level audit log entries visible</td>
@@ -1002,7 +1134,7 @@
     </tr>
   </table>
 
-  <h3 id="uat-workflow">8.4 Status Workflow</h3>
+  <h3 id="uat-workflow">9.4 Status Workflow</h3>
   <table>
     <tr><th>Test ID</th><th>Scenario</th><th>Role</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
     <tr>
@@ -1084,7 +1216,7 @@
     </tr>
   </table>
 
-  <h3 id="uat-access">8.5 Role-Based Access Control</h3>
+  <h3 id="uat-access">9.5 Role-Based Access Control</h3>
   <table>
     <tr><th>Test ID</th><th>Scenario</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
     <tr>
@@ -1179,7 +1311,7 @@
     </tr>
   </table>
 
-  <h3 id="uat-users">8.6 User Management</h3>
+  <h3 id="uat-users">9.6 User Management</h3>
   <table>
     <tr><th>Test ID</th><th>Scenario</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
     <tr>
@@ -1201,13 +1333,79 @@
       <td></td><td></td>
     </tr>
   </table>
+
+  <h3 id="uat-pm">9.7 Product Master</h3>
+  <table>
+    <tr><th>Test ID</th><th>Scenario</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
+    <tr>
+      <td class="tc-id">PM-01</td>
+      <td>Product Master menu — Admin only</td>
+      <td>Login as Admin → "Product Master" appears in sidebar. Login as any other role → menu item not visible</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">PM-02</td>
+      <td>Add product — all fields required</td>
+      <td>Admin → + Add Product → leave any one field blank → attempt to save → validation error shown; product not created</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">PM-03</td>
+      <td>Add product successfully</td>
+      <td>Admin → + Add Product → fill all 14 fields → Save → product appears in list; success toast shown</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">PM-04</td>
+      <td>Edit product</td>
+      <td>Admin → click Edit on a product → change any field → Save → list reflects updated value; success toast shown</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">PM-05</td>
+      <td>Delete product</td>
+      <td>Admin → click Delete → confirm → product removed from list; success toast shown</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">PM-06</td>
+      <td>Deleted product not available in Sales Order</td>
+      <td>Delete a product → Admin → Add New Sales Order → Brand Name dropdown does not include deleted brand</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">PM-07</td>
+      <td>Search filter</td>
+      <td>Admin → Product Master list → type part of a brand name → list filters in real time</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">PM-08</td>
+      <td>Brand Name filter dropdown</td>
+      <td>Admin → Product Master list → select a brand from the Brand Name filter → only matching product(s) shown</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">PM-09</td>
+      <td>Pagination</td>
+      <td>With more products than the page size, pagination arrows and range text are shown and work correctly</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">PM-10</td>
+      <td>Non-admin cannot access Product Master API</td>
+      <td>Log in as QA → attempt to call POST /api/product-masters directly → 403 Forbidden returned</td>
+      <td></td><td></td>
+    </tr>
+  </table>
 </div>
 
-<!-- ══════════════════════ 9. GLOSSARY ═══════════════════════════════ -->
+<!-- ══════════════════════ 10. GLOSSARY ══════════════════════════════ -->
 <div class="page section-page" id="glossary">
-  <h2 class="section">9. Glossary</h2>
+  <h2 class="section">10. Glossary</h2>
   <table>
     <tr><th>Term</th><th>Definition</th></tr>
+    <tr><td>Product Master</td><td>The centralised Admin-managed catalogue of all manufactured products. Each record stores the standard packaging component specifications (Generic Name, Vial, Seal Colour, WFI, Label, Mono Box, Month Box, Tray, Leaflet, Syringe &amp; Needle, Shrink, Shipper, Hologram) for a brand. Selecting a brand in a sales order auto-fills these fields from the catalogue.</td></tr>
     <tr><td>PIS</td><td>Product Information Sheet — the initial product specification document that QA must approve.</td></tr>
     <tr><td>Generic Name</td><td>The non-proprietary (chemical) name of the drug product; previously labelled "Composition" in the form.</td></tr>
     <tr><td>MRP</td><td>Maximum Retail Price — the highest price at which the product can be sold to the end consumer.</td></tr>
