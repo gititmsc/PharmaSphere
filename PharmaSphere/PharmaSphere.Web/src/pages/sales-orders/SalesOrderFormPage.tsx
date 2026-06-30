@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -155,7 +155,6 @@ const SalesOrderFormPage: React.FC = () => {
   const [auditLogs, setAuditLogs]     = useState<OrderAuditLogItem[]>([]);
   const [cancelOpen, setCancelOpen]   = useState(false);
   const [cancelling, setCancelling]   = useState(false);
-  const justSelectedRef = useRef(false);
 
   const { control, handleSubmit, reset, setValue, formState: { isSubmitting } } =
     useForm<OrderFormValues>({ defaultValues: EMPTY, mode: 'onTouched' });
@@ -411,35 +410,26 @@ const SalesOrderFormPage: React.FC = () => {
                   <Controller
                     name="brandName"
                     control={control}
-                    render={({ field }) => (
+                    rules={{ required: 'Brand Name is required' }}
+                    render={({ field, fieldState }) => (
                       <Autocomplete
-                        freeSolo
                         options={brandNames}
                         value={field.value || null}
-                        inputValue={field.value || ''}
                         onChange={(_, v, reason) => {
                           field.onChange(v ?? '');
-                          if (reason === 'selectOption' && v) {
-                            justSelectedRef.current = true;
-                            setTimeout(() => { justSelectedRef.current = false; }, 300);
-                            handleBrandNameSelect(v as string);
-                          }
+                          if (reason === 'selectOption' && v) handleBrandNameSelect(v);
+                          if (reason === 'clear') pmFields.forEach(k => setValue(k, ''));
                         }}
-                        onInputChange={(_, v) => field.onChange(v)}
                         disabled={roBrandName}
                         size="small"
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            label="Brand Name"
-                            placeholder="Select or type brand name"
-                            onBlur={(e) => {
-                              field.onBlur();
-                              const val = (e.target as HTMLInputElement).value?.trim();
-                              if (!justSelectedRef.current && val) {
-                                handleBrandNameSelect(val);
-                              }
-                            }}
+                            label="Brand Name *"
+                            placeholder="Select brand name"
+                            onBlur={field.onBlur}
+                            error={!!fieldState.error}
+                            helperText={fieldState.error?.message}
                           />
                         )}
                       />
