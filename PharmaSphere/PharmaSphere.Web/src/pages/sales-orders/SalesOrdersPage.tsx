@@ -39,7 +39,7 @@ import DeleteOutlineIcon     from '@mui/icons-material/DeleteOutline';
 import ViewColumnIcon        from '@mui/icons-material/ViewColumn';
 import FilterAltIcon         from '@mui/icons-material/FilterAlt';
 
-import { useNavigate }       from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSnackbar }       from 'notistack';
 import axios                 from 'axios';
 import { useAuth }           from '@/contexts/AuthContext';
@@ -70,6 +70,7 @@ const DEFAULT_VISIBLE = new Set(['orderNo','orderDate','party','brandName','qty'
 
 const SalesOrdersPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { enqueueSnackbar } = useSnackbar();
   const { user } = useAuth();
   const isAdmin = user?.roleName === 'Admin';
@@ -88,7 +89,7 @@ const SalesOrdersPage: React.FC = () => {
   const [toDelete, setToDelete]     = useState<OrderListItem | null>(null);
 
   const [search, setSearch]         = useState('');
-  const [statusFilter, setStatus]   = useState('');
+  const [statusFilter, setStatus]   = useState(() => searchParams.get('status') ?? '');
   const [dateFrom, setDateFrom]     = useState('');
   const [dateTo, setDateTo]         = useState('');
 
@@ -126,6 +127,23 @@ const SalesOrdersPage: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
+  // Pick up ?status= whenever it changes (e.g. clicking the dashboard's
+  // Workflow Pipeline while already on this page), then drop it from the
+  // URL so it doesn't stick around as a stale filter on refresh.
+  useEffect(() => {
+    const statusParam = searchParams.get('status');
+    if (statusParam !== null) {
+      setStatus(statusParam);
+      setPage(1);
+      setSearchParams(prev => {
+        const next = new URLSearchParams(prev);
+        next.delete('status');
+        return next;
+      }, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   useEffect(() => {
     clearTimeout(debounce.current);
