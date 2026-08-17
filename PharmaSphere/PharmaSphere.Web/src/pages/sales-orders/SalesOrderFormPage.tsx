@@ -207,6 +207,19 @@ const SalesOrderFormPage: React.FC = () => {
     setValue('shrink',           pm.shrink);
     setValue('shipper',          pm.shipper);
     setValue('hologram',         pm.hologram);
+
+    // New orders only: pre-fill Product Permission dates from the most recent
+    // previous order for this brand, if one exists. Editing an existing order
+    // must never overwrite its own already-saved QA dates.
+    if (!isEdit) {
+      const previous = await OrderService.getLatestByBrand(brandName);
+      if (previous) {
+        setValue('ppApplyDate',    previous.ppApplyDate ?? '');
+        setValue('ppDraftDate',    previous.ppDraftDate ?? '');
+        setValue('ppApprovalDate', previous.ppApprovalDate ?? '');
+        setValue('ppReceivedDate', previous.ppReceivedDate ?? '');
+      }
+    }
   };
 
   useEffect(() => {
