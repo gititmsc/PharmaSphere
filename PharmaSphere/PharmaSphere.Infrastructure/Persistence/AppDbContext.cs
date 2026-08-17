@@ -230,6 +230,10 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(o => o.CreatedDate).IsRequired();
                 e.Property(o => o.UpdatedBy).HasMaxLength(100);
                 e.Property(o => o.IsActive).IsRequired().HasDefaultValue(true);
+                e.Property(o => o.PPNotApplicable).IsRequired().HasDefaultValue(false);
+                e.Property(o => o.CPPNotApplicable).IsRequired().HasDefaultValue(false);
+                e.Property(o => o.COPPNotApplicable).IsRequired().HasDefaultValue(false);
+                e.Property(o => o.FSCNotApplicable).IsRequired().HasDefaultValue(false);
 
                 e.HasIndex(o => o.IsActive).HasDatabaseName("IX_Orders_IsActive");
                 e.HasIndex(o => o.CurrentStatus).HasDatabaseName("IX_Orders_Status");

@@ -39,21 +39,25 @@ namespace PharmaSphere.Core.Models
         public DateTime? PISApprovalDate { get; set; }
         public DateTime? SanoletPartyArtworkApprovalDate { get; set; }
         // Product Permission
+        public bool PPNotApplicable { get; set; }
         public DateTime? PPApplyDate { get; set; }
         public DateTime? PPDraftDate { get; set; }
         public DateTime? PPApprovalDate { get; set; }
         public DateTime? PPReceivedDate { get; set; }
         // Combipack Product Permission
+        public bool CPPNotApplicable { get; set; }
         public DateTime? CPPApplyDate { get; set; }
         public DateTime? CPPDraftDate { get; set; }
         public DateTime? CPPApprovalDate { get; set; }
         public DateTime? CPPReceivedDate { get; set; }
         // COPP
+        public bool COPPNotApplicable { get; set; }
         public DateTime? COPPApplyDate { get; set; }
         public DateTime? COPPDraftDate { get; set; }
         public DateTime? COPPApprovalDate { get; set; }
         public DateTime? COPPReceivedDate { get; set; }
         // FSC
+        public bool FSCNotApplicable { get; set; }
         public DateTime? FSCApplyDate { get; set; }
         public DateTime? FSCDraftDate { get; set; }
         public DateTime? FSCApprovalDate { get; set; }

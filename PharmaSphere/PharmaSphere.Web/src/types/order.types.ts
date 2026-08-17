@@ -80,18 +80,22 @@ export interface OrderDetail {
   // QA
   pisApprovalDate: string | null;
   sanoletPartyArtworkApprovalDate: string | null;
+  ppNotApplicable: boolean;
   ppApplyDate: string | null;
   ppDraftDate: string | null;
   ppApprovalDate: string | null;
   ppReceivedDate: string | null;
+  cppNotApplicable: boolean;
   cppApplyDate: string | null;
   cppDraftDate: string | null;
   cppApprovalDate: string | null;
   cppReceivedDate: string | null;
+  coppNotApplicable: boolean;
   coppApplyDate: string | null;
   coppDraftDate: string | null;
   coppApprovalDate: string | null;
   coppReceivedDate: string | null;
+  fscNotApplicable: boolean;
   fscApplyDate: string | null;
   fscDraftDate: string | null;
   fscApprovalDate: string | null;
@@ -199,18 +203,22 @@ export interface OrderFormValues {
   // QA
   pisApprovalDate: string;
   sanoletPartyArtworkApprovalDate: string;
+  ppNotApplicable: boolean;
   ppApplyDate: string;
   ppDraftDate: string;
   ppApprovalDate: string;
   ppReceivedDate: string;
+  cppNotApplicable: boolean;
   cppApplyDate: string;
   cppDraftDate: string;
   cppApprovalDate: string;
   cppReceivedDate: string;
+  coppNotApplicable: boolean;
   coppApplyDate: string;
   coppDraftDate: string;
   coppApprovalDate: string;
   coppReceivedDate: string;
+  fscNotApplicable: boolean;
   fscApplyDate: string;
   fscDraftDate: string;
   fscApprovalDate: string;

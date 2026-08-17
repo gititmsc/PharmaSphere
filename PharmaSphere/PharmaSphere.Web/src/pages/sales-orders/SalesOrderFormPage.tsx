@@ -17,6 +17,7 @@ import {
   DialogTitle,
   Divider,
   FormControl,
+  FormControlLabel,
   Grid,
   IconButton,
   InputAdornment,
@@ -24,6 +25,7 @@ import {
   MenuItem,
   Select,
   Stack,
+  Switch,
   Tab,
   Table,
   TableBody,
@@ -53,9 +55,13 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
   </div>
 );
 
+// Keys of OrderFormValues whose values are strings (Fld only renders text/date inputs;
+// boolean toggle fields like ppNotApplicable are handled separately via Switch).
+type StringFieldName = { [K in keyof OrderFormValues]: OrderFormValues[K] extends string ? K : never }[keyof OrderFormValues];
+
 // Field wrapper using native react-hook-form Controller
 interface FldProps {
-  name: keyof OrderFormValues;
+  name: StringFieldName;
   label: string;
   control: ReturnType<typeof useForm<OrderFormValues>>['control'];
   required?: string;
@@ -114,10 +120,10 @@ const EMPTY: OrderFormValues = {
   leaflet: '', syringeAndNeedle: '', shrink: '', shipper: '', hologram: '',
   otherRemarks: '',
   pisApprovalDate: '', sanoletPartyArtworkApprovalDate: '',
-  ppApplyDate: '', ppDraftDate: '', ppApprovalDate: '', ppReceivedDate: '',
-  cppApplyDate: '', cppDraftDate: '', cppApprovalDate: '', cppReceivedDate: '',
-  coppApplyDate: '', coppDraftDate: '', coppApprovalDate: '', coppReceivedDate: '',
-  fscApplyDate: '', fscDraftDate: '', fscApprovalDate: '', fscReceivedDate: '',
+  ppNotApplicable: false, ppApplyDate: '', ppDraftDate: '', ppApprovalDate: '', ppReceivedDate: '',
+  cppNotApplicable: false, cppApplyDate: '', cppDraftDate: '', cppApprovalDate: '', cppReceivedDate: '',
+  coppNotApplicable: false, coppApplyDate: '', coppDraftDate: '', coppApprovalDate: '', coppReceivedDate: '',
+  fscNotApplicable: false, fscApplyDate: '', fscDraftDate: '', fscApprovalDate: '', fscReceivedDate: '',
   monoBoxSupplyVendorApprovalDate: '', labelSupplyVendorApprovalDate: '',
   insertSupplyVendorApprovalDate: '', traySupplyVendorApprovalDate: '',
   shipperSupplyVendorApprovalDate: '',
@@ -250,12 +256,16 @@ const SalesOrderFormPage: React.FC = () => {
           otherRemarks: o.otherRemarks ?? '',
           pisApprovalDate: o.pisApprovalDate ?? '',
           sanoletPartyArtworkApprovalDate: o.sanoletPartyArtworkApprovalDate ?? '',
+          ppNotApplicable: o.ppNotApplicable ?? false,
           ppApplyDate: o.ppApplyDate ?? '', ppDraftDate: o.ppDraftDate ?? '',
           ppApprovalDate: o.ppApprovalDate ?? '', ppReceivedDate: o.ppReceivedDate ?? '',
+          cppNotApplicable: o.cppNotApplicable ?? false,
           cppApplyDate: o.cppApplyDate ?? '', cppDraftDate: o.cppDraftDate ?? '',
           cppApprovalDate: o.cppApprovalDate ?? '', cppReceivedDate: o.cppReceivedDate ?? '',
+          coppNotApplicable: o.coppNotApplicable ?? false,
           coppApplyDate: o.coppApplyDate ?? '', coppDraftDate: o.coppDraftDate ?? '',
           coppApprovalDate: o.coppApprovalDate ?? '', coppReceivedDate: o.coppReceivedDate ?? '',
+          fscNotApplicable: o.fscNotApplicable ?? false,
           fscApplyDate: o.fscApplyDate ?? '', fscDraftDate: o.fscDraftDate ?? '',
           fscApprovalDate: o.fscApprovalDate ?? '', fscReceivedDate: o.fscReceivedDate ?? '',
           monoBoxSupplyVendorApprovalDate: o.monoBoxSupplyVendorApprovalDate ?? '',
@@ -287,6 +297,11 @@ const SalesOrderFormPage: React.FC = () => {
       setValue('amount', (rate * qty).toFixed(2), { shouldDirty: true });
     }
   }, [watchedRate, watchedQty, setValue]);
+
+  const ppNotApplicable   = useWatch({ control, name: 'ppNotApplicable' });
+  const cppNotApplicable  = useWatch({ control, name: 'cppNotApplicable' });
+  const coppNotApplicable = useWatch({ control, name: 'coppNotApplicable' });
+  const fscNotApplicable  = useWatch({ control, name: 'fscNotApplicable' });
 
   const handleCancelOrder = async () => {
     if (!orderId) return;
@@ -638,17 +653,29 @@ const SalesOrderFormPage: React.FC = () => {
                       <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Product Permission</Typography>
                     </Divider>
                   </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Fld name="ppApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  <Grid item xs={12}>
+                    <Controller
+                      name="ppNotApplicable"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControlLabel
+                          control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} disabled={roQAExtra} size="small" />}
+                          label="Not Applicable"
+                        />
+                      )}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="ppDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="ppApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra || ppNotApplicable} shrinkLabel />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="ppApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="ppDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra || ppNotApplicable} shrinkLabel />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="ppReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="ppApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra || ppNotApplicable} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="ppReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra || ppNotApplicable} shrinkLabel />
                   </Grid>
 
                   {/* ── Combipack Product Permission ── */}
@@ -657,17 +684,29 @@ const SalesOrderFormPage: React.FC = () => {
                       <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Combipack Product Permission</Typography>
                     </Divider>
                   </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Fld name="cppApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  <Grid item xs={12}>
+                    <Controller
+                      name="cppNotApplicable"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControlLabel
+                          control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} disabled={roQAExtra} size="small" />}
+                          label="Not Applicable"
+                        />
+                      )}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="cppDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="cppApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra || cppNotApplicable} shrinkLabel />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="cppApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="cppDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra || cppNotApplicable} shrinkLabel />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="cppReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="cppApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra || cppNotApplicable} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="cppReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra || cppNotApplicable} shrinkLabel />
                   </Grid>
 
                   {/* ── COPP ── */}
@@ -676,17 +715,29 @@ const SalesOrderFormPage: React.FC = () => {
                       <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>COPP</Typography>
                     </Divider>
                   </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Fld name="coppApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  <Grid item xs={12}>
+                    <Controller
+                      name="coppNotApplicable"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControlLabel
+                          control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} disabled={roQAExtra} size="small" />}
+                          label="Not Applicable"
+                        />
+                      )}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="coppDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="coppApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra || coppNotApplicable} shrinkLabel />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="coppApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="coppDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra || coppNotApplicable} shrinkLabel />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="coppReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="coppApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra || coppNotApplicable} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="coppReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra || coppNotApplicable} shrinkLabel />
                   </Grid>
 
                   {/* ── FSC ── */}
@@ -695,17 +746,29 @@ const SalesOrderFormPage: React.FC = () => {
                       <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>FSC</Typography>
                     </Divider>
                   </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Fld name="fscApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                  <Grid item xs={12}>
+                    <Controller
+                      name="fscNotApplicable"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControlLabel
+                          control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} disabled={roQAExtra} size="small" />}
+                          label="Not Applicable"
+                        />
+                      )}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="fscDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="fscApplyDate" label="Apply Date" control={control} type="date" readOnly={roQAExtra || fscNotApplicable} shrinkLabel />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="fscApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="fscDraftDate" label="Draft Date" control={control} type="date" readOnly={roQAExtra || fscNotApplicable} shrinkLabel />
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Fld name="fscReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra} shrinkLabel />
+                    <Fld name="fscApprovalDate" label="Approval Date" control={control} type="date" readOnly={roQAExtra || fscNotApplicable} shrinkLabel />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Fld name="fscReceivedDate" label="Received Date" control={control} type="date" readOnly={roQAExtra || fscNotApplicable} shrinkLabel />
                   </Grid>
                 </>)}
 
