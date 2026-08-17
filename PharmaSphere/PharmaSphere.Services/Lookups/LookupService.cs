@@ -24,6 +24,9 @@ namespace PharmaSphere.Services.Lookups
         public Task<IReadOnlyList<string>> GetProductMasterBrandsAsync(CancellationToken ct = default)
             => _pmRepo.GetAllBrandNamesAsync(ct);
 
+        public Task<IReadOnlyList<string>> GetGenericNamesAsync(CancellationToken ct = default)
+            => _pmRepo.GetAllGenericNamesAsync(ct);
+
         public async Task<ProductMasterDetailDto?> GetProductMasterByBrandAsync(
             string brandName, CancellationToken ct = default)
         {
@@ -33,6 +36,7 @@ namespace PharmaSphere.Services.Lookups
                 p.Id, p.BrandName, p.GenericName, p.Vial, p.SealColor, p.WFI,
                 p.Label, p.MonoBox, p.MonthBox, p.Tray, p.Leaflet, p.SyringeNeedle,
                 p.Shrink, p.Shipper, p.Hologram,
+                p.ShelfLife, p.ExportType, p.Textile,
                 p.CreatedBy, p.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
                 p.UpdatedBy, p.UpdatedDate?.ToString("yyyy-MM-dd HH:mm"));
         }

@@ -17,6 +17,11 @@ export const LookupService = {
     return data;
   },
 
+  async getGenericNames(): Promise<string[]> {
+    const { data } = await httpClient.get<string[]>('/lookups/generic-names');
+    return data;
+  },
+
   async getProductMasterByBrand(brandName: string): Promise<ProductMasterDetail | null> {
     try {
       const { data } = await httpClient.get<ProductMasterDetail>(

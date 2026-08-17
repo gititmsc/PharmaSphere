@@ -11,10 +11,13 @@ namespace PharmaSphere.Core.Models
         public string? Composition { get; set; }
         public int? Qty { get; set; }
         public string? ShelfLifeMonths { get; set; }
+        public string? ExportType { get; set; }
+        public string? Textile { get; set; }
         public decimal? MRP { get; set; }
         public string? Party { get; set; }
         public string? Make { get; set; }
         public string? NeutralCode { get; set; }
+        public string? PaymentTerms { get; set; }
         public string? AdminRemarks { get; set; }
         public decimal? Rate { get; set; }
         public decimal? Amount { get; set; }

@@ -78,6 +78,14 @@ namespace PharmaSphere.Repositories.ProductMasters
                 .OrderBy(n => n)
                 .ToListAsync(ct);
 
+        public async Task<IReadOnlyList<string>> GetAllGenericNamesAsync(CancellationToken ct = default) =>
+            await _db.ProductMasters.AsNoTracking()
+                .Where(p => !p.IsDeleted)
+                .Select(p => p.GenericName)
+                .Distinct()
+                .OrderBy(n => n)
+                .ToListAsync(ct);
+
         public async Task<ProductMaster?> GetByIdAsync(int id, CancellationToken ct = default) =>
             await _db.ProductMasters.FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted, ct);
 

@@ -6,7 +6,11 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  FormControl,
   Grid,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   TextField,
   Typography,
@@ -35,10 +39,15 @@ const EMPTY: ProductMasterFormValues = {
   shrink:       '',
   shipper:      '',
   hologram:     '',
+  shelfLife:    '',
+  exportType:   '',
+  textile:      '',
 };
 
-// Plain text fields rendered via loop (sealColor handled separately as Autocomplete)
-const TEXT_FIELDS: { key: keyof ProductMasterFormValues; label: string }[] = [
+const EXPORT_TYPES = ['Export', 'Domestic'];
+
+// Plain text fields rendered via loop (sealColor / exportType handled separately)
+const TEXT_FIELDS: { key: keyof ProductMasterFormValues; label: string; required?: boolean }[] = [
   { key: 'brandName',    label: 'Brand Name'     },
   { key: 'genericName',  label: 'Generic Name'   },
   { key: 'vial',         label: 'Vial'           },
@@ -52,6 +61,8 @@ const TEXT_FIELDS: { key: keyof ProductMasterFormValues; label: string }[] = [
   { key: 'shrink',       label: 'Shrink'         },
   { key: 'shipper',      label: 'Shipper'        },
   { key: 'hologram',     label: 'Hologram'       },
+  { key: 'shelfLife',    label: 'Shelf Life',    required: false },
+  { key: 'textile',      label: 'Textile',       required: false },
 ];
 
 const ProductMasterFormPage: React.FC = () => {
@@ -93,6 +104,9 @@ const ProductMasterFormPage: React.FC = () => {
           shrink:       detail.shrink,
           shipper:      detail.shipper,
           hologram:     detail.hologram,
+          shelfLife:    detail.shelfLife ?? '',
+          exportType:   detail.exportType ?? '',
+          textile:      detail.textile ?? '',
         });
       })
       .catch(() => {
@@ -234,13 +248,30 @@ const ProductMasterFormPage: React.FC = () => {
                 />
               </Grid>
 
+              {/* Export Type — fixed dropdown */}
+              <Grid item xs={12} sm={6}>
+                <Controller
+                  name="exportType"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Export Type</InputLabel>
+                      <Select {...field} label="Export Type">
+                        <MenuItem value="">—</MenuItem>
+                        {EXPORT_TYPES.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+                      </Select>
+                    </FormControl>
+                  )}
+                />
+              </Grid>
+
               {/* Remaining plain text fields */}
-              {TEXT_FIELDS.filter(f => !['brandName', 'genericName', 'vial'].includes(f.key)).map(({ key, label }) => (
+              {TEXT_FIELDS.filter(f => !['brandName', 'genericName', 'vial'].includes(f.key)).map(({ key, label, required }) => (
                 <Grid item xs={12} sm={6} key={key}>
                   <Controller
                     name={key}
                     control={control}
-                    rules={{ required: `${label} is required.` }}
+                    rules={required === false ? undefined : { required: `${label} is required.` }}
                     render={({ field }) => (
                       <TextField
                         {...field} label={label} fullWidth size="small"

@@ -44,6 +44,9 @@ namespace PharmaSphere.Services.ProductMasters
                 Shrink        = request.Shrink.Trim(),
                 Shipper       = request.Shipper.Trim(),
                 Hologram      = request.Hologram.Trim(),
+                ShelfLife     = Blank(request.ShelfLife),
+                ExportType    = Blank(request.ExportType),
+                Textile       = Blank(request.Textile),
                 CreatedBy     = createdBy,
                 CreatedDate   = DateTime.UtcNow,
             };
@@ -74,6 +77,9 @@ namespace PharmaSphere.Services.ProductMasters
             product.Shrink        = request.Shrink.Trim();
             product.Shipper       = request.Shipper.Trim();
             product.Hologram      = request.Hologram.Trim();
+            product.ShelfLife     = Blank(request.ShelfLife);
+            product.ExportType    = Blank(request.ExportType);
+            product.Textile       = Blank(request.Textile);
             product.UpdatedBy     = updatedBy;
             product.UpdatedDate   = DateTime.UtcNow;
 
@@ -105,9 +111,15 @@ namespace PharmaSphere.Services.ProductMasters
             p.Shrink,
             p.Shipper,
             p.Hologram,
+            p.ShelfLife,
+            p.ExportType,
+            p.Textile,
             p.CreatedBy,
             p.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
             p.UpdatedBy,
             p.UpdatedDate?.ToString("yyyy-MM-dd HH:mm"));
+
+        private static string? Blank(string? s) =>
+            string.IsNullOrWhiteSpace(s) ? null : s.Trim();
     }
 }

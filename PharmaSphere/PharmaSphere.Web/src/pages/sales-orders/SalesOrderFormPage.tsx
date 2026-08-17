@@ -16,9 +16,13 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
+  FormControl,
   Grid,
   IconButton,
   InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   Tab,
   Table,
@@ -104,7 +108,8 @@ const Fld: React.FC<FldProps> = ({
 const EMPTY: OrderFormValues = {
   orderNo: '', orderDate: new Date().toISOString().slice(0, 10),
   party: '', brandName: '', composition: '', qty: '', shelfLifeMonths: '',
-  mrp: '', rate: '', amount: '', make: '', neutralCode: '', adminRemarks: '',
+  exportType: '', textile: '',
+  mrp: '', rate: '', amount: '', make: '', neutralCode: '', paymentTerms: '', adminRemarks: '',
   vial: '', sealColour: '', wfi: '', label: '', monoBox: '', monthBox: '', tray: '',
   leaflet: '', syringeAndNeedle: '', shrink: '', shipper: '', hologram: '',
   otherRemarks: '',
@@ -172,7 +177,8 @@ const SalesOrderFormPage: React.FC = () => {
   }, []);
 
   const pmFields: (keyof OrderFormValues)[] = [
-    'composition', 'vial', 'sealColour', 'wfi', 'label',
+    'composition', 'shelfLifeMonths', 'exportType', 'textile',
+    'vial', 'sealColour', 'wfi', 'label',
     'monoBox', 'monthBox', 'tray', 'leaflet', 'syringeAndNeedle',
     'shrink', 'shipper', 'hologram',
   ];
@@ -186,6 +192,9 @@ const SalesOrderFormPage: React.FC = () => {
     const pm = await LookupService.getProductMasterByBrand(brandName);
     if (!pm) return;
     setValue('composition',      pm.genericName);
+    setValue('shelfLifeMonths',  pm.shelfLife ?? '');
+    setValue('exportType',       pm.exportType ?? '');
+    setValue('textile',          pm.textile ?? '');
     setValue('vial',             pm.vial);
     setValue('sealColour',       pm.sealColor);
     setValue('wfi',              pm.wfi);
@@ -212,11 +221,13 @@ const SalesOrderFormPage: React.FC = () => {
           party: o.party ?? '', brandName: o.brandName ?? '',
           composition: o.composition ?? '',
           qty: o.qty?.toString() ?? '', shelfLifeMonths: o.shelfLifeMonths ?? '',
+          exportType: o.exportType ?? '', textile: o.textile ?? '',
           mrp: o.mrp?.toString() ?? '',
           rate: o.rate?.toString() ?? '',
           amount: o.amount?.toString() ?? '',
           make: o.make ?? '',
           neutralCode: o.neutralCode ?? '',
+          paymentTerms: o.paymentTerms ?? '',
           adminRemarks: o.adminRemarks ?? '',
           vial: o.vial ?? '', sealColour: o.sealColour ?? '', wfi: o.wfi ?? '',
           label: o.label ?? '', monoBox: o.monoBox ?? '', monthBox: o.monthBox ?? '',
@@ -445,7 +456,28 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="qty" label="Quantity" control={control} type="number" readOnly={roGeneralInfo} placeholder="0" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="shelfLifeMonths" label="Shelf Life" control={control} readOnly={roGeneralInfo} placeholder="e.g. 24 months" />
+                  <Fld name="shelfLifeMonths" label="Shelf Life" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
+                </Grid>
+
+                {/* Row 2b: Export Type | Textile — auto-filled from Product Master */}
+                <Grid item xs={12} sm={4}>
+                  <FormControl size="small" fullWidth disabled>
+                    <InputLabel>Export Type</InputLabel>
+                    <Controller
+                      name="exportType"
+                      control={control}
+                      render={({ field }) => (
+                        <Select {...field} label="Export Type">
+                          <MenuItem value="">—</MenuItem>
+                          <MenuItem value="Export">Export</MenuItem>
+                          <MenuItem value="Domestic">Domestic</MenuItem>
+                        </Select>
+                      )}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="textile" label="Textile" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="mrp" label="MRP (₹)" control={control} type="number" adornment="₹" readOnly={roGeneralInfo} placeholder="0.00" />
@@ -489,6 +521,9 @@ const SalesOrderFormPage: React.FC = () => {
                 <Grid item xs={12} sm={4}>
                   <Fld name="neutralCode" label="Neutral Code / Mfg. Lic. No / LL NO" control={control} readOnly={roGeneralInfo} placeholder="Enter neutral code or licence number" />
                 </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="paymentTerms" label="Payment Terms" control={control} readOnly={roGeneralInfo} placeholder="e.g. 30 days credit" />
+                </Grid>
 
                 {/* Row 4: Admin Remarks — full width */}
                 <Grid item xs={12}>
@@ -510,7 +545,7 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="sealColour" label="Seal Colour" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="wfi" label="WFI" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
+                  <Fld name="wfi" label="Diluent" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
 
                 {/* Row 6: Label | Mono Box | Month Box | Tray */}
@@ -521,7 +556,7 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="monoBox" label="Mono Box" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="monthBox" label="Month Box" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
+                  <Fld name="monthBox" label="Mother Box" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="tray" label="Tray" control={control} readOnly={true} placeholder="Auto-filled from Product Master" />

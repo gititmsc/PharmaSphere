@@ -24,6 +24,9 @@ namespace PharmaSphere.Core.DTOs
         string Shrink,
         string Shipper,
         string Hologram,
+        string? ShelfLife,
+        string? ExportType,
+        string? Textile,
         string? CreatedBy,
         string CreatedDate,
         string? UpdatedBy,
@@ -51,7 +54,10 @@ namespace PharmaSphere.Core.DTOs
         string SyringeNeedle,
         string Shrink,
         string Shipper,
-        string Hologram);
+        string Hologram,
+        string? ShelfLife = null,
+        string? ExportType = null,
+        string? Textile = null);
 
     public sealed record UpdateProductMasterRequestDto(
         string BrandName,
@@ -67,5 +73,8 @@ namespace PharmaSphere.Core.DTOs
         string SyringeNeedle,
         string Shrink,
         string Shipper,
-        string Hologram);
+        string Hologram,
+        string? ShelfLife = null,
+        string? ExportType = null,
+        string? Textile = null);
 }

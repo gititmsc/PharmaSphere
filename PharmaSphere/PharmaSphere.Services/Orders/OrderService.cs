@@ -108,11 +108,14 @@ namespace PharmaSphere.Services.Orders
             Track("Composition",       order.Composition,                      req.Composition);
             Track("Qty",               order.Qty,                              req.Qty);
             Track("Shelf Life (Mths)", order.ShelfLifeMonths,                  req.ShelfLifeMonths);
+            Track("Export Type",       order.ExportType,                      req.ExportType);
+            Track("Textile",           order.Textile,                         req.Textile);
             Track("MRP",               order.MRP,                              req.MRP);
             Track("Rate",              order.Rate,                             req.Rate);
             Track("Amount",            order.Amount,                           req.Amount);
             Track("Make",              order.Make,                             req.Make);
             Track("Neutral Code",      order.NeutralCode,                      req.NeutralCode);
+            Track("Payment Terms",     order.PaymentTerms,                     req.PaymentTerms);
             Track("Admin Remarks",     order.AdminRemarks,                     req.AdminRemarks);
             Track("Other Remarks",     order.OtherRemarks,                     req.OtherRemarks);
 
@@ -371,11 +374,14 @@ namespace PharmaSphere.Services.Orders
                 Composition           = Blank(r.Composition),
                 Qty                   = r.Qty,
                 ShelfLifeMonths       = Blank(r.ShelfLifeMonths),
+                ExportType            = Blank(r.ExportType),
+                Textile               = Blank(r.Textile),
                 MRP                   = r.MRP,
                 Rate                  = r.Rate,
                 Amount                = r.Amount,
                 Make                  = Blank(r.Make),
                 NeutralCode           = Blank(r.NeutralCode),
+                PaymentTerms          = Blank(r.PaymentTerms),
                 AdminRemarks          = Blank(r.AdminRemarks),
                 Vial                  = Blank(r.Vial),
                 SealColour            = Blank(r.SealColour),
@@ -439,11 +445,14 @@ namespace PharmaSphere.Services.Orders
             o.Composition           = Blank(r.Composition);
             o.Qty                   = r.Qty;
             o.ShelfLifeMonths       = Blank(r.ShelfLifeMonths);
+            o.ExportType            = Blank(r.ExportType);
+            o.Textile               = Blank(r.Textile);
             o.MRP                   = r.MRP;
             o.Rate                  = r.Rate;
             o.Amount                = r.Amount;
             o.Make                  = Blank(r.Make);
             o.NeutralCode           = Blank(r.NeutralCode);
+            o.PaymentTerms          = Blank(r.PaymentTerms);
             o.AdminRemarks          = Blank(r.AdminRemarks);
             o.Vial                  = Blank(r.Vial);
             o.SealColour            = Blank(r.SealColour);
@@ -501,11 +510,14 @@ namespace PharmaSphere.Services.Orders
             o.Composition,
             o.Qty,
             o.ShelfLifeMonths,
+            o.ExportType,
+            o.Textile,
             o.MRP,
             o.Rate,
             o.Amount,
             o.Make,
             o.NeutralCode,
+            o.PaymentTerms,
             o.AdminRemarks,
             o.Vial,
             o.SealColour,
@@ -575,7 +587,9 @@ namespace PharmaSphere.Services.Orders
             o.OrderDate.ToString("yyyy-MM-dd"),
             o.Party,
             o.BrandName,
+            null,
             o.Qty,
+            o.Rate,
             o.Amount,
             o.CurrentStatus,
             o.CreatedBy,

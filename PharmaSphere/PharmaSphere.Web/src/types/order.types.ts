@@ -34,7 +34,9 @@ export interface OrderListItem {
   orderDate: string;
   party: string | null;
   brandName: string | null;
+  genericName: string | null;
   qty: number | null;
+  rate: number | null;
   amount: number | null;
   currentStatus: string;
   createdBy: string | null;
@@ -53,11 +55,14 @@ export interface OrderDetail {
   composition: string | null;
   qty: number | null;
   shelfLifeMonths: string | null;
+  exportType: string | null;
+  textile: string | null;
   mrp: number | null;
   rate: number | null;
   amount: number | null;
   make: string | null;
   neutralCode: string | null;
+  paymentTerms: string | null;
   adminRemarks: string | null;
   vial: string | null;
   sealColour: string | null;
@@ -146,6 +151,7 @@ export interface PagedResult<T> {
 export interface OrderListQuery {
   search?: string;
   status?: string;
+  genericName?: string;
   dateFrom?: string;
   dateTo?: string;
   sortBy?: string;
@@ -168,11 +174,14 @@ export interface OrderFormValues {
   composition: string;
   qty: string;
   shelfLifeMonths: string;
+  exportType: string;
+  textile: string;
   mrp: string;
   rate: string;
   amount: string;
   make: string;
   neutralCode: string;
+  paymentTerms: string;
   adminRemarks: string;
   vial: string;
   sealColour: string;

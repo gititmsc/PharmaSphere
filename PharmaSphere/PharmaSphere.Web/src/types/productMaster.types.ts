@@ -50,6 +50,9 @@ export interface ProductMasterDetail {
   shrink: string;
   shipper: string;
   hologram: string;
+  shelfLife: string | null;
+  exportType: string | null;
+  textile: string | null;
   createdBy: string | null;
   createdDate: string;
   updatedBy: string | null;
@@ -80,4 +83,7 @@ export interface ProductMasterFormValues {
   shrink: string;
   shipper: string;
   hologram: string;
+  shelfLife: string;
+  exportType: string;
+  textile: string;
 }

@@ -35,7 +35,7 @@ import {
 import SearchIcon            from '@mui/icons-material/Search';
 import AddIcon               from '@mui/icons-material/Add';
 import EditIcon              from '@mui/icons-material/Edit';
-import DeleteOutlineIcon     from '@mui/icons-material/DeleteOutline';
+import CancelOutlinedIcon    from '@mui/icons-material/CancelOutlined';
 import ViewColumnIcon        from '@mui/icons-material/ViewColumn';
 import FilterAltIcon         from '@mui/icons-material/FilterAlt';
 
@@ -47,6 +47,7 @@ import { OrderService }      from '@/services/order.service';
 import { encodeOrderId }     from '@/types/order.types';
 import type { OrderListItem, SortField, SortDir } from '@/types/order.types';
 import { useOrderStatuses }  from '@/hooks/useOrderStatuses';
+import { LookupService }     from '@/services/lookup.service';
 import { fmtDate, fmtDateTime }                        from '@/utils/date.utils';
 
 const PAGE_SIZES = [10, 25, 50, 100];
@@ -58,7 +59,9 @@ const ALL_COLS: ColDef[] = [
   { id: 'orderDate',   label: 'Order Date',   sortKey: 'orderDate',   width: 110 },
   { id: 'party',       label: 'Party',        sortKey: 'party'                   },
   { id: 'brandName',   label: 'Brand Name',   sortKey: 'brandName'               },
+  { id: 'genericName', label: 'Generic Name'                                     },
   { id: 'qty',         label: 'Qty',          sortKey: 'qty',         width: 80,  align: 'right' },
+  { id: 'rate',        label: 'Rate (₹)',                             width: 100, align: 'right' },
   { id: 'amount',      label: 'Amount (₹)',                           width: 110, align: 'right' },
   { id: 'status',      label: 'Status',       sortKey: 'status',      width: 150 },
   { id: 'createdBy',   label: 'Created By',                           width: 120 },
@@ -66,7 +69,7 @@ const ALL_COLS: ColDef[] = [
   { id: 'updatedDate', label: 'Updated',      sortKey: 'updatedDate', width: 130 },
 ];
 
-const DEFAULT_VISIBLE = new Set(['orderNo','orderDate','party','brandName','qty','amount','status','createdBy','createdDate']);
+const DEFAULT_VISIBLE = new Set(['orderNo','orderDate','party','brandName','genericName','qty','rate','amount','status','createdBy','createdDate']);
 
 const SalesOrdersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -76,20 +79,22 @@ const SalesOrdersPage: React.FC = () => {
   const isAdmin = user?.roleName === 'Admin';
   const { statuses } = useOrderStatuses();
 
-  // Amount column is restricted to Admin only
-  const availableCols = isAdmin ? ALL_COLS : ALL_COLS.filter(c => c.id !== 'amount');
+  // Amount and Rate columns are restricted to Admin only
+  const availableCols = isAdmin ? ALL_COLS : ALL_COLS.filter(c => c.id !== 'amount' && c.id !== 'rate');
   const defaultVisible = isAdmin
     ? new Set(DEFAULT_VISIBLE)
-    : new Set([...DEFAULT_VISIBLE].filter(id => id !== 'amount'));
+    : new Set([...DEFAULT_VISIBLE].filter(id => id !== 'amount' && id !== 'rate'));
 
   const [rows, setRows]             = useState<OrderListItem[]>([]);
   const [totalCount, setTotal]      = useState(0);
   const [loading, setLoading]       = useState(false);
-  const [deleting, setDeleting]     = useState(false);
-  const [toDelete, setToDelete]     = useState<OrderListItem | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [toCancel, setToCancel]     = useState<OrderListItem | null>(null);
 
   const [search, setSearch]         = useState('');
   const [statusFilter, setStatus]   = useState(() => searchParams.get('status') ?? '');
+  const [genericNameFilter, setGenericName] = useState('');
+  const [genericNames, setGenericNames]     = useState<string[]>([]);
   const [dateFrom, setDateFrom]     = useState('');
   const [dateTo, setDateTo]         = useState('');
 
@@ -103,21 +108,26 @@ const SalesOrdersPage: React.FC = () => {
 
   const debounce = useRef<ReturnType<typeof setTimeout>>();
 
+  useEffect(() => {
+    LookupService.getGenericNames().then(setGenericNames).catch(() => {});
+  }, []);
+
   const fetchOrders = useCallback(async (p: {
-    search: string; statusFilter: string; dateFrom: string; dateTo: string;
+    search: string; statusFilter: string; genericNameFilter: string; dateFrom: string; dateTo: string;
     sortBy: SortField; sortDir: SortDir; page: number; pageSize: number;
   }) => {
     setLoading(true);
     try {
       const res = await OrderService.getOrders({
-        search:   p.search   || undefined,
-        status:   p.statusFilter || undefined,
-        dateFrom: p.dateFrom || undefined,
-        dateTo:   p.dateTo   || undefined,
-        sortBy:   p.sortBy,
-        sortDir:  p.sortDir,
-        page:     p.page,
-        pageSize: p.pageSize,
+        search:      p.search   || undefined,
+        status:      p.statusFilter || undefined,
+        genericName: p.genericNameFilter || undefined,
+        dateFrom:    p.dateFrom || undefined,
+        dateTo:      p.dateTo   || undefined,
+        sortBy:      p.sortBy,
+        sortDir:     p.sortDir,
+        page:        p.page,
+        pageSize:    p.pageSize,
       });
       setRows(res.items);
       setTotal(res.totalCount);
@@ -148,10 +158,10 @@ const SalesOrdersPage: React.FC = () => {
   useEffect(() => {
     clearTimeout(debounce.current);
     debounce.current = setTimeout(() => {
-      fetchOrders({ search, statusFilter, dateFrom, dateTo, sortBy, sortDir, page, pageSize });
+      fetchOrders({ search, statusFilter, genericNameFilter, dateFrom, dateTo, sortBy, sortDir, page, pageSize });
     }, 300);
     return () => clearTimeout(debounce.current);
-  }, [search, statusFilter, dateFrom, dateTo, sortBy, sortDir, page, pageSize, fetchOrders]);
+  }, [search, statusFilter, genericNameFilter, dateFrom, dateTo, sortBy, sortDir, page, pageSize, fetchOrders]);
 
   const handleSort = (key: SortField) => {
     if (sortBy === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -159,22 +169,22 @@ const SalesOrdersPage: React.FC = () => {
     setPage(1);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!toDelete) return;
-    setDeleting(true);
+  const handleCancelConfirm = async () => {
+    if (!toCancel) return;
+    setCancelling(true);
     try {
-      await OrderService.deleteOrder(toDelete.orderId);
-      enqueueSnackbar(`Order "${toDelete.orderNo}" deleted.`, {
+      await OrderService.changeStatus(toCancel.orderId, 'Cancelled');
+      enqueueSnackbar(`Order "${toCancel.orderNo}" cancelled.`, {
         variant: 'success', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' },
       });
-      setToDelete(null);
-      fetchOrders({ search, statusFilter, dateFrom, dateTo, sortBy, sortDir, page, pageSize });
+      setToCancel(null);
+      fetchOrders({ search, statusFilter, genericNameFilter, dateFrom, dateTo, sortBy, sortDir, page, pageSize });
     } catch (err) {
-      let msg = 'Failed to delete order.';
+      let msg = 'Failed to cancel order.';
       if (axios.isAxiosError(err)) msg = err.response?.data?.message ?? msg;
       enqueueSnackbar(msg, { variant: 'error', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } finally {
-      setDeleting(false);
+      setCancelling(false);
     }
   };
 
@@ -227,10 +237,10 @@ const SalesOrdersPage: React.FC = () => {
               <ViewColumnIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          {(search || (isAdmin && statusFilter) || dateFrom || dateTo) && (
+          {(search || (isAdmin && statusFilter) || genericNameFilter || dateFrom || dateTo) && (
             <Tooltip title="Clear filters">
               <IconButton size="small" color="error"
-                onClick={() => { setSearch(''); setStatus(''); setDateFrom(''); setDateTo(''); setPage(1); }}
+                onClick={() => { setSearch(''); setStatus(''); setGenericName(''); setDateFrom(''); setDateTo(''); setPage(1); }}
                 sx={{ border: 1, borderColor: 'divider', flexShrink: 0 }}>
                 <FilterAltIcon fontSize="small" />
               </IconButton>
@@ -249,6 +259,13 @@ const SalesOrdersPage: React.FC = () => {
               </Select>
             </FormControl>
           )}
+          <FormControl size="small" sx={{ flex: '1 1 150px' }}>
+            <InputLabel>Generic Name</InputLabel>
+            <Select value={genericNameFilter} label="Generic Name" onChange={e => { setGenericName(e.target.value); setPage(1); }}>
+              <MenuItem value="">All Generic Names</MenuItem>
+              {genericNames.map(g => <MenuItem key={g} value={g}>{g}</MenuItem>)}
+            </Select>
+          </FormControl>
           <TextField
             size="small" label="From Date" type="date" value={dateFrom}
             onChange={e => { setDateFrom(e.target.value); setPage(1); }}
@@ -337,7 +354,9 @@ const SalesOrdersPage: React.FC = () => {
                         : c.id === 'orderDate'   ? fmtDate(row.orderDate)
                         : c.id === 'party'       ? (row.party ?? '—')
                         : c.id === 'brandName'   ? (row.brandName ?? '—')
+                        : c.id === 'genericName' ? (row.genericName ?? '—')
                         : c.id === 'qty'         ? (row.qty?.toLocaleString() ?? '—')
+                        : c.id === 'rate'        ? (row.rate != null ? `₹${row.rate.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '—')
                         : c.id === 'amount'      ? (row.amount != null ? `₹${row.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '—')
                         : c.id === 'createdBy'   ? (row.createdBy ?? '—')
                         : c.id === 'createdDate' ? fmtDateTime(row.createdDate)
@@ -353,10 +372,10 @@ const SalesOrdersPage: React.FC = () => {
                           <EditIcon sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Tooltip>
-                      {isAdmin && (
-                        <Tooltip title="Delete">
-                          <IconButton size="small" color="error" onClick={() => setToDelete(row)}>
-                            <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                      {isAdmin && row.currentStatus !== 'Cancelled' && row.currentStatus !== 'Dispatched' && (
+                        <Tooltip title="Cancel Order">
+                          <IconButton size="small" color="error" onClick={() => setToCancel(row)}>
+                            <CancelOutlinedIcon sx={{ fontSize: 16 }} />
                           </IconButton>
                         </Tooltip>
                       )}
@@ -388,23 +407,22 @@ const SalesOrdersPage: React.FC = () => {
         </Stack>
       </Card>
 
-      {/* ── Delete Confirmation ── */}
-      <Dialog open={toDelete !== null} onClose={() => !deleting && setToDelete(null)} maxWidth="xs" fullWidth>
-        <DialogTitle fontWeight={700}>Delete Order</DialogTitle>
+      {/* ── Cancel Confirmation ── */}
+      <Dialog open={toCancel !== null} onClose={() => !cancelling && setToCancel(null)} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight={700}>Cancel Sales Order</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete order <strong>{toDelete?.orderNo}</strong>?
-            The order will be soft-deleted and can be restored by an Admin.
+            Are you sure you want to cancel order <strong>{toCancel?.orderNo}</strong>? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button variant="outlined" color="inherit" onClick={() => setToDelete(null)} disabled={deleting}>
-            Cancel
+          <Button variant="outlined" color="inherit" onClick={() => setToCancel(null)} disabled={cancelling}>
+            Back
           </Button>
-          <Button variant="contained" color="error" onClick={handleDeleteConfirm} disabled={deleting}
-            startIcon={deleting ? <CircularProgress size={14} color="inherit" /> : undefined}
+          <Button variant="contained" color="error" onClick={handleCancelConfirm} disabled={cancelling}
+            startIcon={cancelling ? <CircularProgress size={14} color="inherit" /> : undefined}
             disableElevation>
-            {deleting ? 'Deleting…' : 'Delete'}
+            {cancelling ? 'Cancelling…' : 'Cancel Sales Order'}
           </Button>
         </DialogActions>
       </Dialog>

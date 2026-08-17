@@ -183,7 +183,10 @@ const SalesOrderDetailPage: React.FC = () => {
                 <Grid item xs={4}><FR label="Qty"         value={order.qty?.toLocaleString()} /></Grid>
                 <Grid item xs={4}><FR label="Shelf Life"  value={order.shelfLifeMonths} /></Grid>
                 <Grid item xs={4}><FR label="Amount (₹)"  value={order.amount != null ? `₹${order.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : null} /></Grid>
+                <Grid item xs={6}><FR label="Export Type" value={order.exportType} /></Grid>
+                <Grid item xs={6}><FR label="Textile"     value={order.textile} /></Grid>
                 <Grid item xs={6}><FR label="Make"        value={order.make} /></Grid>
+                <Grid item xs={6}><FR label="Payment Terms"      value={order.paymentTerms} /></Grid>
                 <Grid item xs={6}><FR label="Admin Remarks"      value={order.adminRemarks} /></Grid>
                 <Grid item xs={12}><FR label="Other Remarks"     value={order.otherRemarks} /></Grid>
               </Grid>
@@ -200,7 +203,7 @@ const SalesOrderDetailPage: React.FC = () => {
               <Grid container spacing={1.5}>
                 <Grid item xs={6}><FR label="Vial"             value={order.vial} /></Grid>
                 <Grid item xs={6}><FR label="Seal Colour"      value={order.sealColour} /></Grid>
-                <Grid item xs={6}><FR label="WFI"              value={order.wfi} /></Grid>
+                <Grid item xs={6}><FR label="Diluent"          value={order.wfi} /></Grid>
                 <Grid item xs={6}><FR label="Label"            value={order.label} /></Grid>
                 <Grid item xs={6}><FR label="Mono Box"         value={order.monoBox} /></Grid>
                 <Grid item xs={6}><FR label="Tray"             value={order.tray} /></Grid>

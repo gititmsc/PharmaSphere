@@ -42,6 +42,15 @@ namespace PharmaSphere.Api.Controllers
             return Ok(brands);
         }
 
+        // GET /api/lookups/generic-names
+        [HttpGet("generic-names")]
+        [ProducesResponseType(typeof(IReadOnlyList<string>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetGenericNames(CancellationToken ct)
+        {
+            var genericNames = await _lookups.GetGenericNamesAsync(ct);
+            return Ok(genericNames);
+        }
+
         // GET /api/lookups/product-master/{brandName}
         [HttpGet("product-master/{brandName}")]
         [ProducesResponseType(typeof(ProductMasterDetailDto), StatusCodes.Status200OK)]

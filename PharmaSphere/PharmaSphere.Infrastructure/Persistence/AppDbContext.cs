@@ -201,12 +201,15 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(o => o.BrandName).HasMaxLength(200);
                 e.Property(o => o.Composition).HasMaxLength(500);
                 e.Property(o => o.ShelfLifeMonths).HasMaxLength(200);
+                e.Property(o => o.ExportType).HasMaxLength(20);
+                e.Property(o => o.Textile).HasMaxLength(200);
                 e.Property(o => o.MRP).HasPrecision(18, 2);
                 e.Property(o => o.Rate).HasPrecision(18, 2);
                 e.Property(o => o.Amount).HasPrecision(18, 2);
                 e.Property(o => o.Party).HasMaxLength(200);
                 e.Property(o => o.Make).HasMaxLength(200);
                 e.Property(o => o.NeutralCode).HasMaxLength(500);
+                e.Property(o => o.PaymentTerms).HasMaxLength(500);
                 e.Property(o => o.AdminRemarks).HasMaxLength(1000);
                 e.Property(o => o.Vial).HasMaxLength(100);
                 e.Property(o => o.SealColour).HasMaxLength(100);
@@ -395,6 +398,9 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(p => p.Shrink).HasMaxLength(200).IsRequired();
                 e.Property(p => p.Shipper).HasMaxLength(200).IsRequired();
                 e.Property(p => p.Hologram).HasMaxLength(200).IsRequired();
+                e.Property(p => p.ShelfLife).HasMaxLength(200);
+                e.Property(p => p.ExportType).HasMaxLength(20);
+                e.Property(p => p.Textile).HasMaxLength(200);
                 e.Property(p => p.CreatedBy).HasMaxLength(100);
                 e.Property(p => p.UpdatedBy).HasMaxLength(100);
             });

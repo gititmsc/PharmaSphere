@@ -11,6 +11,7 @@ function buildParams(query: OrderListQuery): string {
   const p = new URLSearchParams();
   if (query.search)    p.set('search',   query.search);
   if (query.status)    p.set('status',   query.status);
+  if (query.genericName) p.set('genericName', query.genericName);
   if (query.dateFrom)  p.set('dateFrom', query.dateFrom);
   if (query.dateTo)    p.set('dateTo',   query.dateTo);
   if (query.sortBy)    p.set('sortBy',   query.sortBy);
@@ -31,11 +32,14 @@ function toRequest(v: OrderFormValues) {
     composition:                     n(v.composition),
     qty:                             v.qty === '' ? null : Number(v.qty),
     shelfLifeMonths:                 n(v.shelfLifeMonths),
+    exportType:                      n(v.exportType),
+    textile:                         n(v.textile),
     mrp:                             v.mrp === '' ? null : Number(v.mrp),
     rate:                            v.rate === '' ? null : Number(v.rate),
     amount:                          v.amount === '' ? null : Number(v.amount),
     make:                            n(v.make),
     neutralCode:                     n(v.neutralCode),
+    paymentTerms:                    n(v.paymentTerms),
     adminRemarks:                    n(v.adminRemarks),
     vial:                            n(v.vial),
     sealColour:                      n(v.sealColour),

@@ -17,6 +17,9 @@ namespace PharmaSphere.Core.Models
         public string Shrink       { get; set; } = string.Empty;
         public string Shipper      { get; set; } = string.Empty;
         public string Hologram     { get; set; } = string.Empty;
+        public string? ShelfLife   { get; set; }
+        public string? ExportType  { get; set; }
+        public string? Textile     { get; set; }
         public string? CreatedBy   { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public string? UpdatedBy   { get; set; }

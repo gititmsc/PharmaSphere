@@ -29,6 +29,14 @@ namespace PharmaSphere.Repositories.Orders
             if (!string.IsNullOrWhiteSpace(query.Status))
                 q = q.Where(o => o.CurrentStatus == query.Status);
 
+            if (!string.IsNullOrWhiteSpace(query.GenericName))
+            {
+                var brandsForGeneric = _db.ProductMasters.AsNoTracking()
+                    .Where(p => !p.IsDeleted && p.GenericName == query.GenericName)
+                    .Select(p => p.BrandName);
+                q = q.Where(o => o.BrandName != null && brandsForGeneric.Contains(o.BrandName));
+            }
+
             if (!string.IsNullOrWhiteSpace(query.DateFrom) &&
                 DateTime.TryParse(query.DateFrom, out var from))
                 q = q.Where(o => o.OrderDate >= from);
@@ -67,7 +75,13 @@ namespace PharmaSphere.Repositories.Orders
                     o.OrderDate.ToString("yyyy-MM-dd"),
                     o.Party,
                     o.BrandName,
+                    _db.ProductMasters.AsNoTracking()
+                        .Where(p => !p.IsDeleted && p.BrandName == o.BrandName)
+                        .OrderBy(p => p.Id)
+                        .Select(p => p.GenericName)
+                        .FirstOrDefault(),
                     o.Qty,
+                    o.Rate,
                     o.Amount,
                     o.CurrentStatus,
                     o.CreatedBy,
