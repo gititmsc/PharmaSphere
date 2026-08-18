@@ -793,7 +793,7 @@ const SalesOrderFormPage: React.FC = () => {
                   </Divider>
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="monoBoxSupplyVendorApprovalDate" label="Mono Box Supply Vendor Approval Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
+                  <Fld name="monoBoxSupplyVendorApprovalDate" label="Order Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="labelSupplyVendorApprovalDate" label="Label Supply Vendor Approval Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
@@ -809,10 +809,10 @@ const SalesOrderFormPage: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={4} />
 
-                {/* ── Packing Material Receive ── */}
+                {/* ── Packing Material Receive Schedule ── */}
                 <Grid item xs={12}>
                   <Divider sx={{ my: 0.5 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Packing Material Receive</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>Packing Material Receive Schedule</Typography>
                   </Divider>
                 </Grid>
                 <Grid item xs={12} sm={4}>

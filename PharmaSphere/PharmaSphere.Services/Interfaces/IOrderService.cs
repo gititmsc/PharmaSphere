@@ -16,5 +16,6 @@ namespace PharmaSphere.Services.Interfaces
         Task<IReadOnlyList<string>> GetSealColorsAsync(CancellationToken ct = default);
         Task<AdminDashboardDto> GetAdminDashboardAsync(CancellationToken ct = default);
         Task<RoleDashboardDto> GetRoleDashboardAsync(string status, CancellationToken ct = default);
+        Task<DashboardPeriodQtyDto> GetPeriodQtyAsync(int month, int year, CancellationToken ct = default);
     }
 }

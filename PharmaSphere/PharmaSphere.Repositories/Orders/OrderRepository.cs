@@ -190,5 +190,25 @@ namespace PharmaSphere.Repositories.Orders
                     o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null))
                 .ToListAsync(ct);
         }
+
+        public async Task<DashboardPeriodQtyDto> GetPeriodQtyAsync(
+            int month, int year, CancellationToken ct = default)
+        {
+            var periodOrders = _db.Orders
+                .AsNoTracking()
+                .Where(o => o.IsActive
+                         && o.OrderDate.Month == month
+                         && o.OrderDate.Year == year);
+
+            var dispatchedQty = await periodOrders
+                .Where(o => o.CurrentStatus == OrderStatus.Dispatched)
+                .SumAsync(o => o.Qty ?? 0, ct);
+
+            var activeQty = await periodOrders
+                .Where(o => o.CurrentStatus != OrderStatus.Dispatched)
+                .SumAsync(o => o.Qty ?? 0, ct);
+
+            return new DashboardPeriodQtyDto(month, year, dispatchedQty, activeQty);
+        }
     }
 }

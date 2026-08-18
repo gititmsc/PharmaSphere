@@ -38,9 +38,23 @@ export interface DashboardResponse {
   role_data?: RoleDashboard;
 }
 
+export interface DashboardPeriodQty {
+  month: number;
+  year: number;
+  dispatchedQty: number;
+  activeQty: number;
+}
+
 export const DashboardService = {
   async get(): Promise<DashboardResponse> {
     const { data } = await httpClient.get<DashboardResponse>('/dashboard');
+    return data;
+  },
+
+  async getPeriodQty(month: number, year: number): Promise<DashboardPeriodQty> {
+    const { data } = await httpClient.get<DashboardPeriodQty>(
+      `/dashboard/period-qty?month=${month}&year=${year}`,
+    );
     return data;
   },
 };

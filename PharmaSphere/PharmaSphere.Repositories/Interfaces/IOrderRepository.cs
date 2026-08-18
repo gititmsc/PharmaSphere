@@ -17,5 +17,6 @@ namespace PharmaSphere.Repositories.Interfaces
         Task<Dictionary<string, int>> GetStatusCountsAsync(CancellationToken ct = default);
         Task<IReadOnlyList<DashboardOrderItemDto>> GetRecentOrdersAsync(int count, CancellationToken ct = default);
         Task<IReadOnlyList<DashboardOrderItemDto>> GetOrdersByStatusAsync(string status, int count, CancellationToken ct = default);
+        Task<DashboardPeriodQtyDto> GetPeriodQtyAsync(int month, int year, CancellationToken ct = default);
     }
 }

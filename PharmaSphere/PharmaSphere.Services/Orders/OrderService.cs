@@ -364,6 +364,17 @@ namespace PharmaSphere.Services.Orders
             return new RoleDashboardDto(status, pending, orders);
         }
 
+        public Task<DashboardPeriodQtyDto> GetPeriodQtyAsync(
+            int month, int year, CancellationToken ct = default)
+        {
+            if (month < 1 || month > 12)
+                throw new ArgumentOutOfRangeException(nameof(month), "Month must be between 1 and 12.");
+            if (year < 1)
+                throw new ArgumentOutOfRangeException(nameof(year), "Year must be a positive value.");
+
+            return _orders.GetPeriodQtyAsync(month, year, ct);
+        }
+
         // ── Mapping helpers ───────────────────────────────────────────────────────
 
         private static Order MapCreate(CreateOrderRequestDto r, int userId, string userName, string initialStatus)

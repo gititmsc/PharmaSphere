@@ -290,6 +290,12 @@ namespace PharmaSphere.Core.DTOs
         string CreatedDate,
         string? UpdatedDate);
 
+    public sealed record DashboardPeriodQtyDto(
+        int Month,
+        int Year,
+        int DispatchedQty,
+        int ActiveQty);
+
     public sealed record DashboardStatusCountDto(
         string Status,
         int Count,

@@ -46,5 +46,24 @@ namespace PharmaSphere.Api.Controllers
             var roleData = await _orders.GetRoleDashboardAsync(roleStatus, ct);
             return Ok(new { role = CurrentUserRole, role_data = roleData });
         }
+
+        // GET /api/dashboard/period-qty?month=8&year=2026
+        [HttpGet("period-qty")]
+        public async Task<IActionResult> GetPeriodQty(
+            [FromQuery] int? month, [FromQuery] int? year, CancellationToken ct)
+        {
+            if (CurrentUserRole != "Admin")
+                return Forbid();
+
+            var now = DateTime.UtcNow;
+            var m = month ?? now.Month;
+            var y = year  ?? now.Year;
+
+            if (m < 1 || m > 12)
+                return BadRequest(new { message = "Month must be between 1 and 12." });
+
+            var data = await _orders.GetPeriodQtyAsync(m, y, ct);
+            return Ok(data);
+        }
     }
 }

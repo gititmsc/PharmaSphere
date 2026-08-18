@@ -226,13 +226,13 @@ const SalesOrderDetailPage: React.FC = () => {
                 <Grid item xs={12}>
                   <Typography variant="caption" color="text.secondary" fontWeight={600}>Packing Material Order</Typography>
                 </Grid>
-                <Grid item xs={6}><FR label="Mono Box Vendor Approval" value={order.monoBoxSupplyVendorApprovalDate} /></Grid>
+                <Grid item xs={6}><FR label="Order Date" value={order.monoBoxSupplyVendorApprovalDate} /></Grid>
                 <Grid item xs={6}><FR label="Label Vendor Approval"    value={order.labelSupplyVendorApprovalDate} /></Grid>
                 <Grid item xs={6}><FR label="Insert Vendor Approval"   value={order.insertSupplyVendorApprovalDate} /></Grid>
                 <Grid item xs={6}><FR label="Tray Vendor Approval"     value={order.traySupplyVendorApprovalDate} /></Grid>
                 <Grid item xs={6}><FR label="Shipper Vendor Approval"  value={order.shipperSupplyVendorApprovalDate} /></Grid>
                 <Grid item xs={12} sx={{ mt: 0.5 }}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Packing Material Receive</Typography>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Packing Material Receive Schedule</Typography>
                 </Grid>
                 <Grid item xs={6}><FR label="Production MonoBox Date"  value={order.productionMonoBox} /></Grid>
                 <Grid item xs={6}><FR label="Production Label Date"    value={order.productionLabel} /></Grid>

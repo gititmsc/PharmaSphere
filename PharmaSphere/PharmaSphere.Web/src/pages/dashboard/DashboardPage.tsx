@@ -8,7 +8,11 @@ import {
   Chip,
   CircularProgress,
   Divider,
+  FormControl,
   Grid,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   Table,
   TableBody,
@@ -22,13 +26,15 @@ import AssignmentIcon        from '@mui/icons-material/Assignment';
 import CheckCircleIcon       from '@mui/icons-material/CheckCircle';
 import CancelIcon            from '@mui/icons-material/Cancel';
 import PlaylistAddCheckIcon  from '@mui/icons-material/PlaylistAddCheck';
+import LocalShippingIcon     from '@mui/icons-material/LocalShipping';
+import Inventory2Icon        from '@mui/icons-material/Inventory2';
 import EditIcon              from '@mui/icons-material/Edit';
 import ArrowForwardIcon      from '@mui/icons-material/ArrowForward';
 import { useNavigate }       from 'react-router-dom';
 import { useAuth }           from '@/contexts/AuthContext';
 import { DashboardService }  from '@/services/dashboard.service';
 import { encodeOrderId }     from '@/types/order.types';
-import type { AdminDashboard, RoleDashboard, DashboardOrderItem } from '@/services/dashboard.service';
+import type { AdminDashboard, RoleDashboard, DashboardOrderItem, DashboardPeriodQty } from '@/services/dashboard.service';
 
 // ── colour helpers ────────────────────────────────────────────────────────────
 
@@ -121,6 +127,93 @@ const PendingTable: React.FC<PendingTableProps> = ({ orders, showStatus = false 
   );
 };
 
+// ── Month/Year-wise Dispatched & Active Qty ──────────────────────────────────
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+const PeriodQtyCard: React.FC = () => {
+  const now = new Date();
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYear]   = useState(now.getFullYear());
+  const [qty, setQty]     = useState<DashboardPeriodQty | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const years = Array.from({ length: 6 }, (_, i) => now.getFullYear() - i);
+
+  useEffect(() => {
+    setLoading(true);
+    DashboardService.getPeriodQty(month, year)
+      .then(setQty)
+      .catch(() => setQty(null))
+      .finally(() => setLoading(false));
+  }, [month, year]);
+
+  return (
+    <Card elevation={0} sx={{ border: 1, borderColor: 'divider', mb: 3 }}>
+      <CardContent sx={{ p: 2.5 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }}
+          justifyContent="space-between" spacing={1.5} mb={2}>
+          <Typography variant="subtitle1" fontWeight={700}>
+            Dispatched &amp; Active Quantity
+          </Typography>
+          <Stack direction="row" spacing={1.5}>
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>Month</InputLabel>
+              <Select value={month} label="Month" onChange={e => setMonth(Number(e.target.value))}>
+                {MONTH_NAMES.map((m, i) => (
+                  <MenuItem key={m} value={i + 1}>{m}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 100 }}>
+              <InputLabel>Year</InputLabel>
+              <Select value={year} label="Year" onChange={e => setYear(Number(e.target.value))}>
+                {years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Stack>
+        </Stack>
+
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, borderRadius: 2, bgcolor: '#DBEAFE' }}>
+              <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: '#BFDBFE', color: '#1D4ED8', display: 'flex' }}>
+                <Inventory2Icon />
+              </Box>
+              <Box>
+                {loading ? <CircularProgress size={22} /> : (
+                  <Typography variant="h5" fontWeight={700} lineHeight={1} color="#1D4ED8">
+                    {(qty?.activeQty ?? 0).toLocaleString()}
+                  </Typography>
+                )}
+                <Typography variant="body2" color="text.secondary" mt={0.5}>Active Qty</Typography>
+              </Box>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, borderRadius: 2, bgcolor: '#D1FAE5' }}>
+              <Box sx={{ p: 1, borderRadius: 1.5, bgcolor: '#A7F3D0', color: '#065F46', display: 'flex' }}>
+                <LocalShippingIcon />
+              </Box>
+              <Box>
+                {loading ? <CircularProgress size={22} /> : (
+                  <Typography variant="h5" fontWeight={700} lineHeight={1} color="#065F46">
+                    {(qty?.dispatchedQty ?? 0).toLocaleString()}
+                  </Typography>
+                )}
+                <Typography variant="body2" color="text.secondary" mt={0.5}>Dispatched Qty</Typography>
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
+  );
+};
+
 // ── Admin dashboard ───────────────────────────────────────────────────────────
 
 const AdminDashboardView: React.FC<{ data: AdminDashboard }> = ({ data }) => {
@@ -153,6 +246,9 @@ const AdminDashboardView: React.FC<{ data: AdminDashboard }> = ({ data }) => {
           </Grid>
         ))}
       </Grid>
+
+      {/* Month/Year-wise Dispatched & Active Qty */}
+      <PeriodQtyCard />
 
       {/* Workflow pipeline */}
       <Card elevation={0} sx={{ border: 1, borderColor: 'divider', mb: 3 }}>
