@@ -11,7 +11,11 @@ namespace PharmaSphere.Core.DTOs
         string? SortBy      = null,   // orderNo|orderDate|party|brandName|qty|status|createdDate|updatedDate
         string? SortDir     = null,   // asc|desc
         int Page            = 1,
-        int PageSize        = 10);
+        int PageSize        = 10,
+        // Production role sees orders at 'Production Pending' status PLUS any order where PPMC
+        // has already entered the Production Label Date, even before status reaches that stage.
+        // When true, Status is ignored and this OR-condition is applied instead.
+        bool ProductionRoleView = false);
 
     // ── List Item ─────────────────────────────────────────────────────────────────
 

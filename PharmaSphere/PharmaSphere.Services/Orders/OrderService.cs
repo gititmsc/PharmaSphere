@@ -364,6 +364,13 @@ namespace PharmaSphere.Services.Orders
             return new RoleDashboardDto(status, pending, orders);
         }
 
+        public async Task<RoleDashboardDto> GetProductionRoleDashboardAsync(CancellationToken ct = default)
+        {
+            var orders  = await _orders.GetProductionRoleOrdersAsync(50, ct);
+            var pending = orders.Count;
+            return new RoleDashboardDto("Production Pending", pending, orders);
+        }
+
         public Task<DashboardPeriodQtyDto> GetPeriodQtyAsync(
             int month, int year, CancellationToken ct = default)
         {

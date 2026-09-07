@@ -54,7 +54,11 @@ namespace PharmaSphere.Api.Controllers
                 _            => (string?)null
             };
 
-            if (roleStatus is not null)
+            if (CurrentUserRole == "Production")
+                // Production also needs to see orders where PPMC has already entered the
+                // Production Label Date, even before status reaches 'Production Pending'.
+                query = query with { Status = null, ProductionRoleView = true };
+            else if (roleStatus is not null)
                 query = query with { Status = roleStatus };
 
             var result = await _orders.GetOrdersAsync(query, ct);

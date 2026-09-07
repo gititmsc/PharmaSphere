@@ -26,7 +26,9 @@ namespace PharmaSphere.Repositories.Orders
                     (o.BrandName != null && o.BrandName.ToLower().Contains(s)));
             }
 
-            if (!string.IsNullOrWhiteSpace(query.Status))
+            if (query.ProductionRoleView)
+                q = q.Where(o => o.CurrentStatus == "Production Pending" || o.ProductionLabel != null);
+            else if (!string.IsNullOrWhiteSpace(query.Status))
                 q = q.Where(o => o.CurrentStatus == query.Status);
 
             if (!string.IsNullOrWhiteSpace(query.GenericName))
@@ -181,6 +183,26 @@ namespace PharmaSphere.Repositories.Orders
             return await _db.Orders
                 .AsNoTracking()
                 .Where(o => o.IsActive && o.CurrentStatus == status)
+                .OrderByDescending(o => o.CreatedDate)
+                .Take(count)
+                .Select(o => new DashboardOrderItemDto(
+                    o.OrderId, o.OrderNo, o.Party, o.BrandName, o.Qty,
+                    o.CurrentStatus,
+                    o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
+                    o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null))
+                .ToListAsync(ct);
+        }
+
+        public async Task<IReadOnlyList<DashboardOrderItemDto>> GetProductionRoleOrdersAsync(
+            int count, CancellationToken ct = default)
+        {
+            // Same visibility rule as the Production role's Sales Order list:
+            // 'Production Pending' orders, plus any order where PPMC has already
+            // entered the Production Label Date even before status reaches that stage.
+            return await _db.Orders
+                .AsNoTracking()
+                .Where(o => o.IsActive
+                         && (o.CurrentStatus == "Production Pending" || o.ProductionLabel != null))
                 .OrderByDescending(o => o.CreatedDate)
                 .Take(count)
                 .Select(o => new DashboardOrderItemDto(

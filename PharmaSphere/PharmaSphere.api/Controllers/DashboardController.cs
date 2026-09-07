@@ -43,7 +43,11 @@ namespace PharmaSphere.Api.Controllers
             if (roleStatus is null)
                 return Ok(new { role = CurrentUserRole, admin = (object?)null, role_data = (object?)null });
 
-            var roleData = await _orders.GetRoleDashboardAsync(roleStatus, ct);
+            // Production also needs to see orders where PPMC has already entered the
+            // Production Label Date, even before status reaches 'Production Pending'.
+            var roleData = CurrentUserRole == "Production"
+                ? await _orders.GetProductionRoleDashboardAsync(ct)
+                : await _orders.GetRoleDashboardAsync(roleStatus, ct);
             return Ok(new { role = CurrentUserRole, role_data = roleData });
         }
 
