@@ -122,7 +122,7 @@ const ProductMastersPage: React.FC = () => {
     try {
       await ProductMasterService.delete(toDelete.id);
       enqueueSnackbar(`"${toDelete.brandName}" deleted successfully.`, {
-        variant: 'success', autoHideDuration: 10000,
+        variant: 'success',
         anchorOrigin: { vertical: 'top', horizontal: 'right' },
       });
       setToDelete(null);
@@ -133,7 +133,7 @@ const ProductMastersPage: React.FC = () => {
         ? (err.response?.data?.message ?? err.message)
         : 'Delete failed.';
       enqueueSnackbar(msg, {
-        variant: 'error', autoHideDuration: 10000,
+        variant: 'error',
         anchorOrigin: { vertical: 'top', horizontal: 'right' },
       });
     } finally {

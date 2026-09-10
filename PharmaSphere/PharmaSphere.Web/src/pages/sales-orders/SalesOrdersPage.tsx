@@ -175,14 +175,14 @@ const SalesOrdersPage: React.FC = () => {
     try {
       await OrderService.changeStatus(toCancel.orderId, 'Cancelled');
       enqueueSnackbar(`Order "${toCancel.orderNo}" cancelled.`, {
-        variant: 'success', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' },
+        variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' },
       });
       setToCancel(null);
       fetchOrders({ search, statusFilter, genericNameFilter, dateFrom, dateTo, sortBy, sortDir, page, pageSize });
     } catch (err) {
       let msg = 'Failed to cancel order.';
       if (axios.isAxiosError(err)) msg = err.response?.data?.message ?? msg;
-      enqueueSnackbar(msg, { variant: 'error', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      enqueueSnackbar(msg, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } finally {
       setCancelling(false);
     }

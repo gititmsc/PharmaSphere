@@ -111,7 +111,7 @@ const ProductMasterFormPage: React.FC = () => {
       })
       .catch(() => {
         enqueueSnackbar('Failed to load product.', {
-          variant: 'error', autoHideDuration: 10000,
+          variant: 'error',
           anchorOrigin: { vertical: 'top', horizontal: 'right' },
         });
         navigate('/product-masters');
@@ -125,13 +125,13 @@ const ProductMasterFormPage: React.FC = () => {
       if (isEdit && productId) {
         await ProductMasterService.update(productId, values);
         enqueueSnackbar('Product updated successfully.', {
-          variant: 'success', autoHideDuration: 10000,
+          variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' },
         });
       } else {
         await ProductMasterService.create(values);
         enqueueSnackbar('Product created successfully.', {
-          variant: 'success', autoHideDuration: 10000,
+          variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' },
         });
       }
@@ -141,7 +141,7 @@ const ProductMasterFormPage: React.FC = () => {
         ? (err.response?.data?.message ?? err.message)
         : 'Save failed.';
       enqueueSnackbar(msg, {
-        variant: 'error', autoHideDuration: 10000,
+        variant: 'error',
         anchorOrigin: { vertical: 'top', horizontal: 'right' },
       });
     } finally {

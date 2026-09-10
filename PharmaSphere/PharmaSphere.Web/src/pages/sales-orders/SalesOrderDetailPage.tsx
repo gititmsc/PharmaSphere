@@ -71,7 +71,7 @@ const SalesOrderDetailPage: React.FC = () => {
     setLoading(true);
     OrderService.getOrderById(orderId)
       .then(setOrder)
-      .catch(() => { enqueueSnackbar('Failed to load order.', { variant: 'error', autoHideDuration: 10000 }); navigate('/sales-orders'); })
+      .catch(() => { enqueueSnackbar('Failed to load order.', { variant: 'error' }); navigate('/sales-orders'); })
       .finally(() => setLoading(false));
   };
 
@@ -83,7 +83,7 @@ const SalesOrderDetailPage: React.FC = () => {
     try {
       await OrderService.changeStatus(orderId, newStatus, remarks || undefined);
       enqueueSnackbar(`Status changed to "${newStatus}".`, {
-        variant: 'success', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' },
+        variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' },
       });
       setStatusOpen(false);
       setNewStatus('');
@@ -92,7 +92,7 @@ const SalesOrderDetailPage: React.FC = () => {
     } catch (err) {
       let msg = 'Failed to change status.';
       if (axios.isAxiosError(err)) msg = err.response?.data?.message ?? msg;
-      enqueueSnackbar(msg, { variant: 'error', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      enqueueSnackbar(msg, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } finally {
       setChanging(false);
     }

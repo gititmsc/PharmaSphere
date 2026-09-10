@@ -308,12 +308,12 @@ const SalesOrderFormPage: React.FC = () => {
     setCancelling(true);
     try {
       await OrderService.changeStatus(orderId, 'Cancelled');
-      enqueueSnackbar('Order cancelled.', { variant: 'success', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      enqueueSnackbar('Order cancelled.', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       navigate('/sales-orders');
     } catch (err) {
       let msg = 'Failed to cancel order.';
       if (axios.isAxiosError(err)) msg = err.response?.data?.message ?? msg;
-      enqueueSnackbar(msg, { variant: 'error', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      enqueueSnackbar(msg, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } finally {
       setCancelling(false);
       setCancelOpen(false);
@@ -324,16 +324,16 @@ const SalesOrderFormPage: React.FC = () => {
     try {
       if (isEdit && orderId) {
         await OrderService.updateOrder(orderId, data);
-        enqueueSnackbar('Order updated.', { variant: 'success', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+        enqueueSnackbar('Order updated.', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       } else {
         await OrderService.createOrder(data);
-        enqueueSnackbar('Order created.', { variant: 'success', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+        enqueueSnackbar('Order created.', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       }
       navigate('/sales-orders');
     } catch (err) {
       let msg = 'An unexpected error occurred.';
       if (axios.isAxiosError(err)) msg = err.response?.data?.message ?? msg;
-      enqueueSnackbar(msg, { variant: 'error', autoHideDuration: 10000, anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      enqueueSnackbar(msg, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
   };
 

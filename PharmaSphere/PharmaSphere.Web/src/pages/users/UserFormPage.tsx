@@ -122,7 +122,7 @@ const UserFormPage: React.FC = () => {
         });
         enqueueSnackbar('User updated successfully.', {
           variant: 'success',
-          autoHideDuration: 10000,
+          
           anchorOrigin: { vertical: 'top', horizontal: 'right' },
         });
       } else {
@@ -136,7 +136,7 @@ const UserFormPage: React.FC = () => {
         });
         enqueueSnackbar('User created successfully.', {
           variant: 'success',
-          autoHideDuration: 10000,
+          
           anchorOrigin: { vertical: 'top', horizontal: 'right' },
         });
       }
@@ -148,7 +148,7 @@ const UserFormPage: React.FC = () => {
       }
       enqueueSnackbar(message, {
         variant: 'error',
-        autoHideDuration: 10000,
+        
         anchorOrigin: { vertical: 'top', horizontal: 'right' },
       });
     }
