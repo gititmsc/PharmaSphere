@@ -9,8 +9,24 @@ namespace PharmaSphere.Repositories.Orders
     public sealed class OrderRepository : IOrderRepository
     {
         private readonly AppDbContext _db;
+        private readonly IOrderStatusRepository _statuses;
 
-        public OrderRepository(AppDbContext db) => _db = db;
+        public OrderRepository(AppDbContext db, IOrderStatusRepository statuses)
+        {
+            _db = db;
+            _statuses = statuses;
+        }
+
+        /// <summary>
+        /// Per-status overdue/due-soon day thresholds, configured in the OrderStatuses
+        /// table (WarningDays/OverdueDays columns) rather than hardcoded.
+        /// </summary>
+        private async Task<Dictionary<string, (int? WarningDays, int? OverdueDays)>> GetOverdueRuleLookupAsync(
+            CancellationToken ct)
+        {
+            var configs = await _statuses.GetAllActiveAsync(ct);
+            return configs.ToDictionary(s => s.StatusName, s => (s.WarningDays, s.OverdueDays));
+        }
 
         public async Task<PagedResultDto<OrderListItemDto>> GetPagedAsync(
             OrderListQueryDto query, CancellationToken ct = default)
@@ -68,29 +84,49 @@ namespace PharmaSphere.Repositories.Orders
 
             var totalCount = await q.CountAsync(ct);
 
-            var items = await q
+            var rows = await q
                 .Skip((query.Page - 1) * query.PageSize)
                 .Take(query.PageSize)
-                .Select(o => new OrderListItemDto(
-                    o.OrderId,
-                    o.OrderNo,
-                    o.OrderDate.ToString("yyyy-MM-dd"),
-                    o.Party,
-                    o.BrandName,
-                    _db.ProductMasters.AsNoTracking()
-                        .Where(p => !p.IsDeleted && p.BrandName == o.BrandName)
-                        .OrderBy(p => p.Id)
-                        .Select(p => p.GenericName)
-                        .FirstOrDefault(),
-                    o.Qty,
-                    o.Rate,
-                    o.Amount,
-                    o.CurrentStatus,
-                    o.CreatedBy,
-                    o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
-                    o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null,
-                    o.IsActive))
+                .Select(o => new
+                {
+                    Dto = new OrderListItemDto(
+                        o.OrderId,
+                        o.OrderNo,
+                        o.OrderDate.ToString("yyyy-MM-dd"),
+                        o.Party,
+                        o.BrandName,
+                        _db.ProductMasters.AsNoTracking()
+                            .Where(p => !p.IsDeleted && p.BrandName == o.BrandName)
+                            .OrderBy(p => p.Id)
+                            .Select(p => p.GenericName)
+                            .FirstOrDefault(),
+                        o.Qty,
+                        o.Rate,
+                        o.Amount,
+                        o.CurrentStatus,
+                        false,
+                        false,
+                        o.CreatedBy,
+                        o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
+                        o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null,
+                        o.IsActive),
+                    o.CreatedDate,
+                })
                 .ToListAsync(ct);
+
+            var now    = DateTime.UtcNow;
+            var rules  = await GetOverdueRuleLookupAsync(ct);
+            var items = rows
+                .Select(r =>
+                {
+                    var (warningDays, overdueDays) = rules.TryGetValue(r.Dto.CurrentStatus, out var rule) ? rule : default;
+                    return r.Dto with
+                    {
+                        IsOverdue = OrderOverdueRules.IsOverdue(overdueDays, r.CreatedDate, now),
+                        IsDueSoon = OrderOverdueRules.IsDueSoon(warningDays, overdueDays, r.CreatedDate, now),
+                    };
+                })
+                .ToList();
 
             return new PagedResultDto<OrderListItemDto>(items, totalCount, query.Page, query.PageSize);
         }
@@ -161,36 +197,65 @@ namespace PharmaSphere.Repositories.Orders
                 .ToDictionaryAsync(x => x.Status, x => x.Count, ct);
         }
 
+        public async Task<Dictionary<string, int>> GetOverdueCountsAsync(CancellationToken ct = default)
+        {
+            var rows = await _db.Orders
+                .AsNoTracking()
+                .Where(o => o.IsActive)
+                .Select(o => new { o.CurrentStatus, o.CreatedDate })
+                .ToListAsync(ct);
+
+            var now   = DateTime.UtcNow;
+            var rules = await GetOverdueRuleLookupAsync(ct);
+            return rows
+                .Where(r => OrderOverdueRules.IsOverdue(
+                    rules.TryGetValue(r.CurrentStatus, out var rule) ? rule.OverdueDays : null, r.CreatedDate, now))
+                .GroupBy(r => r.CurrentStatus)
+                .ToDictionary(g => g.Key, g => g.Count());
+        }
+
         public async Task<IReadOnlyList<DashboardOrderItemDto>> GetRecentOrdersAsync(
             int count, CancellationToken ct = default)
         {
-            return await _db.Orders
+            var rows = await _db.Orders
                 .AsNoTracking()
                 .Where(o => o.IsActive)
                 .OrderByDescending(o => o.CreatedDate)
                 .Take(count)
-                .Select(o => new DashboardOrderItemDto(
-                    o.OrderId, o.OrderNo, o.Party, o.BrandName, o.Qty,
-                    o.CurrentStatus,
-                    o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
-                    o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null))
+                .Select(o => new
+                {
+                    Dto = new DashboardOrderItemDto(
+                        o.OrderId, o.OrderNo, o.Party, o.BrandName, o.Qty,
+                        o.CurrentStatus, false, false,
+                        o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
+                        o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null),
+                    o.CreatedDate,
+                })
                 .ToListAsync(ct);
+
+            return await ApplyOverdueAsync(rows.Select(r => (r.Dto, r.CreatedDate)), ct);
         }
 
         public async Task<IReadOnlyList<DashboardOrderItemDto>> GetOrdersByStatusAsync(
             string status, int count, CancellationToken ct = default)
         {
-            return await _db.Orders
+            var rows = await _db.Orders
                 .AsNoTracking()
                 .Where(o => o.IsActive && o.CurrentStatus == status)
                 .OrderByDescending(o => o.CreatedDate)
                 .Take(count)
-                .Select(o => new DashboardOrderItemDto(
-                    o.OrderId, o.OrderNo, o.Party, o.BrandName, o.Qty,
-                    o.CurrentStatus,
-                    o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
-                    o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null))
+                .Select(o => new
+                {
+                    Dto = new DashboardOrderItemDto(
+                        o.OrderId, o.OrderNo, o.Party, o.BrandName, o.Qty,
+                        o.CurrentStatus, false, false,
+                        o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
+                        o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null),
+                    o.CreatedDate,
+                })
                 .ToListAsync(ct);
+
+            return await ApplyOverdueAsync(rows.Select(r => (r.Dto, r.CreatedDate)), ct);
         }
 
         public async Task<IReadOnlyList<DashboardOrderItemDto>> GetProductionRoleOrdersAsync(
@@ -199,18 +264,42 @@ namespace PharmaSphere.Repositories.Orders
             // Same visibility rule as the Production role's Sales Order list:
             // 'Production Pending' orders, plus any order where PPMC has already
             // entered the Production Label Date even before status reaches that stage.
-            return await _db.Orders
+            var rows = await _db.Orders
                 .AsNoTracking()
                 .Where(o => o.IsActive
                          && (o.CurrentStatus == "Production Pending" || o.ProductionLabel != null))
                 .OrderByDescending(o => o.CreatedDate)
                 .Take(count)
-                .Select(o => new DashboardOrderItemDto(
-                    o.OrderId, o.OrderNo, o.Party, o.BrandName, o.Qty,
-                    o.CurrentStatus,
-                    o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
-                    o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null))
+                .Select(o => new
+                {
+                    Dto = new DashboardOrderItemDto(
+                        o.OrderId, o.OrderNo, o.Party, o.BrandName, o.Qty,
+                        o.CurrentStatus, false, false,
+                        o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
+                        o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null),
+                    o.CreatedDate,
+                })
                 .ToListAsync(ct);
+
+            return await ApplyOverdueAsync(rows.Select(r => (r.Dto, r.CreatedDate)), ct);
+        }
+
+        private async Task<IReadOnlyList<DashboardOrderItemDto>> ApplyOverdueAsync(
+            IEnumerable<(DashboardOrderItemDto Dto, DateTime CreatedDate)> rows, CancellationToken ct)
+        {
+            var now   = DateTime.UtcNow;
+            var rules = await GetOverdueRuleLookupAsync(ct);
+            return rows
+                .Select(r =>
+                {
+                    var (warningDays, overdueDays) = rules.TryGetValue(r.Dto.CurrentStatus, out var rule) ? rule : default;
+                    return r.Dto with
+                    {
+                        IsOverdue = OrderOverdueRules.IsOverdue(overdueDays, r.CreatedDate, now),
+                        IsDueSoon = OrderOverdueRules.IsDueSoon(warningDays, overdueDays, r.CreatedDate, now),
+                    };
+                })
+                .ToList();
         }
 
         public async Task<DashboardPeriodQtyDto> GetPeriodQtyAsync(

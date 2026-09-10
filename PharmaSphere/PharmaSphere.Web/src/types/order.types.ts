@@ -39,6 +39,8 @@ export interface OrderListItem {
   rate: number | null;
   amount: number | null;
   currentStatus: string;
+  isOverdue: boolean;
+  isDueSoon: boolean;
   createdBy: string | null;
   createdDate: string;
   updatedDate: string | null;

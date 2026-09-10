@@ -38,6 +38,15 @@ import type { AdminDashboard, RoleDashboard, DashboardOrderItem, DashboardPeriod
 
 // ── colour helpers ────────────────────────────────────────────────────────────
 
+// Gentle attention-grabbing pulse for Overdue/Due Soon badges — blinks once per second.
+const attentionBlinkSx = {
+  '@keyframes attentionBlink': {
+    '0%, 100%': { opacity: 1 },
+    '50%':      { opacity: 0.35 },
+  },
+  animation: 'attentionBlink 1s ease-in-out infinite',
+} as const;
+
 type ChipColor = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
 
 const MUI_COLORS: Record<string, ChipColor> = {
@@ -84,6 +93,9 @@ const PendingTable: React.FC<PendingTableProps> = ({ orders, showStatus = false 
         No orders found.
       </Typography>
     );
+  // Show the badge column whenever the caller wants the Status chip, or at least one
+  // row needs an Overdue/Due Soon flag — keeps header/row cell counts in sync.
+  const showBadgeCol = showStatus || orders.some(o => o.isOverdue || o.isDueSoon);
   return (
     <TableContainer>
       <Table size="small">
@@ -94,23 +106,41 @@ const PendingTable: React.FC<PendingTableProps> = ({ orders, showStatus = false 
             <TableCell sx={{ fontWeight: 600, py: '6px' }}>Party</TableCell>
             <TableCell sx={{ fontWeight: 600, py: '6px' }}>Brand</TableCell>
             <TableCell sx={{ fontWeight: 600, py: '6px', textAlign: 'right' }}>Qty</TableCell>
-            {showStatus && <TableCell sx={{ fontWeight: 600, py: '6px' }}>Status</TableCell>}
+            {showBadgeCol && <TableCell sx={{ fontWeight: 600, py: '6px' }}>Status</TableCell>}
             <TableCell sx={{ fontWeight: 600, py: '6px' }}>Created</TableCell>
             <TableCell sx={{ fontWeight: 600, py: '6px', width: 60 }} />
           </TableRow>
         </TableHead>
         <TableBody>
           {orders.map((o, i) => (
-            <TableRow key={o.orderId} hover sx={{ cursor: 'pointer' }}
+            <TableRow key={o.orderId} hover
+              sx={{
+                cursor: 'pointer',
+                ...(o.isOverdue
+                  ? { bgcolor: '#FEF2F2', '&:hover': { bgcolor: '#FEE2E2' } }
+                  : o.isDueSoon
+                  ? { bgcolor: '#FFFBEB', '&:hover': { bgcolor: '#FEF3C7' } }
+                  : {}),
+              }}
               onClick={() => navigate(`/sales-orders/form?id=${encodeOrderId(o.orderId)}`)}>
               <TableCell sx={{ color: 'text.disabled', fontSize: 11 }}>{i + 1}</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>{o.orderNo}</TableCell>
               <TableCell>{o.party ?? '—'}</TableCell>
               <TableCell>{o.brandName ?? '—'}</TableCell>
               <TableCell sx={{ textAlign: 'right' }}>{o.qty?.toLocaleString() ?? '—'}</TableCell>
-              {showStatus && (
+              {showBadgeCol && (
                 <TableCell>
-                  <Chip label={o.currentStatus} size="small" variant="outlined" />
+                  <Stack direction="row" alignItems="center" gap={0.5}>
+                    {showStatus && <Chip label={o.currentStatus} size="small" variant="outlined" />}
+                    {o.isOverdue && (
+                      <Chip label="Overdue" size="small" color="error"
+                        sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600, ...attentionBlinkSx }} />
+                    )}
+                    {!o.isOverdue && o.isDueSoon && (
+                      <Chip label="Due Soon" size="small"
+                        sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600, bgcolor: '#FDE68A', color: '#92400E', ...attentionBlinkSx }} />
+                    )}
+                  </Stack>
                 </TableCell>
               )}
               <TableCell sx={{ whiteSpace: 'nowrap', fontSize: 12, color: 'text.secondary' }}>
@@ -283,6 +313,14 @@ const AdminDashboardView: React.FC<{ data: AdminDashboard }> = ({ data }) => {
                       sx={{ lineHeight: 1.2, display: 'block', mt: 0.5 }}>
                       {p.status}
                     </Typography>
+                    {p.overdueCount > 0 && (
+                      <Chip
+                        label={`${p.overdueCount} overdue`}
+                        size="small"
+                        color="error"
+                        sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, mt: 0.75, ...attentionBlinkSx }}
+                      />
+                    )}
                     {idx < data.pipeline.length - 1 && (
                       <ArrowForwardIcon sx={{
                         position: 'absolute', right: -14, top: '50%',
@@ -362,9 +400,19 @@ const RoleDashboardView: React.FC<RoleDashboardViewProps> = ({ data, role }) => 
                   : 'All caught up!'}
               </Typography>
               <Typography variant="body2" color="text.secondary" mt={0.5}>{meta.tip}</Typography>
-              <Chip label={data.roleStatus} size="small"
-                sx={{ mt: 1, fontWeight: 600, bgcolor: hasWork ? '#FEF3C7' : '#DCFCE7',
-                  color: hasWork ? '#92400E' : '#15803D' }} />
+              <Stack direction="row" flexWrap="wrap" gap={0.75} mt={1}>
+                <Chip label={data.roleStatus} size="small"
+                  sx={{ fontWeight: 600, bgcolor: hasWork ? '#FEF3C7' : '#DCFCE7',
+                    color: hasWork ? '#92400E' : '#15803D' }} />
+                {data.overdueCount > 0 && (
+                  <Chip label={`${data.overdueCount} overdue`} size="small" color="error"
+                    sx={{ fontWeight: 700, ...attentionBlinkSx }} />
+                )}
+                {data.dueSoonCount > 0 && (
+                  <Chip label={`${data.dueSoonCount} due soon`} size="small"
+                    sx={{ fontWeight: 700, bgcolor: '#FDE68A', color: '#92400E', ...attentionBlinkSx }} />
+                )}
+              </Stack>
             </Grid>
             {hasWork && (
               <Grid item xs={12} sm="auto">

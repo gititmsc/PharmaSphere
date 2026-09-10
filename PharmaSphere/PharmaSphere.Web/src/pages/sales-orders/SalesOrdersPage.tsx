@@ -52,6 +52,15 @@ import { fmtDate, fmtDateTime }                        from '@/utils/date.utils'
 
 const PAGE_SIZES = [10, 25, 50, 100];
 
+// Gentle attention-grabbing pulse for Overdue/Due Soon badges — blinks once per second.
+const attentionBlinkSx = {
+  '@keyframes attentionBlink': {
+    '0%, 100%': { opacity: 1 },
+    '50%':      { opacity: 0.35 },
+  },
+  animation: 'attentionBlink 1s ease-in-out infinite',
+} as const;
+
 interface ColDef { id: string; label: string; sortKey?: string; width?: number | string; align?: 'left' | 'right' | 'center'; }
 
 const ALL_COLS: ColDef[] = [
@@ -339,17 +348,38 @@ const SalesOrdersPage: React.FC = () => {
               ) : rows.map((row, idx) => (
                 <TableRow key={row.orderId} hover
                   onClick={() => navigate(`/sales-orders/form?id=${encodeOrderId(row.orderId)}`)}
-                  sx={{ cursor: 'pointer' }}>
+                  sx={{
+                    cursor: 'pointer',
+                    ...(row.isOverdue
+                      ? { bgcolor: '#FEF2F2', '&:hover': { bgcolor: '#FEE2E2' } }
+                      : row.isDueSoon
+                      ? { bgcolor: '#FFFBEB', '&:hover': { bgcolor: '#FEF3C7' } }
+                      : {}),
+                  }}>
                   <TableCell sx={{ color: 'text.disabled', fontSize: 11 }}>{rangeStart + idx}</TableCell>
                   {visibleDefs.map(c => (
                     <TableCell key={c.id} align={c.align}>
                       {c.id === 'status' ? (
-                        <Chip
-                          label={row.currentStatus}
-                          size="small"
-                          color={statuses.find(s => s.statusName === row.currentStatus)?.color ?? 'default'}
-                          sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }}
-                        />
+                        <Stack direction="row" alignItems="center" gap={0.5}>
+                          <Chip
+                            label={row.currentStatus}
+                            size="small"
+                            color={statuses.find(s => s.statusName === row.currentStatus)?.color ?? 'default'}
+                            sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }}
+                          />
+                          {row.isOverdue && (
+                            <Tooltip title="This order has exceeded the allowed time for its current status">
+                              <Chip label="Overdue" size="small" color="error"
+                                sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, ...attentionBlinkSx }} />
+                            </Tooltip>
+                          )}
+                          {!row.isOverdue && row.isDueSoon && (
+                            <Tooltip title="This order is approaching the deadline for its current status">
+                              <Chip label="Due Soon" size="small"
+                                sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600, bgcolor: '#FDE68A', color: '#92400E', ...attentionBlinkSx }} />
+                            </Tooltip>
+                          )}
+                        </Stack>
                       ) : c.id === 'orderNo'     ? row.orderNo
                         : c.id === 'orderDate'   ? fmtDate(row.orderDate)
                         : c.id === 'party'       ? (row.party ?? '—')

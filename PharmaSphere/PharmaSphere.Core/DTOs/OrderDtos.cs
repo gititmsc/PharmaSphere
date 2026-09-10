@@ -30,6 +30,8 @@ namespace PharmaSphere.Core.DTOs
         decimal? Rate,
         decimal? Amount,
         string CurrentStatus,
+        bool IsOverdue,
+        bool IsDueSoon,
         string? CreatedBy,
         string CreatedDate,
         string? UpdatedDate,
@@ -291,6 +293,8 @@ namespace PharmaSphere.Core.DTOs
         string? BrandName,
         int? Qty,
         string CurrentStatus,
+        bool IsOverdue,
+        bool IsDueSoon,
         string CreatedDate,
         string? UpdatedDate);
 
@@ -303,6 +307,7 @@ namespace PharmaSphere.Core.DTOs
     public sealed record DashboardStatusCountDto(
         string Status,
         int Count,
+        int OverdueCount,
         string Color);
 
     public sealed record AdminDashboardDto(
@@ -316,6 +321,8 @@ namespace PharmaSphere.Core.DTOs
     public sealed record RoleDashboardDto(
         string RoleStatus,
         int PendingCount,
+        int OverdueCount,
+        int DueSoonCount,
         IReadOnlyList<DashboardOrderItemDto> PendingOrders);
 
     // ── Order Status Config ───────────────────────────────────────────────────────

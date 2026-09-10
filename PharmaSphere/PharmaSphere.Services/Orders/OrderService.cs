@@ -70,7 +70,7 @@ namespace PharmaSphere.Services.Orders
                 ChangedDate     = order.CreatedDate,
             }, ct);
 
-            return ToListItem(order);
+            return await ToListItemAsync(order, ct);
         }
 
         public async Task<OrderListItemDto> UpdateOrderAsync(
@@ -225,7 +225,7 @@ namespace PharmaSphere.Services.Orders
                 }, ct);
             }
 
-            return ToListItem(order);
+            return await ToListItemAsync(order, ct);
         }
 
         public async Task DeleteOrderAsync(
@@ -336,9 +336,10 @@ namespace PharmaSphere.Services.Orders
 
         public async Task<AdminDashboardDto> GetAdminDashboardAsync(CancellationToken ct = default)
         {
-            var statusConfigs = await _statuses.GetAllActiveAsync(ct);
-            var counts        = await _orders.GetStatusCountsAsync(ct);
-            var recent        = await _orders.GetRecentOrdersAsync(10, ct);
+            var statusConfigs  = await _statuses.GetAllActiveAsync(ct);
+            var counts         = await _orders.GetStatusCountsAsync(ct);
+            var overdueCounts  = await _orders.GetOverdueCountsAsync(ct);
+            var recent         = await _orders.GetRecentOrdersAsync(10, ct);
 
             var pipeline = statusConfigs
                 .Where(s => s.ShowInFlow)
@@ -346,6 +347,7 @@ namespace PharmaSphere.Services.Orders
                 .Select(s => new DashboardStatusCountDto(
                     s.StatusName,
                     counts.TryGetValue(s.StatusName, out var c) ? c : 0,
+                    overdueCounts.TryGetValue(s.StatusName, out var oc) ? oc : 0,
                     s.Color))
                 .ToList();
 
@@ -361,14 +363,18 @@ namespace PharmaSphere.Services.Orders
         {
             var orders  = await _orders.GetOrdersByStatusAsync(status, 50, ct);
             var pending = orders.Count;
-            return new RoleDashboardDto(status, pending, orders);
+            var overdue = orders.Count(o => o.IsOverdue);
+            var dueSoon = orders.Count(o => o.IsDueSoon);
+            return new RoleDashboardDto(status, pending, overdue, dueSoon, orders);
         }
 
         public async Task<RoleDashboardDto> GetProductionRoleDashboardAsync(CancellationToken ct = default)
         {
             var orders  = await _orders.GetProductionRoleOrdersAsync(50, ct);
             var pending = orders.Count;
-            return new RoleDashboardDto("Production Pending", pending, orders);
+            var overdue = orders.Count(o => o.IsOverdue);
+            var dueSoon = orders.Count(o => o.IsDueSoon);
+            return new RoleDashboardDto("Production Pending", pending, overdue, dueSoon, orders);
         }
 
         public Task<DashboardPeriodQtyDto> GetPeriodQtyAsync(
@@ -615,21 +621,40 @@ namespace PharmaSphere.Services.Orders
                     a.ChangedBy, a.ChangedDate.ToString("yyyy-MM-dd HH:mm")))
                 .ToList());
 
-        private static OrderListItemDto ToListItem(Order o) => new(
-            o.OrderId,
-            o.OrderNo,
-            o.OrderDate.ToString("yyyy-MM-dd"),
-            o.Party,
-            o.BrandName,
-            null,
-            o.Qty,
-            o.Rate,
-            o.Amount,
-            o.CurrentStatus,
-            o.CreatedBy,
-            o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
-            o.UpdatedDate?.ToString("yyyy-MM-dd HH:mm"),
-            o.IsActive);
+        /// <summary>
+        /// Per-status overdue/due-soon day thresholds, configured in the OrderStatuses
+        /// table (WarningDays/OverdueDays columns) rather than hardcoded.
+        /// </summary>
+        private async Task<Dictionary<string, (int? WarningDays, int? OverdueDays)>> GetOverdueRuleLookupAsync(
+            CancellationToken ct)
+        {
+            var configs = await _statuses.GetAllActiveAsync(ct);
+            return configs.ToDictionary(s => s.StatusName, s => (s.WarningDays, s.OverdueDays));
+        }
+
+        private async Task<OrderListItemDto> ToListItemAsync(Order o, CancellationToken ct)
+        {
+            var rules = await GetOverdueRuleLookupAsync(ct);
+            var (warningDays, overdueDays) = rules.TryGetValue(o.CurrentStatus, out var rule) ? rule : default;
+            var now = DateTime.UtcNow;
+            return new OrderListItemDto(
+                o.OrderId,
+                o.OrderNo,
+                o.OrderDate.ToString("yyyy-MM-dd"),
+                o.Party,
+                o.BrandName,
+                null,
+                o.Qty,
+                o.Rate,
+                o.Amount,
+                o.CurrentStatus,
+                OrderOverdueRules.IsOverdue(overdueDays, o.CreatedDate, now),
+                OrderOverdueRules.IsDueSoon(warningDays, overdueDays, o.CreatedDate, now),
+                o.CreatedBy,
+                o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
+                o.UpdatedDate?.ToString("yyyy-MM-dd HH:mm"),
+                o.IsActive);
+        }
 
         private static DateTime ParseDate(string? s) =>
             DateTime.TryParse(s, out var d) ? d : DateTime.UtcNow;

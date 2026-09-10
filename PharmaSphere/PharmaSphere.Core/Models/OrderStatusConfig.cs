@@ -10,6 +10,11 @@ namespace PharmaSphere.Core.Models
         public bool IsTerminal { get; set; }
         public bool ShowInFlow { get; set; } = true;
         public bool IsActive { get; set; } = true;
+
+        // Overdue rule for this status, in days from Order.CreatedDate (UTC).
+        // Null means no rule is defined yet for this status — never due-soon/overdue.
+        public int? WarningDays { get; set; }
+        public int? OverdueDays { get; set; }
     }
 
     public sealed class OrderStatusTransition

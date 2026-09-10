@@ -7,6 +7,8 @@ export interface DashboardOrderItem {
   brandName: string | null;
   qty: number | null;
   currentStatus: string;
+  isOverdue: boolean;
+  isDueSoon: boolean;
   createdDate: string;
   updatedDate: string | null;
 }
@@ -14,6 +16,7 @@ export interface DashboardOrderItem {
 export interface DashboardStatusCount {
   status: string;
   count: number;
+  overdueCount: number;
   color: string;
 }
 
@@ -29,6 +32,8 @@ export interface AdminDashboard {
 export interface RoleDashboard {
   roleStatus: string;
   pendingCount: number;
+  overdueCount: number;
+  dueSoonCount: number;
   pendingOrders: DashboardOrderItem[];
 }
 

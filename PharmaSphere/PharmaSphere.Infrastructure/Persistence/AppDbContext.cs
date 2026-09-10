@@ -356,6 +356,8 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(s => s.IsTerminal).IsRequired().HasDefaultValue(false);
                 e.Property(s => s.ShowInFlow).IsRequired().HasDefaultValue(true);
                 e.Property(s => s.IsActive).IsRequired().HasDefaultValue(true);
+                e.Property(s => s.WarningDays);
+                e.Property(s => s.OverdueDays);
                 e.HasIndex(s => s.StatusName).IsUnique()
                  .HasDatabaseName("UQ_OrderStatuses_StatusName");
             });
