@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PharmaSphere.Core.DTOs;
 using PharmaSphere.Core.Models;
 using PharmaSphere.Infrastructure.Persistence;
@@ -18,14 +18,21 @@ namespace PharmaSphere.Repositories.Orders
         }
 
         /// <summary>
-        /// Per-status overdue/due-soon day thresholds, configured in the OrderStatuses
-        /// table (WarningDays/OverdueDays columns) rather than hardcoded.
+        /// Per-status overdue/due-soon day thresholds, configured in the OrderStatuses table.
         /// </summary>
-        private async Task<Dictionary<string, (int? WarningDays, int? OverdueDays)>> GetOverdueRuleLookupAsync(
-            CancellationToken ct)
+        private async Task<Dictionary<string, StatusOverdueRule>> GetOverdueRuleLookupAsync(CancellationToken ct)
         {
             var configs = await _statuses.GetAllActiveAsync(ct);
-            return configs.ToDictionary(s => s.StatusName, s => (s.WarningDays, s.OverdueDays));
+            return configs.ToDictionary(
+                s => s.StatusName,
+                s => new StatusOverdueRule(s.WarningDays, s.OverdueDays, s.SecondaryWarningDays, s.SecondaryOverdueDays));
+        }
+
+        private static (bool IsOverdue, bool IsDueSoon) EvaluateOverdue(
+            OrderOverdueContext ctx, Dictionary<string, StatusOverdueRule> rules, DateTime now)
+        {
+            StatusOverdueRule? rule = rules.TryGetValue(ctx.CurrentStatus, out var r) ? r : null;
+            return OrderOverdueRules.Evaluate(ctx, rule, now);
         }
 
         public async Task<PagedResultDto<OrderListItemDto>> GetPagedAsync(
@@ -43,7 +50,11 @@ namespace PharmaSphere.Repositories.Orders
             }
 
             if (query.ProductionRoleView)
-                q = q.Where(o => o.CurrentStatus == "Production Pending" || o.ProductionLabel != null);
+                // ProductionLabel is set once (during PM Supply Pending) and never cleared, so it
+                // must only grant early visibility while STILL at PM Supply Pending — not for every
+                // later status the order passes through (Packing/Dispatch Pending, Dispatched, ...).
+                q = q.Where(o => o.CurrentStatus == "Production Pending"
+                               || (o.CurrentStatus == "PM Supply Pending" && o.ProductionLabel != null));
             else if (!string.IsNullOrWhiteSpace(query.Status))
                 q = q.Where(o => o.CurrentStatus == query.Status);
 
@@ -110,21 +121,34 @@ namespace PharmaSphere.Repositories.Orders
                         o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
                         o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null,
                         o.IsActive),
-                    o.CreatedDate,
+                    Ctx = new OrderOverdueContext(
+                        o.CurrentStatus,
+                        o.CreatedDate,
+                        o.SanoletPartyArtworkApprovalDate,
+                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                            && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
+                            && o.ShipperSupplyVendorApprovalDate.HasValue,
+                        o.MonoBoxSupplyVendorApprovalDate,
+                        o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                            && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                            && o.ProductionShipper.HasValue,
+                        o.ProductionMonoBox,
+                        o.ProductionLabel,
+                        o.ProductionInsert,
+                        o.ProductionTray,
+                        o.ProductionShipper,
+                        o.FillingPlan,
+                        o.Sterility14DaysDate.HasValue),
                 })
                 .ToListAsync(ct);
 
-            var now    = DateTime.UtcNow;
-            var rules  = await GetOverdueRuleLookupAsync(ct);
+            var now   = DateTime.UtcNow;
+            var rules = await GetOverdueRuleLookupAsync(ct);
             var items = rows
                 .Select(r =>
                 {
-                    var (warningDays, overdueDays) = rules.TryGetValue(r.Dto.CurrentStatus, out var rule) ? rule : default;
-                    return r.Dto with
-                    {
-                        IsOverdue = OrderOverdueRules.IsOverdue(overdueDays, r.CreatedDate, now),
-                        IsDueSoon = OrderOverdueRules.IsDueSoon(warningDays, overdueDays, r.CreatedDate, now),
-                    };
+                    var (overdue, dueSoon) = EvaluateOverdue(r.Ctx, rules, now);
+                    return r.Dto with { IsOverdue = overdue, IsDueSoon = dueSoon };
                 })
                 .ToList();
 
@@ -202,15 +226,31 @@ namespace PharmaSphere.Repositories.Orders
             var rows = await _db.Orders
                 .AsNoTracking()
                 .Where(o => o.IsActive)
-                .Select(o => new { o.CurrentStatus, o.CreatedDate })
+                .Select(o => new OrderOverdueContext(
+                    o.CurrentStatus,
+                    o.CreatedDate,
+                    o.SanoletPartyArtworkApprovalDate,
+                    o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                        && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
+                        && o.ShipperSupplyVendorApprovalDate.HasValue,
+                    o.MonoBoxSupplyVendorApprovalDate,
+                    o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                        && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                        && o.ProductionShipper.HasValue,
+                    o.ProductionMonoBox,
+                    o.ProductionLabel,
+                    o.ProductionInsert,
+                    o.ProductionTray,
+                    o.ProductionShipper,
+                    o.FillingPlan,
+                    o.Sterility14DaysDate.HasValue))
                 .ToListAsync(ct);
 
             var now   = DateTime.UtcNow;
             var rules = await GetOverdueRuleLookupAsync(ct);
             return rows
-                .Where(r => OrderOverdueRules.IsOverdue(
-                    rules.TryGetValue(r.CurrentStatus, out var rule) ? rule.OverdueDays : null, r.CreatedDate, now))
-                .GroupBy(r => r.CurrentStatus)
+                .Where(ctx => EvaluateOverdue(ctx, rules, now).IsOverdue)
+                .GroupBy(ctx => ctx.CurrentStatus)
                 .ToDictionary(g => g.Key, g => g.Count());
         }
 
@@ -229,11 +269,28 @@ namespace PharmaSphere.Repositories.Orders
                         o.CurrentStatus, false, false,
                         o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
                         o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null),
-                    o.CreatedDate,
+                    Ctx = new OrderOverdueContext(
+                        o.CurrentStatus,
+                        o.CreatedDate,
+                        o.SanoletPartyArtworkApprovalDate,
+                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                            && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
+                            && o.ShipperSupplyVendorApprovalDate.HasValue,
+                        o.MonoBoxSupplyVendorApprovalDate,
+                        o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                            && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                            && o.ProductionShipper.HasValue,
+                        o.ProductionMonoBox,
+                        o.ProductionLabel,
+                        o.ProductionInsert,
+                        o.ProductionTray,
+                        o.ProductionShipper,
+                        o.FillingPlan,
+                        o.Sterility14DaysDate.HasValue),
                 })
                 .ToListAsync(ct);
 
-            return await ApplyOverdueAsync(rows.Select(r => (r.Dto, r.CreatedDate)), ct);
+            return await ApplyOverdueAsync(rows.Select(r => (r.Dto, r.Ctx)), ct);
         }
 
         public async Task<IReadOnlyList<DashboardOrderItemDto>> GetOrdersByStatusAsync(
@@ -251,23 +308,43 @@ namespace PharmaSphere.Repositories.Orders
                         o.CurrentStatus, false, false,
                         o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
                         o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null),
-                    o.CreatedDate,
+                    Ctx = new OrderOverdueContext(
+                        o.CurrentStatus,
+                        o.CreatedDate,
+                        o.SanoletPartyArtworkApprovalDate,
+                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                            && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
+                            && o.ShipperSupplyVendorApprovalDate.HasValue,
+                        o.MonoBoxSupplyVendorApprovalDate,
+                        o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                            && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                            && o.ProductionShipper.HasValue,
+                        o.ProductionMonoBox,
+                        o.ProductionLabel,
+                        o.ProductionInsert,
+                        o.ProductionTray,
+                        o.ProductionShipper,
+                        o.FillingPlan,
+                        o.Sterility14DaysDate.HasValue),
                 })
                 .ToListAsync(ct);
 
-            return await ApplyOverdueAsync(rows.Select(r => (r.Dto, r.CreatedDate)), ct);
+            return await ApplyOverdueAsync(rows.Select(r => (r.Dto, r.Ctx)), ct);
         }
 
         public async Task<IReadOnlyList<DashboardOrderItemDto>> GetProductionRoleOrdersAsync(
             int count, CancellationToken ct = default)
         {
             // Same visibility rule as the Production role's Sales Order list:
-            // 'Production Pending' orders, plus any order where PPMC has already
-            // entered the Production Label Date even before status reaches that stage.
+            // 'Production Pending' orders, plus PM Supply Pending orders where PPMC has
+            // already entered the Production Label Date even before status reaches that
+            // stage. ProductionLabel is set once and never cleared, so this must be scoped
+            // to PM Supply Pending only — otherwise it would also match every later status.
             var rows = await _db.Orders
                 .AsNoTracking()
                 .Where(o => o.IsActive
-                         && (o.CurrentStatus == "Production Pending" || o.ProductionLabel != null))
+                         && (o.CurrentStatus == "Production Pending"
+                             || (o.CurrentStatus == "PM Supply Pending" && o.ProductionLabel != null)))
                 .OrderByDescending(o => o.CreatedDate)
                 .Take(count)
                 .Select(o => new
@@ -277,27 +354,40 @@ namespace PharmaSphere.Repositories.Orders
                         o.CurrentStatus, false, false,
                         o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
                         o.UpdatedDate != null ? o.UpdatedDate.Value.ToString("yyyy-MM-dd HH:mm") : null),
-                    o.CreatedDate,
+                    Ctx = new OrderOverdueContext(
+                        o.CurrentStatus,
+                        o.CreatedDate,
+                        o.SanoletPartyArtworkApprovalDate,
+                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                            && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
+                            && o.ShipperSupplyVendorApprovalDate.HasValue,
+                        o.MonoBoxSupplyVendorApprovalDate,
+                        o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                            && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                            && o.ProductionShipper.HasValue,
+                        o.ProductionMonoBox,
+                        o.ProductionLabel,
+                        o.ProductionInsert,
+                        o.ProductionTray,
+                        o.ProductionShipper,
+                        o.FillingPlan,
+                        o.Sterility14DaysDate.HasValue),
                 })
                 .ToListAsync(ct);
 
-            return await ApplyOverdueAsync(rows.Select(r => (r.Dto, r.CreatedDate)), ct);
+            return await ApplyOverdueAsync(rows.Select(r => (r.Dto, r.Ctx)), ct);
         }
 
         private async Task<IReadOnlyList<DashboardOrderItemDto>> ApplyOverdueAsync(
-            IEnumerable<(DashboardOrderItemDto Dto, DateTime CreatedDate)> rows, CancellationToken ct)
+            IEnumerable<(DashboardOrderItemDto Dto, OrderOverdueContext Ctx)> rows, CancellationToken ct)
         {
             var now   = DateTime.UtcNow;
             var rules = await GetOverdueRuleLookupAsync(ct);
             return rows
                 .Select(r =>
                 {
-                    var (warningDays, overdueDays) = rules.TryGetValue(r.Dto.CurrentStatus, out var rule) ? rule : default;
-                    return r.Dto with
-                    {
-                        IsOverdue = OrderOverdueRules.IsOverdue(overdueDays, r.CreatedDate, now),
-                        IsDueSoon = OrderOverdueRules.IsDueSoon(warningDays, overdueDays, r.CreatedDate, now),
-                    };
+                    var (overdue, dueSoon) = EvaluateOverdue(r.Ctx, rules, now);
+                    return r.Dto with { IsOverdue = overdue, IsDueSoon = dueSoon };
                 })
                 .ToList();
         }

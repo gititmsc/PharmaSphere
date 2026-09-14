@@ -15,6 +15,12 @@ namespace PharmaSphere.Core.Models
         // Null means no rule is defined yet for this status — never due-soon/overdue.
         public int? WarningDays { get; set; }
         public int? OverdueDays { get; set; }
+
+        // For compound statuses with two sequential sub-rules (currently only
+        // PM Supply Pending — see OrderOverdueRules.Evaluate). Unused/null for
+        // simple single-deadline statuses.
+        public int? SecondaryWarningDays { get; set; }
+        public int? SecondaryOverdueDays { get; set; }
     }
 
     public sealed class OrderStatusTransition

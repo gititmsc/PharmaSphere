@@ -622,21 +622,40 @@ namespace PharmaSphere.Services.Orders
                 .ToList());
 
         /// <summary>
-        /// Per-status overdue/due-soon day thresholds, configured in the OrderStatuses
-        /// table (WarningDays/OverdueDays columns) rather than hardcoded.
+        /// Per-status overdue/due-soon day thresholds, configured in the OrderStatuses table.
         /// </summary>
-        private async Task<Dictionary<string, (int? WarningDays, int? OverdueDays)>> GetOverdueRuleLookupAsync(
-            CancellationToken ct)
+        private async Task<Dictionary<string, StatusOverdueRule>> GetOverdueRuleLookupAsync(CancellationToken ct)
         {
             var configs = await _statuses.GetAllActiveAsync(ct);
-            return configs.ToDictionary(s => s.StatusName, s => (s.WarningDays, s.OverdueDays));
+            return configs.ToDictionary(
+                s => s.StatusName,
+                s => new StatusOverdueRule(s.WarningDays, s.OverdueDays, s.SecondaryWarningDays, s.SecondaryOverdueDays));
         }
+
+        private static OrderOverdueContext ToOverdueContext(Order o) => new(
+            o.CurrentStatus,
+            o.CreatedDate,
+            o.SanoletPartyArtworkApprovalDate,
+            o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
+                && o.ShipperSupplyVendorApprovalDate.HasValue,
+            o.MonoBoxSupplyVendorApprovalDate,
+            o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                && o.ProductionShipper.HasValue,
+            o.ProductionMonoBox,
+            o.ProductionLabel,
+            o.ProductionInsert,
+            o.ProductionTray,
+            o.ProductionShipper,
+            o.FillingPlan,
+            o.Sterility14DaysDate.HasValue);
 
         private async Task<OrderListItemDto> ToListItemAsync(Order o, CancellationToken ct)
         {
             var rules = await GetOverdueRuleLookupAsync(ct);
-            var (warningDays, overdueDays) = rules.TryGetValue(o.CurrentStatus, out var rule) ? rule : default;
-            var now = DateTime.UtcNow;
+            StatusOverdueRule? rule = rules.TryGetValue(o.CurrentStatus, out var r) ? r : null;
+            var (isOverdue, isDueSoon) = OrderOverdueRules.Evaluate(ToOverdueContext(o), rule, DateTime.UtcNow);
             return new OrderListItemDto(
                 o.OrderId,
                 o.OrderNo,
@@ -648,8 +667,8 @@ namespace PharmaSphere.Services.Orders
                 o.Rate,
                 o.Amount,
                 o.CurrentStatus,
-                OrderOverdueRules.IsOverdue(overdueDays, o.CreatedDate, now),
-                OrderOverdueRules.IsDueSoon(warningDays, overdueDays, o.CreatedDate, now),
+                isOverdue,
+                isDueSoon,
                 o.CreatedBy,
                 o.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
                 o.UpdatedDate?.ToString("yyyy-MM-dd HH:mm"),
@@ -707,15 +726,18 @@ namespace PharmaSphere.Services.Orders
                                && o.ProductionInsert.HasValue
                                && o.ProductionTray.HasValue
                                && o.ProductionShipper.HasValue;
-            var fillingDone  = o.FillingPlan.HasValue;
+            // Both the Filling Date and Sterility Date are required to leave Production
+            // Pending — matches the "Enter the Filling Plan Date and Sterility Date to
+            // advance the status" guidance already shown to the Production role.
+            var productionDone = o.FillingPlan.HasValue && o.Sterility14DaysDate.HasValue;
             var packingDone  = o.PackingPlan.HasValue;
             var dispatchDone = o.DispatchDate.HasValue;
 
-            if (dispatchDone && packingDone && fillingDone && allPMFilled && artworkApproved && qaComplete)
+            if (dispatchDone && packingDone && productionDone && allPMFilled && artworkApproved && qaComplete)
                 return OrderStatus.Dispatched;
-            if (packingDone  && fillingDone && allPMFilled && artworkApproved && qaComplete)
+            if (packingDone  && productionDone && allPMFilled && artworkApproved && qaComplete)
                 return "Dispatch Pending";
-            if (fillingDone  && allPMFilled && artworkApproved && qaComplete)
+            if (productionDone && allPMFilled && artworkApproved && qaComplete)
                 return "Packing Pending";
             if (allPMFilled  && artworkApproved && qaComplete)
                 return "Production Pending";
