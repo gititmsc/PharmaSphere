@@ -54,7 +54,7 @@ const TEXT_FIELDS: { key: keyof ProductMasterFormValues; label: string; required
   { key: 'wfi',          label: 'WFI'            },
   { key: 'label',        label: 'Label'          },
   { key: 'monoBox',      label: 'Mono Box'       },
-  { key: 'monthBox',     label: 'Month Box'      },
+  { key: 'monthBox',     label: 'Mother Box'      },
   { key: 'tray',         label: 'Tray'           },
   { key: 'leaflet',      label: 'Leaflet'        },
   { key: 'syringeNeedle',label: 'Syringe Needle' },
