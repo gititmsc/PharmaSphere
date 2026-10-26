@@ -24,6 +24,7 @@ namespace PharmaSphere.Core.Models
         DateTime? ProductionMonoBoxDate,
         DateTime? ProductionLabelDate,
         DateTime? ProductionInsertDate,
+        bool ProductionTrayNotApplicable,
         DateTime? ProductionTrayDate,
         DateTime? ProductionShipperDate,
         DateTime? FillingDate,
@@ -109,8 +110,12 @@ namespace PharmaSphere.Core.Models
                 {
                     DateTime?[] receiveDates =
                         { ctx.ProductionMonoBoxDate, ctx.ProductionLabelDate, ctx.ProductionInsertDate,
-                          ctx.ProductionTrayDate, ctx.ProductionShipperDate };
+                          ctx.ProductionShipperDate };
                     if (receiveDates.Any(d => d is null)) return (false, false);
+                    if (!ctx.ProductionTrayNotApplicable && ctx.ProductionTrayDate is null) return (false, false);
+                    receiveDates = ctx.ProductionTrayNotApplicable
+                        ? receiveDates
+                        : receiveDates.Append(ctx.ProductionTrayDate).ToArray();
                     var enteredDate = receiveDates.Max()!.Value;
                     return EvaluateSingle(r.WarningDays, r.OverdueDays, enteredDate, nowUtc);
                 }

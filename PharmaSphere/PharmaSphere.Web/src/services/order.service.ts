@@ -84,6 +84,7 @@ function toRequest(v: OrderFormValues) {
     productionMonoBox:               d(v.productionMonoBox),
     productionLabel:                 d(v.productionLabel),
     productionInsert:                d(v.productionInsert),
+    productionTrayNotApplicable:     v.productionTrayNotApplicable,
     productionTray:                  d(v.productionTray),
     productionShipper:               d(v.productionShipper),
     fillingPlan:                     d(v.fillingPlan),

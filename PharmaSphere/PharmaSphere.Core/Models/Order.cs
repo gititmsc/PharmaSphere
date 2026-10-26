@@ -72,6 +72,7 @@ namespace PharmaSphere.Core.Models
         public DateTime? ProductionMonoBox { get; set; }
         public DateTime? ProductionLabel { get; set; }
         public DateTime? ProductionInsert { get; set; }
+        public bool ProductionTrayNotApplicable { get; set; }
         public DateTime? ProductionTray { get; set; }
         public DateTime? ProductionShipper { get; set; }
         public DateTime? FillingPlan { get; set; }

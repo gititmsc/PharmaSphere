@@ -111,6 +111,7 @@ export interface OrderDetail {
   productionMonoBox: string | null;
   productionLabel: string | null;
   productionInsert: string | null;
+  productionTrayNotApplicable: boolean;
   productionTray: string | null;
   productionShipper: string | null;
   fillingPlan: string | null;
@@ -234,6 +235,7 @@ export interface OrderFormValues {
   productionMonoBox: string;
   productionLabel: string;
   productionInsert: string;
+  productionTrayNotApplicable: boolean;
   productionTray: string;
   productionShipper: string;
   fillingPlan: string;

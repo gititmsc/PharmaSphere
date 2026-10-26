@@ -234,6 +234,7 @@ namespace PharmaSphere.Infrastructure.Persistence
                 e.Property(o => o.CPPNotApplicable).IsRequired().HasDefaultValue(false);
                 e.Property(o => o.COPPNotApplicable).IsRequired().HasDefaultValue(false);
                 e.Property(o => o.FSCNotApplicable).IsRequired().HasDefaultValue(false);
+                e.Property(o => o.ProductionTrayNotApplicable).IsRequired().HasDefaultValue(false);
 
                 e.HasIndex(o => o.IsActive).HasDatabaseName("IX_Orders_IsActive");
                 e.HasIndex(o => o.CurrentStatus).HasDatabaseName("IX_Orders_Status");

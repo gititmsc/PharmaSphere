@@ -166,6 +166,7 @@ namespace PharmaSphere.Services.Orders
             Track("Production Mono Box", order.ProductionMonoBox?.ToString("yyyy-MM-dd"), req.ProductionMonoBox);
             Track("Production Label",    order.ProductionLabel?.ToString("yyyy-MM-dd"),   req.ProductionLabel);
             Track("Production Insert",   order.ProductionInsert?.ToString("yyyy-MM-dd"),  req.ProductionInsert);
+            Track("Production Tray Not Applicable", order.ProductionTrayNotApplicable, req.ProductionTrayNotApplicable);
             Track("Production Tray",     order.ProductionTray?.ToString("yyyy-MM-dd"),    req.ProductionTray);
             Track("Production Shipper",  order.ProductionShipper?.ToString("yyyy-MM-dd"), req.ProductionShipper);
             Track("Filling Plan",        order.FillingPlan?.ToString("yyyy-MM-dd"),   req.FillingPlan);
@@ -454,6 +455,7 @@ namespace PharmaSphere.Services.Orders
                 ProductionMonoBox     = ParseDateOpt(r.ProductionMonoBox),
                 ProductionLabel       = ParseDateOpt(r.ProductionLabel),
                 ProductionInsert      = ParseDateOpt(r.ProductionInsert),
+                ProductionTrayNotApplicable = r.ProductionTrayNotApplicable,
                 ProductionTray        = ParseDateOpt(r.ProductionTray),
                 ProductionShipper     = ParseDateOpt(r.ProductionShipper),
                 FillingPlan           = ParseDateOpt(r.FillingPlan),
@@ -529,6 +531,7 @@ namespace PharmaSphere.Services.Orders
             o.ProductionMonoBox     = ParseDateOpt(r.ProductionMonoBox);
             o.ProductionLabel       = ParseDateOpt(r.ProductionLabel);
             o.ProductionInsert      = ParseDateOpt(r.ProductionInsert);
+            o.ProductionTrayNotApplicable = r.ProductionTrayNotApplicable;
             o.ProductionTray        = ParseDateOpt(r.ProductionTray);
             o.ProductionShipper     = ParseDateOpt(r.ProductionShipper);
             o.FillingPlan           = ParseDateOpt(r.FillingPlan);
@@ -598,6 +601,7 @@ namespace PharmaSphere.Services.Orders
             o.ProductionMonoBox?.ToString("yyyy-MM-dd"),
             o.ProductionLabel?.ToString("yyyy-MM-dd"),
             o.ProductionInsert?.ToString("yyyy-MM-dd"),
+            o.ProductionTrayNotApplicable,
             o.ProductionTray?.ToString("yyyy-MM-dd"),
             o.ProductionShipper?.ToString("yyyy-MM-dd"),
             o.FillingPlan?.ToString("yyyy-MM-dd"),
@@ -641,11 +645,12 @@ namespace PharmaSphere.Services.Orders
                 && o.ShipperSupplyVendorApprovalDate.HasValue,
             o.MonoBoxSupplyVendorApprovalDate,
             o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
-                && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                 && o.ProductionShipper.HasValue,
             o.ProductionMonoBox,
             o.ProductionLabel,
             o.ProductionInsert,
+            o.ProductionTrayNotApplicable,
             o.ProductionTray,
             o.ProductionShipper,
             o.FillingPlan,
@@ -724,7 +729,7 @@ namespace PharmaSphere.Services.Orders
                                && o.ProductionMonoBox.HasValue
                                && o.ProductionLabel.HasValue
                                && o.ProductionInsert.HasValue
-                               && o.ProductionTray.HasValue
+                               && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                                && o.ProductionShipper.HasValue;
             // Both the Filling Date and Sterility Date are required to leave Production
             // Pending — matches the "Enter the Filling Plan Date and Sterility Date to

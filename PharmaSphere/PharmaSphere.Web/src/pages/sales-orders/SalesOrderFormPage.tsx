@@ -128,6 +128,7 @@ const EMPTY: OrderFormValues = {
   insertSupplyVendorApprovalDate: '', traySupplyVendorApprovalDate: '',
   shipperSupplyVendorApprovalDate: '',
   productionMonoBox: '', productionLabel: '', productionInsert: '',
+  productionTrayNotApplicable: false,
   productionTray: '', productionShipper: '', fillingPlan: '', packingPlan: '',
   sterility14DaysDate: '', dispatchDate: '',
 };
@@ -276,6 +277,7 @@ const SalesOrderFormPage: React.FC = () => {
           productionMonoBox: o.productionMonoBox ?? '',
           productionLabel: o.productionLabel ?? '',
           productionInsert: o.productionInsert ?? '',
+          productionTrayNotApplicable: o.productionTrayNotApplicable ?? false,
           productionTray: o.productionTray ?? '',
           productionShipper: o.productionShipper ?? '',
           fillingPlan: o.fillingPlan ?? '',
@@ -302,6 +304,7 @@ const SalesOrderFormPage: React.FC = () => {
   const cppNotApplicable  = useWatch({ control, name: 'cppNotApplicable' });
   const coppNotApplicable = useWatch({ control, name: 'coppNotApplicable' });
   const fscNotApplicable  = useWatch({ control, name: 'fscNotApplicable' });
+  const productionTrayNotApplicable = useWatch({ control, name: 'productionTrayNotApplicable' });
 
   const handleCancelOrder = async () => {
     if (!orderId) return;
@@ -825,7 +828,17 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="productionInsert" label="Production Insert Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Fld name="productionTray" label="Production Tray Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
+                  <Fld name="productionTray" label="Production Tray Date" control={control} type="date" readOnly={roPMFields || productionTrayNotApplicable} shrinkLabel />
+                  <Controller
+                    name="productionTrayNotApplicable"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} disabled={roPMFields} size="small" />}
+                        label="Not Applicable"
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="productionShipper" label="Production Shipper Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />

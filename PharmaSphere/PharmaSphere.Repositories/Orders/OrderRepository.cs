@@ -130,11 +130,12 @@ namespace PharmaSphere.Repositories.Orders
                             && o.ShipperSupplyVendorApprovalDate.HasValue,
                         o.MonoBoxSupplyVendorApprovalDate,
                         o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
-                            && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                            && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                             && o.ProductionShipper.HasValue,
                         o.ProductionMonoBox,
                         o.ProductionLabel,
                         o.ProductionInsert,
+                        o.ProductionTrayNotApplicable,
                         o.ProductionTray,
                         o.ProductionShipper,
                         o.FillingPlan,
@@ -235,11 +236,12 @@ namespace PharmaSphere.Repositories.Orders
                         && o.ShipperSupplyVendorApprovalDate.HasValue,
                     o.MonoBoxSupplyVendorApprovalDate,
                     o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
-                        && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                        && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                         && o.ProductionShipper.HasValue,
                     o.ProductionMonoBox,
                     o.ProductionLabel,
                     o.ProductionInsert,
+                    o.ProductionTrayNotApplicable,
                     o.ProductionTray,
                     o.ProductionShipper,
                     o.FillingPlan,
@@ -278,11 +280,12 @@ namespace PharmaSphere.Repositories.Orders
                             && o.ShipperSupplyVendorApprovalDate.HasValue,
                         o.MonoBoxSupplyVendorApprovalDate,
                         o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
-                            && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                            && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                             && o.ProductionShipper.HasValue,
                         o.ProductionMonoBox,
                         o.ProductionLabel,
                         o.ProductionInsert,
+                        o.ProductionTrayNotApplicable,
                         o.ProductionTray,
                         o.ProductionShipper,
                         o.FillingPlan,
@@ -317,11 +320,12 @@ namespace PharmaSphere.Repositories.Orders
                             && o.ShipperSupplyVendorApprovalDate.HasValue,
                         o.MonoBoxSupplyVendorApprovalDate,
                         o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
-                            && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                            && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                             && o.ProductionShipper.HasValue,
                         o.ProductionMonoBox,
                         o.ProductionLabel,
                         o.ProductionInsert,
+                        o.ProductionTrayNotApplicable,
                         o.ProductionTray,
                         o.ProductionShipper,
                         o.FillingPlan,
@@ -363,11 +367,12 @@ namespace PharmaSphere.Repositories.Orders
                             && o.ShipperSupplyVendorApprovalDate.HasValue,
                         o.MonoBoxSupplyVendorApprovalDate,
                         o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
-                            && o.ProductionInsert.HasValue && o.ProductionTray.HasValue
+                            && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                             && o.ProductionShipper.HasValue,
                         o.ProductionMonoBox,
                         o.ProductionLabel,
                         o.ProductionInsert,
+                        o.ProductionTrayNotApplicable,
                         o.ProductionTray,
                         o.ProductionShipper,
                         o.FillingPlan,
