@@ -181,17 +181,22 @@ namespace PharmaSphere.Services.Orders
             order.UpdatedByUserId = userId;
             order.UpdatedDate     = now;
 
-            // Auto-advance status based on completed fields (only forward, never touch Cancelled)
+            // Auto-advance status based on completed fields (only forward, never touch Cancelled).
+            // A single save can satisfy more than one workflow stage at once (e.g. PM Supply +
+            // Production fields filled together), so step through every intermediate status one
+            // at a time rather than jumping straight to the final target — each hop gets logged
+            // so the user/admin can see exactly when the order moved through each status.
             var statusBeforeUpdate = order.CurrentStatus;
-            string? autoAdvancedTo = null;
+            var statusSteps = new List<string>();
             if (order.CurrentStatus != OrderStatus.Cancelled)
             {
                 var targetStatus = ComputeTargetStatus(order);
-                if (WorkflowIndex(targetStatus) > WorkflowIndex(order.CurrentStatus))
-                {
-                    autoAdvancedTo      = targetStatus;
+                var targetIdx    = WorkflowIndex(targetStatus);
+                var currentIdx   = WorkflowIndex(order.CurrentStatus);
+                for (var i = currentIdx + 1; i <= targetIdx; i++)
+                    statusSteps.Add(WorkflowOrder[i]);
+                if (statusSteps.Count > 0)
                     order.CurrentStatus = targetStatus;
-                }
             }
 
             await _orders.SaveChangesAsync(ct);
@@ -202,30 +207,34 @@ namespace PharmaSphere.Services.Orders
             if (!string.IsNullOrWhiteSpace(req.BrandName))
                 await _lookups.EnsureBrandNameExistsAsync(req.BrandName, ct);
 
-            // Record the auto-status advance in history + audit log
-            if (autoAdvancedTo != null)
+            // Record each auto-status step in history + audit log, in order
+            var stepFrom = statusBeforeUpdate;
+            for (var stepIdx = 0; stepIdx < statusSteps.Count; stepIdx++)
             {
+                var step = statusSteps[stepIdx];
+                var stepChangedDate = now.AddTicks(stepIdx);
                 await _orders.AddStatusHistoryAsync(new OrderStatusHistory
                 {
                     OrderId         = orderId,
-                    FromStatus      = statusBeforeUpdate,
-                    ToStatus        = autoAdvancedTo,
+                    FromStatus      = stepFrom,
+                    ToStatus        = step,
                     Remarks         = "Status auto-updated by system",
                     ChangedBy       = userName,
                     ChangedByUserId = userId,
-                    ChangedDate     = now,
+                    ChangedDate     = stepChangedDate,
                 }, ct);
                 await _orders.AddAuditLogAsync(new OrderAuditLog
                 {
                     OrderId         = orderId,
                     Action          = AuditAction.StatusChanged,
                     FieldName       = "CurrentStatus",
-                    OldValue        = statusBeforeUpdate,
-                    NewValue        = autoAdvancedTo,
+                    OldValue        = stepFrom,
+                    NewValue        = step,
                     ChangedBy       = userName,
                     ChangedByUserId = userId,
-                    ChangedDate     = now,
+                    ChangedDate     = stepChangedDate,
                 }, ct);
+                stepFrom = step;
             }
 
             return await ToListItemAsync(order, ct);

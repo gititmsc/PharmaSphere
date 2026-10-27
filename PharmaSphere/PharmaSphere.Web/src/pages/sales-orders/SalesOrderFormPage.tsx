@@ -307,6 +307,7 @@ const SalesOrderFormPage: React.FC = () => {
   const cppNotApplicable  = useWatch({ control, name: 'cppNotApplicable' });
   const coppNotApplicable = useWatch({ control, name: 'coppNotApplicable' });
   const fscNotApplicable  = useWatch({ control, name: 'fscNotApplicable' });
+  const productionLabelSet = useWatch({ control, name: 'productionLabel' }) !== '';
   const productionTrayNotApplicable = useWatch({ control, name: 'productionTrayNotApplicable' });
 
   const handleCancelOrder = async () => {
@@ -369,8 +370,13 @@ const SalesOrderFormPage: React.FC = () => {
   const roArtworkDate = ro || (!isAdmin && !(isDesigner && orderStatus === 'Artwork Pending'));
   // PPMC may only fill PM fields while the order is still in 'PM Supply Pending'
   const roPMFields    = ro || (!isAdmin && !(isPPMC && orderStatus === 'PM Supply Pending'));
-  // Production may only fill filling plan fields while the order is still in 'Production Pending'
-  const roFilling     = ro || (!isAdmin && !(isProduction && orderStatus === 'Production Pending'));
+  // Production may fill filling plan fields once the order reaches 'Production Pending' —
+  // or earlier, while still 'PM Supply Pending', once PPMC has entered the Production Label
+  // Date (the same condition that already grants Production early visibility of the order).
+  const roFilling     = ro || (!isAdmin && !(isProduction && (
+    orderStatus === 'Production Pending'
+    || (orderStatus === 'PM Supply Pending' && productionLabelSet)
+  )));
   // Packing may only fill packing plan date while the order is still in 'Packing Pending'
   const roPackingPlan = ro || (!isAdmin && !(isPacking && orderStatus === 'Packing Pending'));
   // Dispatch may only fill dispatch date while the order is still in 'Dispatch Pending'
@@ -859,7 +865,7 @@ const SalesOrderFormPage: React.FC = () => {
             {/* ── Tab: Production Info ── */}
             {productionTabIdx >= 0 && (
             <TabPanel value={tab} index={productionTabIdx}>
-              {isEdit && !isAdmin && ((isProduction && orderStatus === 'Production Pending') || (isPacking && orderStatus === 'Packing Pending') || (isDispatch && orderStatus === 'Dispatch Pending')) && (
+              {isEdit && !isAdmin && ((isProduction && (orderStatus === 'Production Pending' || (orderStatus === 'PM Supply Pending' && productionLabelSet))) || (isPacking && orderStatus === 'Packing Pending') || (isDispatch && orderStatus === 'Dispatch Pending')) && (
                 <Alert severity="info" sx={{ mb: 1.5 }}>
                   {isProduction && 'Enter the Filling Plan Date and Sterility Date to advance the status.'}
                   {isPacking    && 'Enter the Packing Plan Date to advance the status.'}
