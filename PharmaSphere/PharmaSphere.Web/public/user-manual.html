@@ -169,9 +169,9 @@
   <h1>PharmaSphere</h1>
   <h2>User Manual &amp; UAT Guide</h2>
   <div>
-    <span class="badge">Version 1.0</span>
+    <span class="badge">Version 1.1</span>
     <span class="badge">Confidential</span>
-    <span class="badge">June 2026</span>
+    <span class="badge">October 2026</span>
   </div>
   <p style="margin-top:40px;font-size:15px;opacity:.9;max-width:520px;">
     This document provides step-by-step instructions for every role in the
@@ -216,6 +216,10 @@
         <li><a href="#so-workflow">5.5 Status Workflow</a></li>
         <li><a href="#so-cancel">5.6 Cancelling a Sales Order (Admin)</a></li>
         <li><a href="#so-delete">5.7 Deleting a Sales Order (Admin)</a></li>
+        <li><a href="#so-notapplicable">5.8 "Not Applicable" Toggles</a></li>
+        <li><a href="#so-earlyvisibility">5.9 Early Visibility for Production</a></li>
+        <li><a href="#so-overdue">5.10 Overdue &amp; Due Soon Indicators</a></li>
+        <li><a href="#so-multistep">5.11 Multi-Stage Status Logging</a></li>
       </ol>
     </li>
     <li><a href="#role-guides">6. Role-Specific Guides</a>
@@ -246,6 +250,7 @@
         <li><a href="#uat-access">9.5 Role-Based Access Control</a></li>
         <li><a href="#uat-users">9.6 User Management</a></li>
         <li><a href="#uat-pm">9.7 Product Master</a></li>
+        <li><a href="#uat-overdue">9.8 Overdue &amp; Due Soon / Early Visibility</a></li>
       </ol>
     </li>
     <li><a href="#glossary">10. Glossary</a></li>
@@ -277,8 +282,11 @@
     <li>Complete audit log and status history per order</li>
     <li>Secure JWT authentication with optional Two-Factor Authentication (2FA)</li>
     <li>Admin-only access to sensitive fields (Rate, Amount) and management features</li>
-    <li>Dedicated QA / Design tab for regulatory permission dates (Product Permission, COPP, FSC)</li>
+    <li>Dedicated QA / Design tab for regulatory permission dates (Product Permission, COPP, FSC), each with a "Not Applicable" toggle to skip sections that don't apply to a product</li>
     <li>Centralised Product Master catalogue — brand selection auto-fills all packaging component specifications into new sales orders</li>
+    <li>Early visibility: Production can see and start filling their dates as soon as PPMC records the Production Label Date, even before the order formally reaches Production Pending</li>
+    <li>Configurable Overdue / Due Soon badges per workflow stage, shown on the Sales Order list and summarised on the Admin dashboard</li>
+    <li>Multi-stage status auto-advance — if one save completes more than one stage at once, every intermediate status change is logged individually</li>
   </ul>
 
   <h3>Supported Browsers</h3>
@@ -316,7 +324,8 @@
       <td>PIS Pending queue</td>
       <td>PIS Pending only</td>
       <td>General Info, QA / Design</td>
-      <td>PIS Approval Date; Product Permission, Combipack Product Permission, COPP &amp; FSC dates</td>
+      <td>PIS Approval Date; Product Permission, Combipack Product Permission, COPP &amp; FSC dates
+          (each section can be marked <strong>Not Applicable</strong> to skip its 4 dates)</td>
     </tr>
     <tr>
       <td><span class="role role-designer">Designer</span></td>
@@ -330,14 +339,17 @@
       <td>PM Supply Pending queue</td>
       <td>PM Supply Pending only</td>
       <td>General Info, Packaging Material</td>
-      <td>All 10 Packing Material Order &amp; Receive dates (component specs not visible)</td>
+      <td>All 12 Packing Material Order &amp; Receive dates, including Mono Box and Mother Box in
+          both sections (component specs not visible). The Production Tray Date has a
+          <strong>Not Applicable</strong> toggle.</td>
     </tr>
     <tr>
       <td><span class="role role-prod">Production</span></td>
-      <td>Production Pending queue</td>
-      <td>Production Pending only</td>
+      <td>Production Pending queue (plus early-visibility orders, see §5.9)</td>
+      <td>Production Pending; also PM Supply Pending orders once Production Label Date is set</td>
       <td>General Info, Production Info</td>
-      <td>Filling Plan Date, Sterility 14 Days Date</td>
+      <td>Filling Plan Date, Sterility 14 Days Date — <strong>both are required</strong> to advance
+          to Packing Pending</td>
     </tr>
     <tr>
       <td><span class="role role-pack">Packing</span></td>
@@ -381,6 +393,15 @@
 
   <p>Status advances <strong>automatically</strong> when the required field(s)
      for each stage are saved. No manual status change is needed by role users.</p>
+
+  <div class="callout callout-info">
+    <strong>One exception: Production</strong>
+    Production may start entering the Filling Plan Date and Sterility 14 Days Date
+    as soon as PPMC records the <strong>Production Label Date</strong> — even while the
+    order is still <span class="status s-pm">PM Supply Pending</span>. See §5.9 for details.
+    Even so, the status will not skip ahead to <span class="status s-pack">Packing Pending</span>
+    until every PM Supply field is also complete.
+  </div>
 </div>
 
 <!-- ═══════════════════════════ 3. AUTH ═══════════════════════════════ -->
@@ -449,7 +470,8 @@
   </ul>
 
   <h4>Workflow Pipeline</h4>
-  <p>Six colour-coded cards show the live count of orders at each stage.
+  <p>Six colour-coded cards show the live count of orders at each stage, plus how many of
+     those orders are currently Overdue for that stage (see §5.10 for how Overdue is determined).
      Click any card to jump to the Sales Order list filtered by that status.</p>
 
   <h4>Recent Orders</h4>
@@ -463,8 +485,14 @@
     <li>A <strong>Go to My Orders</strong> button that navigates to the filtered
         Sales Order list.</li>
     <li>A <strong>work queue table</strong> listing every order at their stage
-        with a direct edit link per row.</li>
+        with a direct edit link per row, including Overdue / Due Soon badges (see §5.10).</li>
   </ul>
+  <div class="callout callout-info">
+    <strong>Production's work queue</strong>
+    The Production role's work queue also includes orders still at
+    <span class="status s-pm">PM Supply Pending</span> once PPMC has entered the Production
+    Label Date — see §5.9 for details.
+  </div>
 
   <div class="callout callout-success">
     <strong>Tip</strong>
@@ -559,7 +587,10 @@
       <td><strong>QA / Design</strong></td>
       <td>Admin, QA, Designer</td>
       <td>
-        <strong>QA:</strong> PIS Approval Date + Product Permission, Combipack Product Permission, COPP, FSC date sections.<br/>
+        <strong>QA:</strong> PIS Approval Date + Product Permission, Combipack Product Permission, COPP, FSC date sections.
+        Each of the four permission sections has its own <strong>Not Applicable</strong> switch — ticking it
+        hides the need for that section's 4 dates (Apply/Draft/Approval/Received) when computing whether QA's
+        work is complete.<br/>
         <strong>Designer:</strong> Artwork Approval Date only — PIS date and all permission sections are hidden.<br/>
         <strong>Admin:</strong> All fields.
       </td>
@@ -568,7 +599,10 @@
       <td><strong>Packaging Material</strong></td>
       <td>Admin, PPMC</td>
       <td>
-        <strong>PPMC:</strong> Packing Material Order dates &amp; Packing Material Receive dates (10 fields total) — component specifications are hidden.<br/>
+        <strong>PPMC:</strong> Packing Material Order dates &amp; Packing Material Receive dates
+        (12 fields total — Mono Box, Mother Box, Label, Insert, Tray &amp; Shipper in each of the two sections)
+        — component specifications are hidden. The <strong>Production Tray Date</strong> has its own
+        <strong>Not Applicable</strong> switch.<br/>
         <strong>Admin:</strong> All fields including component specifications.
       </td>
     </tr>
@@ -576,7 +610,9 @@
       <td><strong>Production Info</strong></td>
       <td>Admin, Production, Packing, Dispatcher</td>
       <td>
-        <strong>Production:</strong> Filling Plan Date &amp; Sterility 14 Days Date only.<br/>
+        <strong>Production:</strong> Filling Plan Date &amp; Sterility 14 Days Date only — editable once the
+        order reaches Production Pending, <em>or earlier</em> while still PM Supply Pending if PPMC has
+        already entered the Production Label Date (see §5.9).<br/>
         <strong>Packing:</strong> Packing Plan Date only.<br/>
         <strong>Dispatcher:</strong> Dispatch Date only.<br/>
         <strong>Admin:</strong> All four fields.
@@ -614,13 +650,18 @@
     <tr>
       <td><span class="status s-pm">PM Supply Pending</span></td>
       <td><span class="role role-ppmc">PPMC</span></td>
-      <td>Fill all <strong>10 Packing Material</strong> order &amp; receive date fields and save</td>
+      <td>Fill all <strong>12 Packing Material</strong> order &amp; receive date fields (Mono Box,
+          Mother Box, Label, Insert, Tray, Shipper — in both the Order and Receive sections) and save.
+          The Production Tray Date is satisfied either by a date or by ticking its
+          <strong>Not Applicable</strong> switch.</td>
       <td><span class="status s-prod">Production Pending</span></td>
     </tr>
     <tr>
       <td><span class="status s-prod">Production Pending</span></td>
       <td><span class="role role-prod">Production</span></td>
-      <td>Enter <strong>Filling Plan Date</strong> and save</td>
+      <td>Enter <strong>both</strong> the <strong>Filling Plan Date</strong> and the
+          <strong>Sterility 14 Days Date</strong> and save. Either date alone is not enough —
+          both must be filled for the status to advance.</td>
       <td><span class="status s-pack">Packing Pending</span></td>
     </tr>
     <tr>
@@ -670,6 +711,101 @@
     Deletion is a soft-delete — the record is retained in the database and can
     be restored by a system administrator if needed.
   </div>
+
+  <h3 id="so-notapplicable">5.8 "Not Applicable" Toggles</h3>
+  <p>Some regulatory and packaging fields do not apply to every product. Rather than forcing a
+     date to be entered, the following date groups can instead be marked
+     <strong>Not Applicable</strong> using a switch next to the group:</p>
+  <ul>
+    <li><strong>QA / Design tab</strong> — Product Permission, Combipack Product Permission,
+        COPP, and FSC each have their own Not Applicable switch. Ticking it removes the
+        requirement for that section's Apply / Draft / Approval / Received dates when the
+        system checks whether QA's work is complete.</li>
+    <li><strong>Packaging Material tab</strong> — the Production Tray Date (in the
+        Packing Material Receive Schedule section) has a Not Applicable switch. Ticking it
+        removes the requirement for that one date; the field itself becomes read-only while ticked.</li>
+  </ul>
+  <div class="callout callout-warning">
+    <strong>Who can toggle these</strong>
+    Only the role that owns the section (QA for the QA / Design toggles, PPMC for Production
+    Tray) or Admin can change a Not Applicable switch — the same read-only rule that applies
+    to the dates themselves.
+  </div>
+
+  <h3 id="so-earlyvisibility">5.9 Early Visibility for Production</h3>
+  <p>Normally a role can only see and edit orders once the order's status reaches their stage.
+     Production is a deliberate exception:</p>
+  <ul>
+    <li>As soon as PPMC enters the <strong>Production Label Date</strong> (one of the 12 fields
+        on the Packaging Material tab) — even while the order is still
+        <span class="status s-pm">PM Supply Pending</span> — the order appears in the
+        Production role's dashboard queue and order list.</li>
+    <li>Production may immediately start entering the <strong>Filling Plan Date</strong> and
+        <strong>Sterility 14 Days Date</strong> on that order, without waiting for the status
+        to formally reach <span class="status s-prod">Production Pending</span>.</li>
+    <li>This does <strong>not</strong> let the order skip ahead: the status only advances to
+        <span class="status s-pack">Packing Pending</span> once every PM Supply field is also
+        complete. Until then, the order simply remains at
+        <span class="status s-pm">PM Supply Pending</span> with Production's dates already saved.</li>
+  </ul>
+  <div class="callout callout-info">
+    <strong>Why this exists</strong>
+    It lets Production start planning in parallel with PPMC's remaining packaging-material work
+    instead of waiting idle for the status to change, while still guaranteeing that PM Supply
+    is fully signed off before the order is treated as production-complete.
+  </div>
+
+  <h3 id="so-overdue">5.10 Overdue &amp; Due Soon Indicators</h3>
+  <p>Each workflow stage can have a configured number of days after which an order is flagged
+     <strong>Due Soon</strong> (a warning) or <strong>Overdue</strong> (the deadline has passed).
+     These thresholds are configured per-status by an administrator and may be switched off
+     (no badge is ever shown) for any status that has no threshold set.</p>
+  <table>
+    <tr><th>Status</th><th>What the "clock" starts from</th></tr>
+    <tr><td><span class="status s-pis">PIS Pending</span>, <span class="status s-art">Artwork Pending</span></td>
+        <td>Order Created Date</td></tr>
+    <tr><td><span class="status s-pm">PM Supply Pending</span> — stage 1 (the 6 vendor-approval dates)</td>
+        <td>Artwork Approval Date (when the order entered this status)</td></tr>
+    <tr><td><span class="status s-pm">PM Supply Pending</span> — stage 2 (the 6 receive-schedule dates)</td>
+        <td>Order Date on the Packing Material Order (once stage 1 is complete)</td></tr>
+    <tr><td><span class="status s-prod">Production Pending</span> — stage 1 (Filling Plan Date)</td>
+        <td>The latest of the 6 Packing Material Receive dates (when the order entered this status)</td></tr>
+    <tr><td><span class="status s-prod">Production Pending</span> — stage 2 (Sterility 14 Days Date)</td>
+        <td>Filling Plan Date (once stage 1 is complete)</td></tr>
+    <tr><td><span class="status s-disp-p">Dispatch Pending</span></td>
+        <td>Filling Plan Date</td></tr>
+    <tr><td><span class="status s-pack">Packing Pending</span></td>
+        <td>Order Created Date (single-rule status)</td></tr>
+  </table>
+  <p>PM Supply Pending and Production Pending are <strong>compound</strong> statuses — each has
+     two sequential sub-rules, with its own warning/overdue day counts. Only the sub-rule for
+     the part that is still incomplete is evaluated; once both parts of the stage are done the
+     order has already advanced past that status, so no badge is shown.</p>
+  <ul>
+    <li>A <strong>Due Soon</strong> badge (amber) appears once the warning-day threshold has
+        passed but the order is not yet overdue.</li>
+    <li>An <strong>Overdue</strong> badge (red) appears once the overdue-day threshold has
+        passed — it replaces the Due Soon badge.</li>
+    <li>Badges are shown on the Sales Order list for every visible row, and summarised as a
+        per-stage overdue count on the Admin Dashboard's Workflow Pipeline cards (see §4.1).</li>
+  </ul>
+  <div class="callout callout-info">
+    <strong>Configuration</strong>
+    Warning/overdue day thresholds (and the secondary thresholds for the compound statuses)
+    are maintained by an administrator in the Order Statuses configuration. Changing a
+    threshold takes effect immediately for all orders in that status.
+  </div>
+
+  <h3 id="so-multistep">5.11 Multi-Stage Status Logging</h3>
+  <p>Normally a single save advances the status by at most one stage. However, if an order
+     already has some fields pre-filled (for example, Production entered the Filling Plan and
+     Sterility dates early per §5.9, and PPMC then completes the remaining PM Supply fields in
+     the same save), a single save can satisfy more than one stage's requirements at once.</p>
+  <p>In that case the system does not jump straight to the final status — it records
+     <strong>each intermediate status change as its own entry</strong> in the order's status
+     history and audit log (for example PM Supply Pending → Production Pending, immediately
+     followed by Production Pending → Packing Pending), so Admins can see exactly which stage
+     was completed and when, even when several stages complete together.</p>
 </div>
 
 <!-- ══════════════════════ 6. ROLE GUIDES ════════════════════════════ -->
@@ -703,10 +839,12 @@
     <li><p>Once the status advances, the order disappears from your queue.</p></li>
   </ol>
   <div class="callout callout-warning">
-    <strong>All 17 fields are required.</strong>
+    <strong>All 17 fields are required — unless marked Not Applicable.</strong>
     PIS Approval Date alone is not sufficient. Every Apply, Draft, Approval, and Received
     date across all four sections (Product Permission, Combipack Product Permission,
-    COPP, FSC) must be saved before the status advances.
+    COPP, FSC) must be saved before the status advances — unless you tick that section's
+    <strong>Not Applicable</strong> switch, in which case its 4 dates are skipped entirely
+    (see §5.8).
   </div>
   <div class="callout callout-info">
     <strong>Access restriction</strong>
@@ -730,46 +868,64 @@
   </ol>
 
   <h3 id="rg-ppmc">6.3 PPMC Role — Packing Material Supply</h3>
-  <p>You coordinate ordering and receipt of all 10 packaging material components.</p>
+  <p>You coordinate ordering and receipt of all packaging material components.</p>
   <div class="callout callout-info">
     <strong>Tabs visible to your role:</strong> General Info and Packaging Material only.
-    On the Packaging Material tab you will see <strong>only the 10 date fields</strong>
+    On the Packaging Material tab you will see <strong>only the 12 date fields</strong>
     (Packing Material Order &amp; Receive) — component specifications are not shown.
   </div>
   <ol class="steps">
     <li><p>Log in. Your Dashboard shows all <span class="status s-pm">PM Supply Pending</span> orders.</p></li>
     <li><p>Open an order and go to the <strong>Packaging Material</strong> tab.</p></li>
-    <li><p>Fill in all <strong>5 Supply Vendor Approval Dates</strong>
-        (Mono Box, Label, Insert, Tray, Shipper) under the
+    <li><p>Fill in all <strong>6 Supply Vendor Approval Dates</strong>
+        (Mono Box, Mother Box, Label, Insert, Tray, Shipper) under the
         <em>Packing Material Order</em> section.</p></li>
-    <li><p>Fill in all <strong>5 Production Dates</strong>
-        (Mono Box, Label, Insert, Tray, Shipper) under the
-        <em>Packing Material Receive</em> section.</p></li>
-    <li><p>Click <strong>Save Changes</strong>. All 10 fields must be filled
-        for the status to advance to
+    <li><p>Fill in all <strong>6 Production Dates</strong>
+        (Mono Box, Mother Box, Label, Insert, Tray, Shipper) under the
+        <em>Packing Material Receive Schedule</em> section. If the Production Tray Date does not
+        apply to this product, tick its <strong>Not Applicable</strong> switch instead of leaving
+        it blank.</p></li>
+    <li><p>Click <strong>Save Changes</strong>. All 12 fields must be satisfied (filled, or Not
+        Applicable for Production Tray) for the status to advance to
         <span class="status s-prod">Production Pending</span>.</p></li>
   </ol>
   <div class="callout callout-warning">
-    <strong>All 10 fields are required.</strong>
+    <strong>All 12 fields are required.</strong>
     Saving with any field empty will save the record but will not advance
-    the status. Fill all fields and save again.
+    the status. Fill all fields (or mark Production Tray Not Applicable) and save again.
+  </div>
+  <div class="callout callout-info">
+    <strong>Tip — Production Label Date</strong>
+    As soon as you save the Production Label Date, Production can see the order and start
+    entering their own dates in parallel, even though the status is still
+    <span class="status s-pm">PM Supply Pending</span>. See §5.9.
   </div>
 
-  <h3 id="rg-production">6.4 Production Role — Filling Plan</h3>
-  <p>You enter the filling production schedule.</p>
+  <h3 id="rg-production">6.4 Production Role — Filling Plan &amp; Sterility</h3>
+  <p>You enter the filling and sterility schedule.</p>
   <div class="callout callout-info">
     <strong>Tabs visible to your role:</strong> General Info and Production Info only.
     On the Production Info tab you will see <strong>Filling Plan Date and Sterility 14 Days Date only</strong> —
     Packing Plan and Dispatch Date are not shown.
   </div>
   <ol class="steps">
-    <li><p>Log in. Your Dashboard shows all <span class="status s-prod">Production Pending</span> orders.</p></li>
+    <li><p>Log in. Your Dashboard shows all <span class="status s-prod">Production Pending</span> orders,
+        plus any <span class="status s-pm">PM Supply Pending</span> order where PPMC has already
+        entered the Production Label Date (see §5.9) — these are editable early.</p></li>
     <li><p>Open an order and go to the <strong>Production Info</strong> tab.</p></li>
-    <li><p>Enter the <strong>Filling Plan Date</strong> (and optionally
-        <strong>Sterility 14 Days Date</strong>).</p></li>
-    <li><p>Click <strong>Save Changes</strong>. Status advances to
-        <span class="status s-pack">Packing Pending</span>.</p></li>
+    <li><p>Enter <strong>both</strong> the <strong>Filling Plan Date</strong> and the
+        <strong>Sterility 14 Days Date</strong>.</p></li>
+    <li><p>Click <strong>Save Changes</strong>. Once both dates are saved — and all PM Supply
+        fields are also complete — status advances to
+        <span class="status s-pack">Packing Pending</span>. If the order is still
+        <span class="status s-pm">PM Supply Pending</span> when you save, your dates are kept
+        but the status stays PM Supply Pending until PPMC's fields are complete too.</p></li>
   </ol>
+  <div class="callout callout-warning">
+    <strong>Both dates are required.</strong>
+    Filling Plan Date alone does not advance the status — Sterility 14 Days Date must also
+    be filled.
+  </div>
 
   <h3 id="rg-packing">6.5 Packing Role — Packing Plan</h3>
   <p>You schedule the packing operation after filling is complete.</p>
@@ -1169,21 +1325,28 @@
       <td class="tc-id">WF-05</td>
       <td>PPMC — partial save does not advance</td>
       <td><span class="role role-ppmc">PPMC</span></td>
-      <td>Fill only 9 of 10 PM dates → Save → status stays PM Supply Pending</td>
+      <td>Fill only 11 of 12 PM dates → Save → status stays PM Supply Pending</td>
       <td></td><td></td>
     </tr>
     <tr>
       <td class="tc-id">WF-06</td>
       <td>PPMC advances PM Supply Pending → Production Pending</td>
       <td><span class="role role-ppmc">PPMC</span></td>
-      <td>Fill all 10 PM dates → Save → status becomes Production Pending</td>
+      <td>Fill all 12 PM dates (or mark Production Tray Not Applicable instead of a date) → Save → status becomes Production Pending</td>
       <td></td><td></td>
     </tr>
     <tr>
       <td class="tc-id">WF-07</td>
+      <td>Production — Filling Plan alone does not advance</td>
+      <td><span class="role role-prod">Production</span></td>
+      <td>Enter only Filling Plan Date (leave Sterility 14 Days Date empty) → Save → status stays at current stage</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">WF-07b</td>
       <td>Production advances → Packing Pending</td>
       <td><span class="role role-prod">Production</span></td>
-      <td>Enter Filling Plan Date → Save → status becomes Packing Pending</td>
+      <td>Enter both Filling Plan Date and Sterility 14 Days Date → Save → status becomes Packing Pending</td>
       <td></td><td></td>
     </tr>
     <tr>
@@ -1264,7 +1427,7 @@
     <tr>
       <td class="tc-id">RBAC-08</td>
       <td>PPMC sees only PM date fields (not component specs)</td>
-      <td>Login as PPMC → open any order → Packaging Material tab → only 10 date fields visible; Vial, Label spec, Mono Box spec etc. not shown</td>
+      <td>Login as PPMC → open any order → Packaging Material tab → only 12 date fields visible (including both Mono Box and Mother Box in each section); Vial, Label spec, Mono Box spec etc. not shown</td>
       <td></td><td></td>
     </tr>
     <tr>
@@ -1398,6 +1561,65 @@
       <td></td><td></td>
     </tr>
   </table>
+
+  <h3 id="uat-overdue">9.8 Overdue &amp; Due Soon / Early Visibility</h3>
+  <table>
+    <tr><th>Test ID</th><th>Scenario</th><th>Expected Result</th><th>Result</th><th>Notes</th></tr>
+    <tr>
+      <td class="tc-id">OD-01</td>
+      <td>QA Not Applicable skips a permission section</td>
+      <td>QA → open a PIS Pending order → tick "Not Applicable" on, e.g., FSC → save without FSC dates → status still advances to Artwork Pending once the other 13 fields are complete</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">OD-02</td>
+      <td>Production Tray Not Applicable skips its date</td>
+      <td>PPMC → tick "Not Applicable" on Production Tray Date → leave it blank → save with the other 11 PM fields filled → status advances to Production Pending</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">OD-03</td>
+      <td>Production sees order early</td>
+      <td>PPMC saves the Production Label Date only (status still PM Supply Pending) → login as Production → order appears in Production's dashboard/queue and its Filling Plan / Sterility fields are editable</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">OD-04</td>
+      <td>Early Production entry does not skip the status</td>
+      <td>With the order still PM Supply Pending, Production enters and saves both Filling Plan and Sterility dates → status remains PM Supply Pending until PPMC's remaining fields are also complete</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">OD-05</td>
+      <td>Multi-stage save logs every intermediate status</td>
+      <td>With Production's dates already saved per OD-04, PPMC completes the remaining PM fields and saves → History tab shows two separate entries: PM Supply Pending → Production Pending, then Production Pending → Packing Pending</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">OD-06</td>
+      <td>Due Soon badge appears</td>
+      <td>An order's current status has a Warning-Days threshold configured, and that many days have elapsed without the stage's action being completed → a "Due Soon" badge appears on the Sales Order list row</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">OD-07</td>
+      <td>Overdue badge replaces Due Soon</td>
+      <td>Continuing OD-06, once the Overdue-Days threshold also elapses → the badge changes to "Overdue" (red)</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">OD-08</td>
+      <td>Admin dashboard shows overdue counts</td>
+      <td>Login as Admin → Dashboard → a Workflow Pipeline card for a status with overdue orders shows a non-zero overdue count</td>
+      <td></td><td></td>
+    </tr>
+    <tr>
+      <td class="tc-id">OD-09</td>
+      <td>No badge when no threshold configured</td>
+      <td>A status with no Warning/Overdue days configured never shows a Due Soon or Overdue badge, regardless of elapsed time</td>
+      <td></td><td></td>
+    </tr>
+  </table>
 </div>
 
 <!-- ══════════════════════ 10. GLOSSARY ══════════════════════════════ -->
@@ -1417,7 +1639,12 @@
     <tr><td>FSC</td><td>Free Sale Certificate — certifies that the product is approved for sale. Tracked by Apply, Draft, Approval, and Received dates.</td></tr>
     <tr><td>QA / Design Tab</td><td>The dedicated tab on the Sales Order form containing all QA regulatory dates (PIS Approval, Artwork Approval, PP, CPP, COPP, FSC). Visible to Admin and QA; Artwork date also visible to Designer.</td></tr>
     <tr><td>PPMC</td><td>Production Planning &amp; Material Control — the team responsible for ordering and tracking packaging materials.</td></tr>
-    <tr><td>PM Supply</td><td>Packaging Material Supply — the stage where all 10 packaging component orders and receipts are recorded.</td></tr>
+    <tr><td>PM Supply</td><td>Packaging Material Supply — the stage where all 12 packaging component orders and receipts are recorded (Mono Box, Mother Box, Label, Insert, Tray, Shipper — in each of the Order and Receive sections).</td></tr>
+    <tr><td>Month Box</td><td>A General Info / Packaging Material <strong>component specification</strong> field, auto-filled from the Product Master catalogue when a Brand Name is selected. Not to be confused with "Mother Box" below.</td></tr>
+    <tr><td>Mother Box</td><td>A pair of <strong>date fields</strong> on the Packaging Material tab (Mother Box Supply Vendor Approval Date, and Production Mother Box Date) entered by PPMC/Admin as part of the 12 required PM Supply dates. Distinct from the "Month Box" component-spec field above, despite the similar name.</td></tr>
+    <tr><td>Not Applicable</td><td>A switch next to certain date groups (QA's Product Permission / Combipack Product Permission / COPP / FSC sections, and the Packaging Material tab's Production Tray Date) that marks the section as not relevant to this product, so the system no longer requires its date(s) before the status can advance. See §5.8.</td></tr>
+    <tr><td>Early Visibility (Production)</td><td>Once PPMC saves the Production Label Date, the order appears in the Production role's queue and its Filling Plan / Sterility dates become editable immediately — even while the order is still PM Supply Pending. See §5.9.</td></tr>
+    <tr><td>Overdue / Due Soon</td><td>Per-status badges shown when a configured number of days has elapsed since the order entered that stage (or a stage-specific reference date) without the required action being completed. Due Soon is a warning; Overdue means the deadline has passed. See §5.10.</td></tr>
     <tr><td>Soft Delete</td><td>A deletion that hides the record from the UI but retains it in the database for potential recovery.</td></tr>
     <tr><td>UAT</td><td>User Acceptance Testing — the process of validating that the system meets business requirements before go-live.</td></tr>
     <tr><td>2FA</td><td>Two-Factor Authentication — a second verification step (OTP sent to email) after password entry.</td></tr>
@@ -1428,8 +1655,8 @@
   </table>
 
   <div style="margin-top:60px;padding:24px;background:#f9fafb;border-radius:8px;text-align:center;color:#6B7280;font-size:13px;">
-    <strong style="color:#1a3c5e;display:block;margin-bottom:6px;">PharmaSphere – User Manual v1.0</strong>
-    Prepared by IT Musketeers &nbsp;|&nbsp; sales@itmusketeers.com &nbsp;|&nbsp; June 2026<br/>
+    <strong style="color:#1a3c5e;display:block;margin-bottom:6px;">PharmaSphere – User Manual v1.1</strong>
+    Prepared by IT Musketeers &nbsp;|&nbsp; ai@itmusketeers.com &nbsp;|&nbsp; October 2026<br/>
     This document is confidential and intended for authorised personnel only.
   </div>
 </div>
