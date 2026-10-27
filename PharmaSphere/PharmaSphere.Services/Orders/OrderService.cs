@@ -157,6 +157,7 @@ namespace PharmaSphere.Services.Orders
             Track("FSC Approval Date",    order.FSCApprovalDate?.ToString("yyyy-MM-dd"), req.FSCApprovalDate);
             Track("FSC Received Date",    order.FSCReceivedDate?.ToString("yyyy-MM-dd"), req.FSCReceivedDate);
             Track("MonoBox Vendor Approval", order.MonoBoxSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"), req.MonoBoxSupplyVendorApprovalDate);
+            Track("MotherBox Vendor Approval", order.MotherBoxSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"), req.MotherBoxSupplyVendorApprovalDate);
             Track("Label Vendor Approval",          order.LabelSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),   req.LabelSupplyVendorApprovalDate);
             Track("Insert Vendor Approval",         order.InsertSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),  req.InsertSupplyVendorApprovalDate);
             Track("Tray Vendor Approval",           order.TraySupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),    req.TraySupplyVendorApprovalDate);
@@ -164,6 +165,7 @@ namespace PharmaSphere.Services.Orders
 
             // ── Production Info ───────────────────────────────────────────────────
             Track("Production Mono Box", order.ProductionMonoBox?.ToString("yyyy-MM-dd"), req.ProductionMonoBox);
+            Track("Production Mother Box", order.ProductionMotherBox?.ToString("yyyy-MM-dd"), req.ProductionMotherBox);
             Track("Production Label",    order.ProductionLabel?.ToString("yyyy-MM-dd"),   req.ProductionLabel);
             Track("Production Insert",   order.ProductionInsert?.ToString("yyyy-MM-dd"),  req.ProductionInsert);
             Track("Production Tray Not Applicable", order.ProductionTrayNotApplicable, req.ProductionTrayNotApplicable);
@@ -448,11 +450,13 @@ namespace PharmaSphere.Services.Orders
                 FSCApprovalDate = ParseDateOpt(r.FSCApprovalDate),
                 FSCReceivedDate = ParseDateOpt(r.FSCReceivedDate),
                 MonoBoxSupplyVendorApprovalDate = ParseDateOpt(r.MonoBoxSupplyVendorApprovalDate),
+                MotherBoxSupplyVendorApprovalDate = ParseDateOpt(r.MotherBoxSupplyVendorApprovalDate),
                 LabelSupplyVendorApprovalDate   = ParseDateOpt(r.LabelSupplyVendorApprovalDate),
                 InsertSupplyVendorApprovalDate  = ParseDateOpt(r.InsertSupplyVendorApprovalDate),
                 TraySupplyVendorApprovalDate    = ParseDateOpt(r.TraySupplyVendorApprovalDate),
                 ShipperSupplyVendorApprovalDate = ParseDateOpt(r.ShipperSupplyVendorApprovalDate),
                 ProductionMonoBox     = ParseDateOpt(r.ProductionMonoBox),
+                ProductionMotherBox   = ParseDateOpt(r.ProductionMotherBox),
                 ProductionLabel       = ParseDateOpt(r.ProductionLabel),
                 ProductionInsert      = ParseDateOpt(r.ProductionInsert),
                 ProductionTrayNotApplicable = r.ProductionTrayNotApplicable,
@@ -524,11 +528,13 @@ namespace PharmaSphere.Services.Orders
             o.FSCApprovalDate = ParseDateOpt(r.FSCApprovalDate);
             o.FSCReceivedDate = ParseDateOpt(r.FSCReceivedDate);
             o.MonoBoxSupplyVendorApprovalDate = ParseDateOpt(r.MonoBoxSupplyVendorApprovalDate);
+            o.MotherBoxSupplyVendorApprovalDate = ParseDateOpt(r.MotherBoxSupplyVendorApprovalDate);
             o.LabelSupplyVendorApprovalDate   = ParseDateOpt(r.LabelSupplyVendorApprovalDate);
             o.InsertSupplyVendorApprovalDate  = ParseDateOpt(r.InsertSupplyVendorApprovalDate);
             o.TraySupplyVendorApprovalDate    = ParseDateOpt(r.TraySupplyVendorApprovalDate);
             o.ShipperSupplyVendorApprovalDate = ParseDateOpt(r.ShipperSupplyVendorApprovalDate);
             o.ProductionMonoBox     = ParseDateOpt(r.ProductionMonoBox);
+            o.ProductionMotherBox   = ParseDateOpt(r.ProductionMotherBox);
             o.ProductionLabel       = ParseDateOpt(r.ProductionLabel);
             o.ProductionInsert      = ParseDateOpt(r.ProductionInsert);
             o.ProductionTrayNotApplicable = r.ProductionTrayNotApplicable;
@@ -594,11 +600,13 @@ namespace PharmaSphere.Services.Orders
             o.FSCApprovalDate?.ToString("yyyy-MM-dd"),
             o.FSCReceivedDate?.ToString("yyyy-MM-dd"),
             o.MonoBoxSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
+            o.MotherBoxSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.LabelSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.InsertSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.TraySupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.ShipperSupplyVendorApprovalDate?.ToString("yyyy-MM-dd"),
             o.ProductionMonoBox?.ToString("yyyy-MM-dd"),
+            o.ProductionMotherBox?.ToString("yyyy-MM-dd"),
             o.ProductionLabel?.ToString("yyyy-MM-dd"),
             o.ProductionInsert?.ToString("yyyy-MM-dd"),
             o.ProductionTrayNotApplicable,
@@ -640,14 +648,16 @@ namespace PharmaSphere.Services.Orders
             o.CurrentStatus,
             o.CreatedDate,
             o.SanoletPartyArtworkApprovalDate,
-            o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+            o.MonoBoxSupplyVendorApprovalDate.HasValue && o.MotherBoxSupplyVendorApprovalDate.HasValue
+                && o.LabelSupplyVendorApprovalDate.HasValue
                 && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
                 && o.ShipperSupplyVendorApprovalDate.HasValue,
             o.MonoBoxSupplyVendorApprovalDate,
-            o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+            o.ProductionMonoBox.HasValue && o.ProductionMotherBox.HasValue && o.ProductionLabel.HasValue
                 && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                 && o.ProductionShipper.HasValue,
             o.ProductionMonoBox,
+            o.ProductionMotherBox,
             o.ProductionLabel,
             o.ProductionInsert,
             o.ProductionTrayNotApplicable,
@@ -722,11 +732,13 @@ namespace PharmaSphere.Services.Orders
 
             var artworkApproved = o.SanoletPartyArtworkApprovalDate.HasValue;
             var allPMFilled     = o.MonoBoxSupplyVendorApprovalDate.HasValue
+                               && o.MotherBoxSupplyVendorApprovalDate.HasValue
                                && o.LabelSupplyVendorApprovalDate.HasValue
                                && o.InsertSupplyVendorApprovalDate.HasValue
                                && o.TraySupplyVendorApprovalDate.HasValue
                                && o.ShipperSupplyVendorApprovalDate.HasValue
                                && o.ProductionMonoBox.HasValue
+                               && o.ProductionMotherBox.HasValue
                                && o.ProductionLabel.HasValue
                                && o.ProductionInsert.HasValue
                                && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)

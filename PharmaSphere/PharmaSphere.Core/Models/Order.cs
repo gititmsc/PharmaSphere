@@ -63,6 +63,7 @@ namespace PharmaSphere.Core.Models
         public DateTime? FSCApprovalDate { get; set; }
         public DateTime? FSCReceivedDate { get; set; }
         public DateTime? MonoBoxSupplyVendorApprovalDate { get; set; }
+        public DateTime? MotherBoxSupplyVendorApprovalDate { get; set; }
         public DateTime? LabelSupplyVendorApprovalDate { get; set; }
         public DateTime? InsertSupplyVendorApprovalDate { get; set; }
         public DateTime? TraySupplyVendorApprovalDate { get; set; }
@@ -70,6 +71,7 @@ namespace PharmaSphere.Core.Models
 
         // ── Production Fields ─────────────────────────────────────────────────────
         public DateTime? ProductionMonoBox { get; set; }
+        public DateTime? ProductionMotherBox { get; set; }
         public DateTime? ProductionLabel { get; set; }
         public DateTime? ProductionInsert { get; set; }
         public bool ProductionTrayNotApplicable { get; set; }

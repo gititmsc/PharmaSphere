@@ -227,6 +227,7 @@ const SalesOrderDetailPage: React.FC = () => {
                   <Typography variant="caption" color="text.secondary" fontWeight={600}>Packing Material Order</Typography>
                 </Grid>
                 <Grid item xs={6}><FR label="Order Date" value={order.monoBoxSupplyVendorApprovalDate} /></Grid>
+                <Grid item xs={6}><FR label="Mother Box Vendor Approval" value={order.motherBoxSupplyVendorApprovalDate} /></Grid>
                 <Grid item xs={6}><FR label="Label Vendor Approval"    value={order.labelSupplyVendorApprovalDate} /></Grid>
                 <Grid item xs={6}><FR label="Insert Vendor Approval"   value={order.insertSupplyVendorApprovalDate} /></Grid>
                 <Grid item xs={6}><FR label="Tray Vendor Approval"     value={order.traySupplyVendorApprovalDate} /></Grid>
@@ -235,6 +236,7 @@ const SalesOrderDetailPage: React.FC = () => {
                   <Typography variant="caption" color="text.secondary" fontWeight={600}>Packing Material Receive Schedule</Typography>
                 </Grid>
                 <Grid item xs={6}><FR label="Production MonoBox Date"  value={order.productionMonoBox} /></Grid>
+                <Grid item xs={6}><FR label="Production Mother Box Date" value={order.productionMotherBox} /></Grid>
                 <Grid item xs={6}><FR label="Production Label Date"    value={order.productionLabel} /></Grid>
                 <Grid item xs={6}><FR label="Production Insert Date"   value={order.productionInsert} /></Grid>
                 <Grid item xs={6}><FR label="Production Tray Date"     value={order.productionTray} /></Grid>

@@ -22,6 +22,7 @@ namespace PharmaSphere.Core.Models
         DateTime? PackingMaterialOrderDate,
         bool PackingMaterialReceiveComplete,
         DateTime? ProductionMonoBoxDate,
+        DateTime? ProductionMotherBoxDate,
         DateTime? ProductionLabelDate,
         DateTime? ProductionInsertDate,
         bool ProductionTrayNotApplicable,
@@ -109,8 +110,8 @@ namespace PharmaSphere.Core.Models
                 if (ctx.FillingDate is null)
                 {
                     DateTime?[] receiveDates =
-                        { ctx.ProductionMonoBoxDate, ctx.ProductionLabelDate, ctx.ProductionInsertDate,
-                          ctx.ProductionShipperDate };
+                        { ctx.ProductionMonoBoxDate, ctx.ProductionMotherBoxDate, ctx.ProductionLabelDate,
+                          ctx.ProductionInsertDate, ctx.ProductionShipperDate };
                     if (receiveDates.Any(d => d is null)) return (false, false);
                     if (!ctx.ProductionTrayNotApplicable && ctx.ProductionTrayDate is null) return (false, false);
                     receiveDates = ctx.ProductionTrayNotApplicable

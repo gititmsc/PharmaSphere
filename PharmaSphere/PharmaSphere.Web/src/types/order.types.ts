@@ -103,12 +103,14 @@ export interface OrderDetail {
   fscApprovalDate: string | null;
   fscReceivedDate: string | null;
   monoBoxSupplyVendorApprovalDate: string | null;
+  motherBoxSupplyVendorApprovalDate: string | null;
   labelSupplyVendorApprovalDate: string | null;
   insertSupplyVendorApprovalDate: string | null;
   traySupplyVendorApprovalDate: string | null;
   shipperSupplyVendorApprovalDate: string | null;
   // Production
   productionMonoBox: string | null;
+  productionMotherBox: string | null;
   productionLabel: string | null;
   productionInsert: string | null;
   productionTrayNotApplicable: boolean;
@@ -227,12 +229,14 @@ export interface OrderFormValues {
   fscApprovalDate: string;
   fscReceivedDate: string;
   monoBoxSupplyVendorApprovalDate: string;
+  motherBoxSupplyVendorApprovalDate: string;
   labelSupplyVendorApprovalDate: string;
   insertSupplyVendorApprovalDate: string;
   traySupplyVendorApprovalDate: string;
   shipperSupplyVendorApprovalDate: string;
   // Production
   productionMonoBox: string;
+  productionMotherBox: string;
   productionLabel: string;
   productionInsert: string;
   productionTrayNotApplicable: boolean;

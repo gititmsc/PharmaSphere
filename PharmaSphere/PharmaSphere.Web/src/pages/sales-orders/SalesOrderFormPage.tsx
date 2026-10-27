@@ -124,10 +124,11 @@ const EMPTY: OrderFormValues = {
   cppNotApplicable: false, cppApplyDate: '', cppDraftDate: '', cppApprovalDate: '', cppReceivedDate: '',
   coppNotApplicable: false, coppApplyDate: '', coppDraftDate: '', coppApprovalDate: '', coppReceivedDate: '',
   fscNotApplicable: false, fscApplyDate: '', fscDraftDate: '', fscApprovalDate: '', fscReceivedDate: '',
-  monoBoxSupplyVendorApprovalDate: '', labelSupplyVendorApprovalDate: '',
+  monoBoxSupplyVendorApprovalDate: '', motherBoxSupplyVendorApprovalDate: '',
+  labelSupplyVendorApprovalDate: '',
   insertSupplyVendorApprovalDate: '', traySupplyVendorApprovalDate: '',
   shipperSupplyVendorApprovalDate: '',
-  productionMonoBox: '', productionLabel: '', productionInsert: '',
+  productionMonoBox: '', productionMotherBox: '', productionLabel: '', productionInsert: '',
   productionTrayNotApplicable: false,
   productionTray: '', productionShipper: '', fillingPlan: '', packingPlan: '',
   sterility14DaysDate: '', dispatchDate: '',
@@ -270,11 +271,13 @@ const SalesOrderFormPage: React.FC = () => {
           fscApplyDate: o.fscApplyDate ?? '', fscDraftDate: o.fscDraftDate ?? '',
           fscApprovalDate: o.fscApprovalDate ?? '', fscReceivedDate: o.fscReceivedDate ?? '',
           monoBoxSupplyVendorApprovalDate: o.monoBoxSupplyVendorApprovalDate ?? '',
+          motherBoxSupplyVendorApprovalDate: o.motherBoxSupplyVendorApprovalDate ?? '',
           labelSupplyVendorApprovalDate: o.labelSupplyVendorApprovalDate ?? '',
           insertSupplyVendorApprovalDate: o.insertSupplyVendorApprovalDate ?? '',
           traySupplyVendorApprovalDate: o.traySupplyVendorApprovalDate ?? '',
           shipperSupplyVendorApprovalDate: o.shipperSupplyVendorApprovalDate ?? '',
           productionMonoBox: o.productionMonoBox ?? '',
+          productionMotherBox: o.productionMotherBox ?? '',
           productionLabel: o.productionLabel ?? '',
           productionInsert: o.productionInsert ?? '',
           productionTrayNotApplicable: o.productionTrayNotApplicable ?? false,
@@ -799,6 +802,9 @@ const SalesOrderFormPage: React.FC = () => {
                   <Fld name="monoBoxSupplyVendorApprovalDate" label="Order Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
+                  <Fld name="motherBoxSupplyVendorApprovalDate" label="Mother Box Supply Vendor Approval Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
                   <Fld name="labelSupplyVendorApprovalDate" label="Label Supply Vendor Approval Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -810,7 +816,6 @@ const SalesOrderFormPage: React.FC = () => {
                 <Grid item xs={12} sm={4}>
                   <Fld name="shipperSupplyVendorApprovalDate" label="Shipper Supply Vendor Approval Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
-                <Grid item xs={12} sm={4} />
 
                 {/* ── Packing Material Receive Schedule ── */}
                 <Grid item xs={12}>
@@ -820,6 +825,9 @@ const SalesOrderFormPage: React.FC = () => {
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="productionMonoBox" label="Production MonoBox Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Fld name="productionMotherBox" label="Production Mother Box Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Fld name="productionLabel" label="Production Label Date" control={control} type="date" readOnly={roPMFields} shrinkLabel />

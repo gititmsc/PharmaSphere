@@ -125,14 +125,16 @@ namespace PharmaSphere.Repositories.Orders
                         o.CurrentStatus,
                         o.CreatedDate,
                         o.SanoletPartyArtworkApprovalDate,
-                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.MotherBoxSupplyVendorApprovalDate.HasValue
+                            && o.LabelSupplyVendorApprovalDate.HasValue
                             && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
                             && o.ShipperSupplyVendorApprovalDate.HasValue,
                         o.MonoBoxSupplyVendorApprovalDate,
-                        o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                        o.ProductionMonoBox.HasValue && o.ProductionMotherBox.HasValue && o.ProductionLabel.HasValue
                             && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                             && o.ProductionShipper.HasValue,
                         o.ProductionMonoBox,
+                        o.ProductionMotherBox,
                         o.ProductionLabel,
                         o.ProductionInsert,
                         o.ProductionTrayNotApplicable,
@@ -231,14 +233,16 @@ namespace PharmaSphere.Repositories.Orders
                     o.CurrentStatus,
                     o.CreatedDate,
                     o.SanoletPartyArtworkApprovalDate,
-                    o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                    o.MonoBoxSupplyVendorApprovalDate.HasValue && o.MotherBoxSupplyVendorApprovalDate.HasValue
+                        && o.LabelSupplyVendorApprovalDate.HasValue
                         && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
                         && o.ShipperSupplyVendorApprovalDate.HasValue,
                     o.MonoBoxSupplyVendorApprovalDate,
-                    o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                    o.ProductionMonoBox.HasValue && o.ProductionMotherBox.HasValue && o.ProductionLabel.HasValue
                         && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                         && o.ProductionShipper.HasValue,
                     o.ProductionMonoBox,
+                    o.ProductionMotherBox,
                     o.ProductionLabel,
                     o.ProductionInsert,
                     o.ProductionTrayNotApplicable,
@@ -275,14 +279,16 @@ namespace PharmaSphere.Repositories.Orders
                         o.CurrentStatus,
                         o.CreatedDate,
                         o.SanoletPartyArtworkApprovalDate,
-                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.MotherBoxSupplyVendorApprovalDate.HasValue
+                            && o.LabelSupplyVendorApprovalDate.HasValue
                             && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
                             && o.ShipperSupplyVendorApprovalDate.HasValue,
                         o.MonoBoxSupplyVendorApprovalDate,
-                        o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                        o.ProductionMonoBox.HasValue && o.ProductionMotherBox.HasValue && o.ProductionLabel.HasValue
                             && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                             && o.ProductionShipper.HasValue,
                         o.ProductionMonoBox,
+                        o.ProductionMotherBox,
                         o.ProductionLabel,
                         o.ProductionInsert,
                         o.ProductionTrayNotApplicable,
@@ -315,14 +321,16 @@ namespace PharmaSphere.Repositories.Orders
                         o.CurrentStatus,
                         o.CreatedDate,
                         o.SanoletPartyArtworkApprovalDate,
-                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.MotherBoxSupplyVendorApprovalDate.HasValue
+                            && o.LabelSupplyVendorApprovalDate.HasValue
                             && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
                             && o.ShipperSupplyVendorApprovalDate.HasValue,
                         o.MonoBoxSupplyVendorApprovalDate,
-                        o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                        o.ProductionMonoBox.HasValue && o.ProductionMotherBox.HasValue && o.ProductionLabel.HasValue
                             && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                             && o.ProductionShipper.HasValue,
                         o.ProductionMonoBox,
+                        o.ProductionMotherBox,
                         o.ProductionLabel,
                         o.ProductionInsert,
                         o.ProductionTrayNotApplicable,
@@ -362,14 +370,16 @@ namespace PharmaSphere.Repositories.Orders
                         o.CurrentStatus,
                         o.CreatedDate,
                         o.SanoletPartyArtworkApprovalDate,
-                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.LabelSupplyVendorApprovalDate.HasValue
+                        o.MonoBoxSupplyVendorApprovalDate.HasValue && o.MotherBoxSupplyVendorApprovalDate.HasValue
+                            && o.LabelSupplyVendorApprovalDate.HasValue
                             && o.InsertSupplyVendorApprovalDate.HasValue && o.TraySupplyVendorApprovalDate.HasValue
                             && o.ShipperSupplyVendorApprovalDate.HasValue,
                         o.MonoBoxSupplyVendorApprovalDate,
-                        o.ProductionMonoBox.HasValue && o.ProductionLabel.HasValue
+                        o.ProductionMonoBox.HasValue && o.ProductionMotherBox.HasValue && o.ProductionLabel.HasValue
                             && o.ProductionInsert.HasValue && (o.ProductionTrayNotApplicable || o.ProductionTray.HasValue)
                             && o.ProductionShipper.HasValue,
                         o.ProductionMonoBox,
+                        o.ProductionMotherBox,
                         o.ProductionLabel,
                         o.ProductionInsert,
                         o.ProductionTrayNotApplicable,
